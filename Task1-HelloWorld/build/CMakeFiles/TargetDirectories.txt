@@ -1,0 +1,3 @@
+/home/ivan/Work/Projects/LestaTasks/Task1-HelloWorld/build/CMakeFiles/HelloWorld.dir
+/home/ivan/Work/Projects/LestaTasks/Task1-HelloWorld/build/CMakeFiles/edit_cache.dir
+/home/ivan/Work/Projects/LestaTasks/Task1-HelloWorld/build/CMakeFiles/rebuild_cache.dir

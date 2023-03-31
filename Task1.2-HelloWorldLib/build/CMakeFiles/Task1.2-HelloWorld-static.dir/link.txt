@@ -1,0 +1,1 @@
+/usr/bin/c++ -static CMakeFiles/Task1.2-HelloWorld-static.dir/main.cxx.o -o Task1.2-HelloWorld-static  lib/libPrintLib-Static.a 

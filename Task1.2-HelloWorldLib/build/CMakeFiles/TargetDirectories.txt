@@ -1,0 +1,8 @@
+/home/ivan/Work/Projects/LestaTasks/Task1.2-HelloWorldLib/build/CMakeFiles/Task1.2-HelloWorld-static.dir
+/home/ivan/Work/Projects/LestaTasks/Task1.2-HelloWorldLib/build/CMakeFiles/Task1.2-HelloWorld-shared.dir
+/home/ivan/Work/Projects/LestaTasks/Task1.2-HelloWorldLib/build/CMakeFiles/edit_cache.dir
+/home/ivan/Work/Projects/LestaTasks/Task1.2-HelloWorldLib/build/CMakeFiles/rebuild_cache.dir
+/home/ivan/Work/Projects/LestaTasks/Task1.2-HelloWorldLib/build/lib/CMakeFiles/PrintLib-Static.dir
+/home/ivan/Work/Projects/LestaTasks/Task1.2-HelloWorldLib/build/lib/CMakeFiles/PrintLib-Shared.dir
+/home/ivan/Work/Projects/LestaTasks/Task1.2-HelloWorldLib/build/lib/CMakeFiles/edit_cache.dir
+/home/ivan/Work/Projects/LestaTasks/Task1.2-HelloWorldLib/build/lib/CMakeFiles/rebuild_cache.dir
