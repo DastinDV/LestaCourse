@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/Task1.2-HelloWorld-shared.dir/main.cxx.o -o Task1.2-HelloWorld-shared  -Wl,-rpath,/home/ivan/Work/Projects/LestaTasks/Task1.2-HelloWorldLib/build/lib lib/libPrintLib-Shared.so 

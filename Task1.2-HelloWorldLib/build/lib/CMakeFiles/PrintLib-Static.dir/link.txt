@@ -1,2 +1,0 @@
-/usr/bin/ar qc libPrintLib-Static.a CMakeFiles/PrintLib-Static.dir/src/printLib.cxx.o
-/usr/bin/ranlib libPrintLib-Static.a
