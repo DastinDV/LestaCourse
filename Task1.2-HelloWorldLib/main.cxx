@@ -2,7 +2,6 @@
 
 int main(int argc, char* argv[]){
 
-
   for (int i = 0; i < argc; i++){
     std::string nextAr(argv[i]);
     bool wasPrinted = printMessage(nextAr);
