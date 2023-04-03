@@ -2,6 +2,11 @@ cmake_minimum_required (VERSION 3.22)
 
 project(Task1.2-HelloWorld)
 
+if(MSVC)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    set(BUILD_SHARED_LIBS TRUE)
+endif()
+
 add_subdirectory(lib)
 
 add_executable(Task1.2-HelloWorld-static main.cxx)
