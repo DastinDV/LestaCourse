@@ -1,0 +1,20 @@
+name: github-actions
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  build-tasks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and run tests
+        run: | 
+          cd ./Task1.2-HelloWorldLib
+          mkdir -p build && cd build && \
+          cmake .. && \
+          cmake -- build . && \
+          ctest ./SimpleTest
+          cd ./Task1.2-HelloWorld-shared && cd ./Task1.2-HelloWorld-static
