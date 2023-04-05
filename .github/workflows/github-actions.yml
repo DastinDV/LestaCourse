@@ -17,4 +17,5 @@ jobs:
           cmake .. && \
           cmake --build . && \
           ctest ./SimpleTest
-          cd ./Task1.2-HelloWorld-shared && cd ./Task1.2-HelloWorld-static
+          ./Task1.2-HelloWorld-shared Hello World Shared &&
+          ./Task1.2-HelloWorld-static Hello World Static
