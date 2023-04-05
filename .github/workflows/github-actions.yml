@@ -15,6 +15,6 @@ jobs:
           cd ./Task1.2-HelloWorldLib
           mkdir -p build && cd build && \
           cmake .. && \
-          cmake -- build . && \
+          cmake --build . && \
           ctest ./SimpleTest
           cd ./Task1.2-HelloWorld-shared && cd ./Task1.2-HelloWorld-static
