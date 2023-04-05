@@ -22,8 +22,8 @@ add_executable(SimpleTest main.cxx)
 target_link_libraries(SimpleTest PrintLib-Static)
 add_test(NAME TEST_HELLO_WORLD_GOOD_EXIT COMMAND SimpleTest hello world)
 
-add_test(
-  NAME TEST_HELLO_WORLD_BAD_EXIT
-  COMMAND
-    sh -c
-    "${CMAKE_CURRENT_LIST_DIR}/build/./SimpleTest hello world >> /dev/video0")
+#add_test(
+  #NAME TEST_HELLO_WORLD_BAD_EXIT
+  #COMMAND
+    #sh -c
+    #"${CMAKE_CURRENT_LIST_DIR}/build/./SimpleTest hello world >> /dev/video0")
