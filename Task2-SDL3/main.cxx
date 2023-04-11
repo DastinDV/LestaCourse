@@ -17,7 +17,7 @@ int main(int, char **) {
   SDL_Init(SDL_INIT_VIDEO); // Initialize SDL2
 
   // Create an application window with the following settings:
-  window = SDL_CreateWindow("An SDL2 window", // window title
+  window = SDL_CreateWindow("An SDL3 window", // window title
                             640,              // width, in pixels
                             480,              // height, in pixels
                             SDL_WINDOW_OPENGL // flags - see below

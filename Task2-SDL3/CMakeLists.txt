@@ -3,16 +3,22 @@ project(Task2-SDL3)
 
 # Create an option to switch between a system sdl library and a vendored sdl
 # library
-set(SDL3_VENDORED FALSE CACHE BOOL "Use vendored libraries" FORCE)
-set(SDL_LINK_STATIC TRUE CACHE BOOL "use static linking with SDL lib" FORCE)
+set(SDL3_VENDORED
+    TRUE
+    CACHE BOOL "Use vendored libraries" FORCE)
+set(SDL_LINK_STATIC
+    TRUE
+    CACHE BOOL "use static linking with SDL lib" FORCE)
 
 if(SDL3_VENDORED)
   set(CMAKE_INSTALL_PREFIX
-      ${CMAKE_BINARY_DIR}/../bin/install
-      CACHE PATH "Set path for install mode" FORCE)
+      ${CMAKE_BINARY_DIR}
+      CACHE PATH "Path for install" FORCE)
+
+  # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../externals/SDL3
+  # ${CMAKE_BINARY_DIR}/lib/SDL3)
 
   if(SDL_LINK_STATIC)
-    set(BUILD_SHARED_LIBS OFF)
     set(SDL_SHARED OFF)
     set(SDL_STATIC ON)
   endif()
