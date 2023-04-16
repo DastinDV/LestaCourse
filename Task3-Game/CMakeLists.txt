@@ -32,10 +32,14 @@ else()
 
 endif()
 
+# Use my engine
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Engine
+                 ${CMAKE_BINARY_DIR}/lib/MyEngine)
+
 if(NOT SDL_LINK_STATIC)
   # Create your game executable target as usual
   add_executable(Task3-Game-shared main.cxx)
-  target_link_libraries(Task3-Game-shared PRIVATE SDL3::SDL3-shared)
+  target_link_libraries(Task3-Game-shared PRIVATE Engine)
 else()
   add_executable(Task3-Game-static main.cxx)
   target_link_libraries(Task3-Game-static PRIVATE SDL3::SDL3-static)
