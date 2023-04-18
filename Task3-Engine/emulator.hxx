@@ -1,10 +1,9 @@
-
 #pragma once
 #include <SDL3/SDL.h>
 #include <string>
 #include <unordered_map>
 
-namespace engine_sdl {
+namespace core {
 
 struct KeyBind {
   SDL_KeyCode keyCode;
@@ -28,4 +27,4 @@ public:
   void Init() override;
 };
 
-} // namespace engine_sdl
+} // namespace core

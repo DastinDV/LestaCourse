@@ -2,7 +2,7 @@
 
 #include "engine.hxx"
 
-namespace engine_sdl {
+namespace core {
 
 static std::ostream &operator<<(std::ostream &out, const SDL_version &v) {
   out << static_cast<int>(v.major) << '.';
@@ -75,4 +75,4 @@ int Engine::ProcessEvent(event &event) {
   return 1;
 }
 
-} // namespace engine_sdl
+} // namespace core

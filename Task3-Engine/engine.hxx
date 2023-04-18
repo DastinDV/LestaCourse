@@ -1,9 +1,12 @@
-
 #pragma once
 #include "emulator.hxx"
 #include <SDL3/SDL.h>
 
-namespace engine_sdl {
+#ifndef IZ_DECLSPEC
+#define IZ_DECLSPEC
+#endif
+
+namespace core {
 
 enum class event { key_pressed, key_released, quit };
 
@@ -12,7 +15,7 @@ struct KeyEventInfo {
   std::string keyCode;
 };
 
-class Engine {
+class IZ_DECLSPEC Engine {
 public:
   Engine();
 
@@ -26,4 +29,4 @@ private:
   EventEmulatorI *eventEmulator;
   KeyEventInfo eventInfo;
 };
-} // namespace engine_sdl
+} // namespace core

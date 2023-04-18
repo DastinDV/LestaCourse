@@ -1,7 +1,7 @@
 #include "emulator.hxx"
 #include <stdexcept>
 
-namespace engine_sdl {
+namespace core {
 void EventEmulatorI::AddKeyBinding(std::string emulatedKeyName,
                                    KeyBind newKeyEvent) {
   this->keyNameToEvent[emulatedKeyName] = newKeyEvent;
@@ -41,4 +41,4 @@ void SonyPSEventEmulator::Init() {
   AddKeyBinding(SDL_GetKeyName(SDL_KeyCode::SDLK_o),
                 {SDL_KeyCode::SDLK_o, "Options"});
 }
-} // namespace engine_sdl
+} // namespace core

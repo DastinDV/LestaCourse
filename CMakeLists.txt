@@ -8,5 +8,7 @@ add_subdirectory(Task1-HelloWorld)
 add_subdirectory(Task1.2-HelloWorldLib)
 # program which uses SDL3 lib
 add_subdirectory(Task2-SDL3)
-# loop with key processing events
-add_subdirectory(Task3-Game)
+# sdl wrapper
+
+add_subdirectory(Task3-Engine)
+#add_subdirectory(Task3-Game)
