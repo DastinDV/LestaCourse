@@ -1,20 +1,18 @@
-#include "ConsoleGame.hxx"
+#include "consoleGame.hxx"
 #include <chrono>
 #include <iostream>
 #include <thread>
 
-#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
-//#define PBSTR "************************************************************"
+//#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+#define PBSTR "************************************************************"
 
-ConsoleGame::ConsoleGame() : percentage{0} {}
+ConsoleGame::ConsoleGame() {}
 
 void ConsoleGame::Init() {}
 
 void ConsoleGame::Render() {
   PrintProgress(percentage);
   using namespace std::chrono;
-  // std::this_thread::sleep_for(milliseconds(200));
-  // system("clear");
 }
 
 void ConsoleGame::Update() {
@@ -24,12 +22,9 @@ void ConsoleGame::Update() {
   std::this_thread::sleep_for(milliseconds(200));
 }
 
-void ConsoleGame::OnEvent(core::event &event) {
-  // std::cout << "Event" << std::endl;
-}
+void ConsoleGame::OnEvent(core::event &event) {}
 
 void ConsoleGame::PrintProgress(int percentage) {
-  // std::cout << PBWIDTH << std::endl;
   int val = (int)(percentage);
   int lpad = (val * PBWIDTH) / 100;
   int rpad = PBWIDTH - lpad;

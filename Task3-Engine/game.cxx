@@ -49,8 +49,6 @@ Game *ReloadGame(Game *old, const char *library_name,
               << " " << SDL_GetError() << std::endl;
     return nullptr;
   }
-  // void* destroy_game_func_ptr = SDL_LoadFunction(game_handle,
-  // "destroy_game");
 
   using create_game_ptr = decltype(&CreateGame);
 

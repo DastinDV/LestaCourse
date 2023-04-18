@@ -16,8 +16,8 @@ extern "C" int main() {
     bool quit;
     const char *library_name = SDL_GetPlatform() == "Windows"
                                    ? "libConsoleGame.dll"
-                                   : "./libConsoleGame.so";
-    const char *tmp_library_file = "./temp.so";
+                                   : "../lib/MyGame/libConsoleGame.so";
+    const char *tmp_library_file = "../lib/MyGame/temp.so";
 
     void *game_library_handle{};
 

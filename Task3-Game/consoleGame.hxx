@@ -13,9 +13,9 @@ public:
 
 private:
   int16_t percentage;
-  int PBWIDTH = 60;
+  int PBWIDTH = 80;
 
   void PrintProgress(int percentage);
 };
 
-OM_DECLSPEC core::Game *CreateGame() { return new ConsoleGame(); }
+IZ_DECLSPEC core::Game *CreateGame() { return new ConsoleGame(); }
