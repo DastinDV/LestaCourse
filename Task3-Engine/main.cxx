@@ -9,7 +9,7 @@
 #include <iostream>
 #include <thread>
 
-extern "C" int main() {
+int main() {
   {
     using namespace core;
 

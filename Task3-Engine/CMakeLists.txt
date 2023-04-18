@@ -25,8 +25,3 @@ target_link_libraries(Engine PRIVATE SDL3::SDL3-shared)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Game
 ${CMAKE_BINARY_DIR}/lib/MyGame)
-# add_library(ConsoleGame SHARED consoleGame.cxx consoleGame.hxx)
-
-# target_compile_features(ConsoleGame PUBLIC cxx_std_20)
-
-# target_link_libraries(ConsoleGame PRIVATE Engine)
