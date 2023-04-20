@@ -9,7 +9,7 @@ public:
   void Render() override;
   void Update() override;
   void Init() override;
-  void OnEvent(core::event &event) override;
+  void OnEvent(core::Event &event) override;
 
 private:
   int16_t percentage;

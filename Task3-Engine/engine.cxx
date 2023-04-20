@@ -1,8 +1,16 @@
 #include <iostream>
+#include <unordered_map>
 
 #include "engine.hxx"
+#include <SDL3/SDL.h>
 
 namespace core {
+
+const std::unordered_map<SDL_Keycode, KeyCode> sdlToEngineKeyBinding{
+    {SDLK_w, KeyCode::w},         {SDLK_s, KeyCode::w},
+    {SDLK_a, KeyCode::w},         {SDLK_d, KeyCode::w},
+    {SDLK_LCTRL, KeyCode::lctrl}, {SDLK_RCTRL, KeyCode::rctrl},
+    {SDLK_SPACE, KeyCode::space}};
 
 static std::ostream &operator<<(std::ostream &out, const SDL_version &v) {
   out << static_cast<int>(v.major) << '.';
@@ -48,28 +56,25 @@ int Engine::Initialize() {
   return EXIT_SUCCESS;
 }
 
-void Engine::SetKeyBoardEmulator(EventEmulatorI *currentEmulator) {
-  this->eventEmulator = currentEmulator;
-}
-
-KeyEventInfo &Engine::GetKeyEventInfo() { return this->eventInfo; }
-
-int Engine::ProcessEvent(event &event) {
+int Engine::ProcessEvent(Event &event) {
   SDL_Event sdlEvent;
   while (SDL_PollEvent(&sdlEvent)) {
     if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
-      event = event::key_pressed;
-      std::string keyName = SDL_GetKeyName(sdlEvent.key.keysym.sym);
-      eventInfo.eventType = "Pressed";
-      eventInfo.keyCode = this->eventEmulator->GetKeyBindInfo(keyName);
+      event.eventType = EventType::keyboard_event;
+      KeyboardInfo info{SDL_GetKeyName(sdlEvent.key.keysym.sym),
+                        sdlToEngineKeyBinding.at(sdlEvent.key.keysym.sym),
+                        KeyboardEventType::key_pressed};
+      event.keyBoardInfo = info;
     }
     if (sdlEvent.type == SDL_EVENT_KEY_UP) {
-      event = event::key_released;
-      eventInfo.eventType = "Released";
+      event.eventType = EventType::keyboard_event;
+      KeyboardInfo info{SDL_GetKeyName(sdlEvent.key.keysym.sym),
+                        sdlToEngineKeyBinding.at(sdlEvent.key.keysym.sym),
+                        KeyboardEventType::key_released};
+      event.keyBoardInfo = info;
     }
     if (sdlEvent.type == SDL_EVENT_QUIT) {
-      event = event::quit;
-      eventInfo.eventType = "Qiut";
+      event.eventType = EventType::quit;
     }
   }
   return 1;

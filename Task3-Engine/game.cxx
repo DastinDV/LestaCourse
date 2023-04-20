@@ -1,4 +1,5 @@
 #include "game.hxx"
+#include <SDL3/SDL.h>
 #include <filesystem>
 #include <iostream>
 

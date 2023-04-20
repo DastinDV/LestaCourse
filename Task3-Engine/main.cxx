@@ -1,8 +1,7 @@
-#include "emulator.hxx"
 #include "engine.hxx"
 #include "game.hxx"
 
-//#include "consoleGame.hxx"
+#include <SDL3/SDL.h>
 
 #include <chrono>
 #include <filesystem>
@@ -21,17 +20,15 @@ int main() {
 
     void *game_library_handle{};
 
-    EventEmulatorI *sonyEmulator = new SonyPSEventEmulator();
     Engine engine;
     engine.Initialize();
-    engine.SetKeyBoardEmulator(sonyEmulator);
 
     Game *consoleGame = ReloadGame(nullptr, library_name, tmp_library_file,
                                    engine, game_library_handle);
 
     auto time_during_loading = std::filesystem::last_write_time(library_name);
     while (!quit) {
-      event event;
+      Event event;
       engine.ProcessEvent(event);
 
       auto time_current_file_time =
@@ -48,11 +45,8 @@ int main() {
         }
       }
       consoleGame->OnEvent(event);
-      if (event == event::quit)
+      if (event.eventType == EventType::quit)
         quit = true;
-
-      std::cout << engine.GetKeyEventInfo().eventType << " "
-                << engine.GetKeyEventInfo().keyCode << std::endl;
 
       consoleGame->Render();
       consoleGame->Update();

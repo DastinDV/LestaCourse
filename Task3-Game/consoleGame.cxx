@@ -3,8 +3,8 @@
 #include <iostream>
 #include <thread>
 
-//#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
-#define PBSTR "************************************************************"
+#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+//#define PBSTR "************************************************************"
 
 ConsoleGame::ConsoleGame() {}
 
@@ -22,7 +22,7 @@ void ConsoleGame::Update() {
   std::this_thread::sleep_for(milliseconds(200));
 }
 
-void ConsoleGame::OnEvent(core::event &event) {}
+void ConsoleGame::OnEvent(core::Event &event) {}
 
 void ConsoleGame::PrintProgress(int percentage) {
   int val = (int)(percentage);

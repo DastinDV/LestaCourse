@@ -3,11 +3,9 @@ project(Task3-Engine)
 
 add_executable(
   Engine
-  emulator.cxx
   engine.cxx
   game.cxx
   main.cxx
-  emulator.hxx
   engine.hxx
   game.hxx)
 

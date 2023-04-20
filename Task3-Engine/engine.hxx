@@ -1,18 +1,32 @@
 #pragma once
-#include "emulator.hxx"
-#include <SDL3/SDL.h>
 
 #ifndef IZ_DECLSPEC
 #define IZ_DECLSPEC
 #endif
 
+#include <optional>
+#include <string_view>
+
 namespace core {
 
-enum class event { key_pressed, key_released, quit };
+enum class EventType { keyboard_event, quit };
 
-struct KeyEventInfo {
-  std::string eventType;
-  std::string keyCode;
+enum class KeyCode { w, a, s, d, space, lctrl, rctrl };
+
+enum class KeyboardEventType {
+  key_pressed,
+  key_released,
+};
+
+struct KeyboardInfo {
+  std::string_view keyCodeName;
+  KeyCode keyCode;
+  KeyboardEventType type;
+};
+
+struct Event {
+  EventType eventType;
+  std::optional<KeyboardInfo> keyBoardInfo;
 };
 
 class IZ_DECLSPEC Engine {
@@ -20,13 +34,9 @@ public:
   Engine();
 
   int Initialize();
-  int ProcessEvent(event &event);
-
-  void SetKeyBoardEmulator(EventEmulatorI *currentEmulator);
-  KeyEventInfo &GetKeyEventInfo();
+  int ProcessEvent(Event &event);
 
 private:
-  EventEmulatorI *eventEmulator;
-  KeyEventInfo eventInfo;
+  void KeyBinding();
 };
 } // namespace core
