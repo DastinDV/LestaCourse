@@ -56,22 +56,25 @@ int Engine::Initialize() {
   return EXIT_SUCCESS;
 }
 
+KeyboardInfo KeyBinding(SDL_Keycode from, KeyboardEventType keyboardEvent) {
+  KeyCode keyCode = sdlToEngineKeyBinding.count(from)
+                        ? sdlToEngineKeyBinding.at(from)
+                        : KeyCode::not_bind;
+  return {SDL_GetKeyName(from), keyCode, keyboardEvent};
+}
+
 int Engine::ProcessEvent(Event &event) {
   SDL_Event sdlEvent;
   while (SDL_PollEvent(&sdlEvent)) {
     if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
       event.eventType = EventType::keyboard_event;
-      KeyboardInfo info{SDL_GetKeyName(sdlEvent.key.keysym.sym),
-                        sdlToEngineKeyBinding.at(sdlEvent.key.keysym.sym),
-                        KeyboardEventType::key_pressed};
-      event.keyBoardInfo = info;
+      event.keyBoardInfo =
+          KeyBinding(sdlEvent.key.keysym.sym, KeyboardEventType::key_pressed);
     }
     if (sdlEvent.type == SDL_EVENT_KEY_UP) {
       event.eventType = EventType::keyboard_event;
-      KeyboardInfo info{SDL_GetKeyName(sdlEvent.key.keysym.sym),
-                        sdlToEngineKeyBinding.at(sdlEvent.key.keysym.sym),
-                        KeyboardEventType::key_released};
-      event.keyBoardInfo = info;
+      event.keyBoardInfo =
+          KeyBinding(sdlEvent.key.keysym.sym, KeyboardEventType::key_released);
     }
     if (sdlEvent.type == SDL_EVENT_QUIT) {
       event.eventType = EventType::quit;

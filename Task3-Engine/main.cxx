@@ -45,10 +45,17 @@ int main() {
         }
       }
       consoleGame->OnEvent(event);
+
+      if (event.eventType == EventType::keyboard_event &&
+          event.keyBoardInfo.has_value()) {
+        std::cout << "Key pressed " << event.keyBoardInfo->keyCodeName
+                  << std::endl;
+      }
+
       if (event.eventType == EventType::quit)
         quit = true;
 
-      consoleGame->Render();
+      // consoleGame->Render();
       consoleGame->Update();
     }
   }

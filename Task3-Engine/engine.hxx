@@ -11,7 +11,7 @@ namespace core {
 
 enum class EventType { keyboard_event, quit };
 
-enum class KeyCode { w, a, s, d, space, lctrl, rctrl };
+enum class KeyCode { w, a, s, d, space, lctrl, rctrl, not_bind };
 
 enum class KeyboardEventType {
   key_pressed,
@@ -35,8 +35,5 @@ public:
 
   int Initialize();
   int ProcessEvent(Event &event);
-
-private:
-  void KeyBinding();
 };
 } // namespace core
