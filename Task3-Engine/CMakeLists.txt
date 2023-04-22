@@ -5,7 +5,9 @@ add_executable(
   Engine
   engine.cxx
   game.cxx
+  canvas.cxx
   main.cxx
+  canvas.hxx
   engine.hxx
   game.hxx)
 

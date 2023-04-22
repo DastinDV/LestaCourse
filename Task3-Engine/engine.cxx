@@ -1,10 +1,14 @@
 #include <iostream>
 #include <unordered_map>
 
+#include "canvas.hxx"
 #include "engine.hxx"
 #include <SDL3/SDL.h>
 
 namespace core {
+
+SDL_Window *window = nullptr;
+SDL_Renderer *renderer = nullptr;
 
 const std::unordered_map<SDL_Keycode, KeyCode> sdlToEngineKeyBinding{
     {SDLK_w, KeyCode::w},         {SDLK_s, KeyCode::w},
@@ -43,12 +47,20 @@ int Engine::Initialize() {
     return EXIT_FAILURE;
   }
 
-  SDL_Window *const window =
-      SDL_CreateWindow("title", 640, 480, ::SDL_WINDOW_OPENGL);
+  window = SDL_CreateWindow("title", 640, 480, ::SDL_WINDOW_OPENGL);
 
   if (window == nullptr) {
     const char *err_message = SDL_GetError();
     cerr << "error: failed call SDL_CreateWindow: " << err_message << endl;
+    SDL_Quit();
+    return EXIT_FAILURE;
+  }
+
+  renderer = SDL_CreateRenderer(window, NULL, SDL_RENDERER_ACCELERATED);
+
+  if (renderer == nullptr) {
+    const char *err_message = SDL_GetError();
+    cerr << "error: failed call SDL_CreateRenderer: " << err_message << endl;
     SDL_Quit();
     return EXIT_FAILURE;
   }

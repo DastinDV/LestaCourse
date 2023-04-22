@@ -1,3 +1,4 @@
+#include "canvas.hxx"
 #include "engine.hxx"
 #include "game.hxx"
 
@@ -27,6 +28,13 @@ int main() {
                                    engine, game_library_handle);
 
     auto time_during_loading = std::filesystem::last_write_time(library_name);
+
+    Canvas canvas(640, 480);
+    for (int i = 10; i <= 640 - 10; i += 4) {
+      canvas.SetPixel(i, 90, {255, 255, 255});
+    }
+    canvas.RenderToSDLWindow();
+
     while (!quit) {
       Event event;
       engine.ProcessEvent(event);
