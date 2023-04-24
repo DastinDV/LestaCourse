@@ -1,3 +1,4 @@
+#include "./Renderers/lineRenderer.hxx"
 #include "canvas.hxx"
 #include "engine.hxx"
 #include "game.hxx"
@@ -30,9 +31,27 @@ int main() {
     auto time_during_loading = std::filesystem::last_write_time(library_name);
 
     Canvas canvas(640, 480);
-    for (int i = 10; i <= 640 - 10; i += 4) {
-      canvas.SetPixel(i, 90, {255, 255, 255});
+
+    LineRenderer lineRenderer(canvas);
+    // lineRenderer.Draw({200, 200}, {300, 300}, {0, 255, 0});
+    // lineRenderer.Draw({200, 200}, {300, 100}, {255, 0, 0});
+    // lineRenderer.Draw({200, 200}, {100, 300}, {0, 0, 255});
+    // lineRenderer.Draw({200, 200}, {100, 100}, {255, 255, 255});
+    // lineRenderer.Draw({210, 200}, {300, 200}, {255, 0, 0});
+    // lineRenderer.Draw({200, 210}, {200, 300}, {255, 0, 0});
+    // lineRenderer.Draw({190, 200}, {100, 200}, {255, 0, 0});
+    // lineRenderer.Draw({200, 190}, {200, 100}, {255, 0, 0});
+
+    for (int i = 0; i < 480; i++) {
+      lineRenderer.Draw({320, 240}, {640, i}, {0, 255, 0});
+      lineRenderer.Draw({320, 240}, {0, i}, {0, 255, 0});
+      //   lineRenderer.Draw({200, 200}, {i, 100}, {0, 255, 0});
     }
+    for (int i = 0; i <= 640; i++) {
+      lineRenderer.Draw({320, 240}, {i, 0}, {255, 0, 0});
+      lineRenderer.Draw({320, 240}, {i, 480}, {255, 0, 0});
+    }
+
     canvas.RenderToSDLWindow();
 
     while (!quit) {

@@ -1,7 +1,13 @@
+#pragma once
 #include <string>
 #include <vector>
 
 namespace core {
+
+struct Position {
+  int x;
+  int y;
+};
 
 struct Color {
   u_int8_t r = 0;
