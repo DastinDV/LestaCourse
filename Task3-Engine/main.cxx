@@ -1,4 +1,5 @@
 #include "./Renderers/lineRenderer.hxx"
+#include "./Renderers/triangleRenderer.hxx"
 #include "canvas.hxx"
 #include "engine.hxx"
 #include "game.hxx"
@@ -42,15 +43,52 @@ int main() {
     // lineRenderer.Draw({190, 200}, {100, 200}, {255, 0, 0});
     // lineRenderer.Draw({200, 190}, {200, 100}, {255, 0, 0});
 
-    for (int i = 0; i < 480; i++) {
-      lineRenderer.Draw({320, 240}, {640, i}, {0, 255, 0});
-      lineRenderer.Draw({320, 240}, {0, i}, {0, 255, 0});
-      //   lineRenderer.Draw({200, 200}, {i, 100}, {0, 255, 0});
+    TriangleRenderer triangleRenderer(canvas);
+    std::vector<Position> vertexies;
+    Position v1 = {0, 0};
+    Position v2 = {640, 480};
+    Position v3 = {0, 480};
+    int step = 10;
+    for (int i = 0; i < 16; i++) {
+      vertexies.push_back(v1);
+      vertexies.push_back(v2);
+      vertexies.push_back(v3);
+      v1.x += 10;
+      v1.y += 20;
+      v2.x -= 30;
+      v2.y -= 10;
+      v3.x += 10;
+      v3.y -= 10;
     }
-    for (int i = 0; i <= 640; i++) {
-      lineRenderer.Draw({320, 240}, {i, 0}, {255, 0, 0});
-      lineRenderer.Draw({320, 240}, {i, 480}, {255, 0, 0});
+
+    std::vector<Position> vertexies1;
+    Position v11 = {0, 0};
+    Position v21 = {640, 0};
+    Position v31 = {640, 480};
+
+    for (int i = 0; i < 16; i++) {
+      vertexies1.push_back(v11);
+      vertexies1.push_back(v21);
+      vertexies1.push_back(v31);
+      v11.x += 30;
+      v11.y += 10;
+      v21.x -= 10;
+      v21.y += 10;
+      v31.x -= 10;
+      v31.y -= 20;
     }
+
+    triangleRenderer.Draw(vertexies, {0, 255, 0});
+    triangleRenderer.Draw(vertexies1, {255, 0, 0});
+    // for (int i = 100; i < 380; i++) {
+    //   lineRenderer.Draw({320, 240}, {640, i}, {0, 255, 0});
+    //   lineRenderer.Draw({320, 240}, {0, i}, {0, 255, 0});
+    //   //   lineRenderer.Draw({200, 200}, {i, 100}, {0, 255, 0});
+    // }
+    // for (int i = 100; i <= 540; i++) {
+    //   lineRenderer.Draw({320, 240}, {i, 0}, {255, 0, 0});
+    //   lineRenderer.Draw({320, 240}, {i, 480}, {255, 0, 0});
+    // }
 
     canvas.RenderToSDLWindow();
 

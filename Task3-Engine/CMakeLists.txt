@@ -7,11 +7,13 @@ add_executable(
   game.cxx
   canvas.cxx
   ./Renderers/lineRenderer.cxx
+  ./Renderers/triangleRenderer.cxx
   main.cxx
   canvas.hxx
   engine.hxx
   game.hxx
-  ./Renderers/lineRenderer.cxx)
+  ./Renderers/lineRenderer.hxx
+  ./Renderers/triangleRenderer.hxx)
 
 set_target_properties(
   Engine PROPERTIES ENABLE_EXPORTS 1 # we need to be able to link to exe
