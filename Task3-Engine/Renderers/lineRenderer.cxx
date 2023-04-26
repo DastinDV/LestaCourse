@@ -6,7 +6,10 @@ namespace core {
 LineRenderer::LineRenderer(Canvas &canvas) : canvas(canvas) {}
 
 // Bresenham's algorithm.
-void LineRenderer::Draw(Position from, Position to, Color color) {
+std::vector<Position> LineRenderer::Draw(Position from, Position to,
+                                         Color color) {
+
+  std::vector<Position> linePixels;
   int x1 = from.x;
   int y1 = from.y;
   int x2 = to.x;
@@ -25,6 +28,7 @@ void LineRenderer::Draw(Position from, Position to, Color color) {
 
     for (int i = 0; dx > 0 ? i <= dx : i >= dx; dx >= 0 ? i++ : i--) {
       canvas.SetPixel(x, y, color);
+      linePixels.push_back({x, y});
       x = x1 + i;
       error += derror;
       if (2 * error > std::abs(dx)) {
@@ -36,6 +40,7 @@ void LineRenderer::Draw(Position from, Position to, Color color) {
     int derror = std::abs(dx) * 2;
     for (int i = 0; dy > 0 ? i <= dy : i >= dy; dy >= 0 ? i++ : i--) {
       canvas.SetPixel(x, y, color);
+      linePixels.push_back({x, y});
       y = y1 + i;
       error += derror;
       if (2 * error > std::abs(dy)) {
@@ -44,5 +49,6 @@ void LineRenderer::Draw(Position from, Position to, Color color) {
       }
     }
   }
+  return linePixels;
 }
 } // namespace core

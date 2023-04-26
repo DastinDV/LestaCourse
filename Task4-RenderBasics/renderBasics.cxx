@@ -1,0 +1,161 @@
+#include "renderBasics.hxx"
+#include <chrono>
+#include <iostream>
+#include <thread>
+#include <vector>
+
+RenderBasicsGame::RenderBasicsGame() {}
+
+void RenderBasicsGame::Init() {
+  canvas = std::make_unique<core::Canvas>(width, height);
+  lineRenderer = std::make_unique<core::LineRenderer>(*canvas);
+  triangleRenderer = std::make_unique<core::TriangleRenderer>(*canvas);
+  InitTestFunctions();
+}
+
+void RenderBasicsGame::Render() {
+  int index = 0;
+  while (index < tests.size()) {
+    std::cout << index << std::endl;
+    tests[index++]();
+    canvas->RenderToSDLWindow();
+    canvas->Clear({0, 0, 0});
+    using namespace std::chrono;
+    std::this_thread::sleep_for(milliseconds(1000));
+  }
+  std::cout << "Hello Render from renderBasics" << std::endl;
+}
+
+void RenderBasicsGame::OnEvent(core::Event &event) {}
+
+void RenderBasicsGame::Update() {
+  std::cout << "Hello Update from renderBasics" << std::endl;
+}
+
+void RenderBasicsGame::InitTestFunctions() {
+  // Line drawing with Bresenhams algorithm.
+  std::function<void(void)> CreateLinesInAllDirection = [this]() {
+    lineRenderer->Draw({200, 200}, {300, 300}, {0, 255, 0});
+    lineRenderer->Draw({200, 200}, {300, 100}, {255, 0, 0});
+    lineRenderer->Draw({200, 200}, {100, 300}, {0, 0, 255});
+    lineRenderer->Draw({200, 200}, {100, 100}, {255, 255, 255});
+    lineRenderer->Draw({210, 200}, {300, 200}, {255, 0, 0});
+    lineRenderer->Draw({200, 210}, {200, 300}, {255, 0, 0});
+    lineRenderer->Draw({190, 200}, {100, 200}, {255, 0, 0});
+    lineRenderer->Draw({200, 190}, {200, 100}, {255, 0, 0});
+  };
+
+  // Triangles creation with vertexes vector
+  std::function<void(void)> CreateTrianglesWithIndexBuf = [this]() {
+    using namespace core;
+    std::vector<Position> vertexes;
+
+    Position v1 = {0, 0};
+    Position v2 = {width, height};
+    Position v3 = {0, height};
+    int step = 10;
+    for (int i = 0; i < 16; i++) {
+      vertexes.push_back(v1);
+      vertexes.push_back(v2);
+      vertexes.push_back(v3);
+      v1.x += 10;
+      v1.y += 20;
+      v2.x -= 30;
+      v2.y -= 10;
+      v3.x += 10;
+      v3.y -= 10;
+    }
+
+    std::vector<Position> vertexes1;
+    Position v11 = {0, 0};
+    Position v21 = {width, 0};
+    Position v31 = {width, height};
+
+    for (int i = 0; i < 16; i++) {
+      vertexes1.push_back(v11);
+      vertexes1.push_back(v21);
+      vertexes1.push_back(v31);
+      v11.x += 30;
+      v11.y += 10;
+      v21.x -= 10;
+      v21.y += 10;
+      v31.x -= 10;
+      v31.y -= 20;
+    }
+
+    triangleRenderer->Draw(vertexes, {0, 255, 0}, false);
+    triangleRenderer->Draw(vertexes1, {255, 0, 0}, false);
+  };
+
+  // Triangles with vertexes and indexes buffers
+  std::function<void(void)> CreateIndexedBufferGrid = [this]() {
+    using namespace core;
+    std::vector<Position> vertexes2;
+    Position first = {0, 0};
+    std::vector<int> indexes;
+
+    for (int y = 0; y < height; y += 20) {
+      for (int x = 0; x < width; x += 40) {
+        first.x = x;
+        first.y = y;
+        vertexes2.push_back(first);
+      }
+    }
+
+    int lastRow = height / 20;
+    int lastCol = width / 40;
+    for (int y = 0; y < lastRow - 1; y++) {
+      for (int x = 0; x < lastCol - 1; x++) {
+        int index0 = y * lastCol + x;
+        int index1 = y * lastCol + (x + 1);
+        int index2 = (y + 1) * lastCol + x;
+        int index3 = (y + 1) * lastCol + (x + 1);
+
+        indexes.push_back(index0);
+        indexes.push_back(index1);
+        indexes.push_back(index3);
+
+        indexes.push_back(index0);
+        indexes.push_back(index2);
+        indexes.push_back(index3);
+      }
+    }
+    triangleRenderer->Draw(vertexes2, indexes, {0, 0, 255});
+  };
+
+  // Rasterization of triangles
+  std::function<void(void)> CreateSimpleTrianglesRasterization = [this]() {
+    using namespace core;
+    std::vector<Position> vertexes;
+    Position v1 = {100, 100};
+    Position v2 = {50, 300};
+    Position v3 = {300, 480};
+
+    Position v4 = {200, 200};
+    Position v5 = {150, 250};
+    Position v6 = {400, 230};
+
+    Position v7 = {300, 300};
+    Position v8 = {100, 100};
+    Position v9 = {500, 100};
+
+    vertexes.push_back(v1);
+    vertexes.push_back(v2);
+    vertexes.push_back(v3);
+
+    vertexes.push_back(v4);
+    vertexes.push_back(v5);
+    vertexes.push_back(v6);
+
+    vertexes.push_back(v7);
+    vertexes.push_back(v8);
+    vertexes.push_back(v9);
+
+    triangleRenderer->Draw(vertexes, {0, 255, 0}, true);
+  };
+
+  tests.push_back(CreateLinesInAllDirection);
+  tests.push_back(CreateTrianglesWithIndexBuf);
+  tests.push_back(CreateIndexedBufferGrid);
+  tests.push_back(CreateSimpleTrianglesRasterization);
+}

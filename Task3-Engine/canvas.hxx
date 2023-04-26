@@ -23,6 +23,7 @@ public:
   void SetPixel(size_t x, size_t y, Color color);
   void WriteImage(const std::string &fileName);
   void RenderToSDLWindow();
+  void Clear(Color color);
 
   const std::vector<Color> &GetPixels() const;
 

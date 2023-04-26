@@ -17,6 +17,14 @@ Canvas::Canvas(size_t w, size_t h) : width{w}, height{h} {
   pixels.resize(width * height);
 }
 
+void Canvas::Clear(Color color) {
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      pixels[y * width + x] = color;
+    }
+  }
+}
+
 void Canvas::RenderToSDLWindow() {
   if (SDL_RenderClear(renderer) != 0)
     std::cout << "Error in clearing" << std::endl;

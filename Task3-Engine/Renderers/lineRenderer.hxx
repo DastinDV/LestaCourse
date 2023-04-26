@@ -6,7 +6,7 @@ class LineRenderer {
 public:
   LineRenderer(Canvas &canvas);
 
-  void Draw(Position from, Position to, Color color);
+  std::vector<Position> Draw(Position from, Position to, Color color);
 
 private:
   Canvas &canvas;

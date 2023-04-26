@@ -27,5 +27,8 @@ find_package(SDL3 REQUIRED)
 #target_link_libraries(Engine PRIVATE SDL3::SDL3-shared ConsoleGame)
 target_link_libraries(Engine PRIVATE SDL3::SDL3-shared)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Game
-${CMAKE_BINARY_DIR}/lib/MyGame)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Game
+#${CMAKE_BINARY_DIR}/lib/MyGame)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task4-RenderBasics
+${CMAKE_BINARY_DIR}/lib/RenderBasicsGame)

@@ -9,7 +9,11 @@ class TriangleRenderer {
 public:
   TriangleRenderer(Canvas &canvas);
 
-  void Draw(std::vector<Position> vertexes, Color color);
+  void Draw(const std::vector<Position> &vertexes, const Color color,
+            bool isFilled);
+  void Draw(const std::vector<Position> &vertexes,
+            const std::vector<int> &indexes, const Color color);
+  void Rasterize(int xLeft, int xRight, int y, const Color color);
 
 private:
   std::unique_ptr<LineRenderer> lineRenderer;
