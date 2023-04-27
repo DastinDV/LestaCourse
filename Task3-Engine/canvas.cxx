@@ -7,6 +7,10 @@ namespace core {
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
 
+bool operator==(const Color &l, const Color &r) {
+  return l.r == r.r && l.g == r.g && l.b == r.b;
+}
+
 void Canvas::SetPixel(size_t x, size_t y, Color color) {
   pixels[y * width + x] = color;
 }

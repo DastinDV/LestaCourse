@@ -16,6 +16,15 @@ struct Color {
   friend bool operator==(const Color &l, const Color &r);
 };
 
+struct Vertex {
+  Position pos;
+  Color color;
+};
+
+const Color red = {255, 0, 0};
+const Color green = {0, 255, 0};
+const Color blue = {0, 0, 255};
+
 class Canvas {
 
 public:

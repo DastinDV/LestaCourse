@@ -48,16 +48,16 @@ void RenderBasicsGame::InitTestFunctions() {
   // Triangles creation with vertexes vector
   std::function<void(void)> CreateTrianglesWithIndexBuf = [this]() {
     using namespace core;
-    std::vector<Position> vertexes;
+    std::vector<Vertex> vertexes;
 
     Position v1 = {0, 0};
     Position v2 = {width, height};
     Position v3 = {0, height};
     int step = 10;
-    for (int i = 0; i < 16; i++) {
-      vertexes.push_back(v1);
-      vertexes.push_back(v2);
-      vertexes.push_back(v3);
+    for (int i = 0; i < 1; i++) {
+      vertexes.push_back({v1, red});
+      vertexes.push_back({v2, green});
+      vertexes.push_back({v3, blue});
       v1.x += 10;
       v1.y += 20;
       v2.x -= 30;
@@ -66,15 +66,15 @@ void RenderBasicsGame::InitTestFunctions() {
       v3.y -= 10;
     }
 
-    std::vector<Position> vertexes1;
+    std::vector<Vertex> vertexes1;
     Position v11 = {0, 0};
     Position v21 = {width, 0};
     Position v31 = {width, height};
 
     for (int i = 0; i < 16; i++) {
-      vertexes1.push_back(v11);
-      vertexes1.push_back(v21);
-      vertexes1.push_back(v31);
+      vertexes1.push_back({v11, green});
+      vertexes1.push_back({v21, green});
+      vertexes1.push_back({v31, green});
       v11.x += 30;
       v11.y += 10;
       v21.x -= 10;
@@ -83,14 +83,14 @@ void RenderBasicsGame::InitTestFunctions() {
       v31.y -= 20;
     }
 
-    triangleRenderer->Draw(vertexes, {0, 255, 0}, false);
+    triangleRenderer->Draw(vertexes, {0, 255, 0}, true);
     triangleRenderer->Draw(vertexes1, {255, 0, 0}, false);
   };
 
   // Triangles with vertexes and indexes buffers
   std::function<void(void)> CreateIndexedBufferGrid = [this]() {
     using namespace core;
-    std::vector<Position> vertexes2;
+    std::vector<Vertex> vertexes2;
     Position first = {0, 0};
     std::vector<int> indexes;
 
@@ -98,7 +98,7 @@ void RenderBasicsGame::InitTestFunctions() {
       for (int x = 0; x < width; x += 40) {
         first.x = x;
         first.y = y;
-        vertexes2.push_back(first);
+        vertexes2.push_back({first, red});
       }
     }
 
@@ -126,7 +126,7 @@ void RenderBasicsGame::InitTestFunctions() {
   // Rasterization of triangles
   std::function<void(void)> CreateSimpleTrianglesRasterization = [this]() {
     using namespace core;
-    std::vector<Position> vertexes;
+    std::vector<Vertex> vertexes;
     Position v1 = {100, 100};
     Position v2 = {50, 300};
     Position v3 = {300, 480};
@@ -139,17 +139,17 @@ void RenderBasicsGame::InitTestFunctions() {
     Position v8 = {100, 100};
     Position v9 = {500, 100};
 
-    vertexes.push_back(v1);
-    vertexes.push_back(v2);
-    vertexes.push_back(v3);
+    vertexes.push_back({v1, green});
+    vertexes.push_back({v2, green});
+    vertexes.push_back({v3, green});
 
-    vertexes.push_back(v4);
-    vertexes.push_back(v5);
-    vertexes.push_back(v6);
+    vertexes.push_back({v4, blue});
+    vertexes.push_back({v5, blue});
+    vertexes.push_back({v6, blue});
 
-    vertexes.push_back(v7);
-    vertexes.push_back(v8);
-    vertexes.push_back(v9);
+    vertexes.push_back({v7, red});
+    vertexes.push_back({v8, red});
+    vertexes.push_back({v9, red});
 
     triangleRenderer->Draw(vertexes, {0, 255, 0}, true);
   };
