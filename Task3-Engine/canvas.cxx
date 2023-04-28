@@ -1,5 +1,6 @@
 #include "canvas.hxx"
 #include <SDL3/SDL.h>
+#include <fstream>
 #include <iostream>
 
 namespace core {
@@ -9,6 +10,10 @@ extern SDL_Renderer *renderer;
 
 bool operator==(const Color &l, const Color &r) {
   return l.r == r.r && l.g == r.g && l.b == r.b;
+}
+
+bool operator<(const Vertex &vertex, const Vertex &other) {
+  return vertex.pos.x <= other.pos.x;
 }
 
 void Canvas::SetPixel(size_t x, size_t y, Color color) {
@@ -43,5 +48,15 @@ void Canvas::RenderToSDLWindow() {
     }
   }
   SDL_RenderPresent(renderer);
+}
+
+void Canvas::SaveImage(std::string name) {
+  std::ofstream out;
+  out.exceptions(std::ios_base::failbit);
+  out.open(name, std::ios_base::binary);
+  out << "P6\n" << width << ' ' << height << ' ' << 255 << '\n';
+  std::streamsize buf_size =
+      static_cast<std::streamsize>(sizeof(Color) * pixels.size());
+  out.write(reinterpret_cast<const char *>(pixels.data()), buf_size);
 }
 } // namespace core

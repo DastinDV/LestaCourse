@@ -6,12 +6,14 @@ class LineRenderer {
 public:
   LineRenderer(Canvas &canvas);
 
-  std::vector<Position> Draw(Position from, Position to, Color color);
-  std::vector<Vertex> DrawInterpolated(Position from, Position to,
-                                       Color colorFrom, Color colorTo);
+  std::vector<Vertex> Draw(Position from, Position to, Color color);
+  std::vector<Vertex> DrawInterpolated(Vertex from, Vertex to);
   Color Interpolate(Color from, Color to, int curr, int count);
 
 private:
   Canvas &canvas;
+
+  void CreateBresenhamsLine(Position &from, Position &to,
+                            std::vector<Vertex> &pixels);
 };
 } // namespace core

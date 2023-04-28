@@ -21,7 +21,7 @@ void RenderBasicsGame::Render() {
     canvas->RenderToSDLWindow();
     canvas->Clear({0, 0, 0});
     using namespace std::chrono;
-    std::this_thread::sleep_for(milliseconds(1000));
+    std::this_thread::sleep_for(milliseconds(1500));
   }
   std::cout << "Hello Render from renderBasics" << std::endl;
 }
@@ -43,6 +43,8 @@ void RenderBasicsGame::InitTestFunctions() {
     lineRenderer->Draw({200, 210}, {200, 300}, {255, 0, 0});
     lineRenderer->Draw({190, 200}, {100, 200}, {255, 0, 0});
     lineRenderer->Draw({200, 190}, {200, 100}, {255, 0, 0});
+
+    canvas->SaveImage("lines.ppm");
   };
 
   // Triangles creation with vertexes vector
@@ -83,8 +85,14 @@ void RenderBasicsGame::InitTestFunctions() {
       v31.y -= 20;
     }
 
-    triangleRenderer->Draw(vertexes, {0, 255, 0}, true);
-    triangleRenderer->Draw(vertexes1, {255, 0, 0}, false);
+    BitFlag flags;
+    flags.SetFlag(ETriangleSettings::RASTERIZED);
+    flags.SetFlag(ETriangleSettings::INTERPOLATED);
+    triangleRenderer->Draw(vertexes, {0, 255, 0}, true, flags);
+    flags.UnsetFlag(ETriangleSettings::RASTERIZED);
+    triangleRenderer->Draw(vertexes1, {255, 0, 0}, false, flags);
+
+    canvas->SaveImage("triangles.ppm");
   };
 
   // Triangles with vertexes and indexes buffers
@@ -121,6 +129,8 @@ void RenderBasicsGame::InitTestFunctions() {
       }
     }
     triangleRenderer->Draw(vertexes2, indexes, {0, 0, 255});
+
+    canvas->SaveImage("indexedTriangles.ppm");
   };
 
   // Rasterization of triangles
@@ -135,23 +145,28 @@ void RenderBasicsGame::InitTestFunctions() {
     Position v5 = {150, 250};
     Position v6 = {400, 230};
 
-    Position v7 = {300, 300};
-    Position v8 = {100, 100};
-    Position v9 = {500, 100};
+    Position v7 = {320, 0};
+    Position v8 = {0, 480};
+    Position v9 = {640, 480};
 
-    vertexes.push_back({v1, green});
-    vertexes.push_back({v2, green});
-    vertexes.push_back({v3, green});
+    // vertexes.push_back({v1, red});
+    // vertexes.push_back({v2, green});
+    // vertexes.push_back({v3, blue});
 
-    vertexes.push_back({v4, blue});
-    vertexes.push_back({v5, blue});
-    vertexes.push_back({v6, blue});
+    // vertexes.push_back({v4, red});
+    // vertexes.push_back({v5, green});
+    // vertexes.push_back({v6, blue});
 
     vertexes.push_back({v7, red});
-    vertexes.push_back({v8, red});
-    vertexes.push_back({v9, red});
+    vertexes.push_back({v8, green});
+    vertexes.push_back({v9, blue});
 
-    triangleRenderer->Draw(vertexes, {0, 255, 0}, true);
+    BitFlag flags;
+    flags.SetFlag(ETriangleSettings::RASTERIZED);
+    flags.SetFlag(ETriangleSettings::INTERPOLATED);
+    triangleRenderer->Draw(vertexes, {0, 255, 0}, true, flags);
+
+    canvas->SaveImage("interpolated.ppm");
   };
 
   tests.push_back(CreateLinesInAllDirection);

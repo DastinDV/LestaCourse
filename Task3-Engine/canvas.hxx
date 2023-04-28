@@ -9,16 +9,19 @@ struct Position {
   int y;
 };
 
+#pragma pack(push, 1)
 struct Color {
   u_int8_t r = 0;
   u_int8_t g = 0;
   u_int8_t b = 0;
   friend bool operator==(const Color &l, const Color &r);
 };
+#pragma pack(pop)
 
 struct Vertex {
   Position pos;
   Color color;
+  friend bool operator<(const Vertex &vertex, const Vertex &other);
 };
 
 const Color red = {255, 0, 0};
@@ -33,6 +36,7 @@ public:
   void WriteImage(const std::string &fileName);
   void RenderToSDLWindow();
   void Clear(Color color);
+  void SaveImage(std::string fileName);
 
   const std::vector<Color> &GetPixels() const;
 

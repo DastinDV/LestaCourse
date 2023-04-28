@@ -1,5 +1,7 @@
 #include "triangleRenderer.hxx"
 #include <iostream>
+#include <set>
+#include <unordered_map>
 
 namespace core {
 TriangleRenderer::TriangleRenderer(Canvas &canvas) : canvas(canvas) {
@@ -17,11 +19,13 @@ void TriangleRenderer::RasterizeInterpolated(int xLeft, int xRight, int y,
                                              const Color toColor) {
   if (xLeft == xRight)
     return;
-  lineRenderer->DrawInterpolated({xLeft, y}, {xRight, y}, fromColor, toColor);
+  lineRenderer->DrawInterpolated(Vertex{{xLeft, y}, fromColor},
+                                 Vertex{{xRight, y}, toColor});
 }
 // Sequence buffer
 void TriangleRenderer::Draw(const std::vector<Vertex> &vertexes,
-                            const Color color, bool isFilled) {
+                            const Color color, bool isFilled,
+                            BitFlag settings) {
   for (int i = 0; i < vertexes.size() / 3; i++) {
 
     std::array<Vertex, 3> nextTriangle = {
@@ -33,58 +37,63 @@ void TriangleRenderer::Draw(const std::vector<Vertex> &vertexes,
               });
 
     auto line1 = lineRenderer->DrawInterpolated(
-        nextTriangle[0].pos, nextTriangle[1].pos, nextTriangle[1].color,
-        nextTriangle[0].color);
+        Vertex{nextTriangle[0].pos, nextTriangle[1].color},
+        Vertex{nextTriangle[1].pos, nextTriangle[0].color});
     auto line2 = lineRenderer->DrawInterpolated(
-        nextTriangle[1].pos, nextTriangle[2].pos, nextTriangle[2].color,
-        nextTriangle[1].color);
+        Vertex{nextTriangle[1].pos, nextTriangle[2].color},
+        Vertex{nextTriangle[2].pos, nextTriangle[1].color});
     auto line3 = lineRenderer->DrawInterpolated(
-        nextTriangle[2].pos, nextTriangle[0].pos, nextTriangle[0].color,
-        nextTriangle[2].color);
+        Vertex{nextTriangle[2].pos, nextTriangle[0].color},
+        Vertex{nextTriangle[0].pos, nextTriangle[2].color});
 
+    std::unordered_map<int, std::set<Vertex>> yToX;
+
+    for (const Vertex &pixel : line1)
+      yToX[pixel.pos.y].insert(pixel);
+    for (auto &pixel : line2)
+      yToX[pixel.pos.y].insert(pixel);
+    for (auto &pixel : line3)
+      yToX[pixel.pos.y].insert(pixel);
     // auto line1 =
-    //     lineRenderer->Draw(nextTriangle[0].pos, nextTriangle[1].pos, color);
+    //     lineRenderer->Draw(nextTriangle[0].pos, nextTriangle[1].pos,
+    //     color);
     // auto line2 =
-    //     lineRenderer->Draw(nextTriangle[1].pos, nextTriangle[2].pos, color);
+    //     lineRenderer->Draw(nextTriangle[1].pos, nextTriangle[2].pos,
+    //     color);
     // auto line3 =
-    //     lineRenderer->Draw(nextTriangle[2].pos, nextTriangle[0].pos, color);
+    //     lineRenderer->Draw(nextTriangle[2].pos, nextTriangle[0].pos,
+    //     color);
 
-    if (isFilled) {
+    if (settings.HasFlag(ETriangleSettings::RASTERIZED)) {
       int highY = nextTriangle[0].pos.y;
       int midY = nextTriangle[1].pos.y;
       int lowY = nextTriangle[2].pos.y;
 
-      for (int y = highY + 1; y < midY; y++) {
-        auto startLeft =
-            find_if(line1.begin(), line1.end(),
-                    [y](const Vertex &nextPos) { return nextPos.pos.y == y; });
-        auto startRight =
-            find_if(line3.begin(), line3.end(),
-                    [y](const Vertex &nextPos) { return nextPos.pos.y == y; });
+      for (int y = highY + 1; y <= midY; y++) {
 
+        auto startLeft = yToX.at(y).begin();
+        auto startRight = prev(yToX.at(y).end());
         // std::cout << "Up " << startLeft->x << " " << startRight->x << " " <<
         // y
-        //<< std::endl;
+        //           << std::endl;
 
-        // Rasterize(startLeft->pos.x, startRight->pos.x, y, {255, 0, 0});
-        RasterizeInterpolated(startLeft->pos.x, startRight->pos.x, y,
-                              startRight->color, startLeft->color);
+        !settings.HasFlag(ETriangleSettings::INTERPOLATED)
+            ? Rasterize(startLeft->pos.x, startRight->pos.x, y, {255, 0, 0})
+            : RasterizeInterpolated(startLeft->pos.x, startRight->pos.x, y,
+                                    startRight->color, startLeft->color);
       }
 
       for (int y = midY + 1; y < lowY; y++) {
-        auto startLeft =
-            find_if(line2.begin(), line2.end(),
-                    [y](const Vertex &nextPos) { return nextPos.pos.y == y; });
-        auto startRight =
-            find_if(line3.begin(), line3.end(),
-                    [y](const Vertex &nextPos) { return nextPos.pos.y == y; });
+        auto startLeft = yToX.at(y).begin();
+        auto startRight = prev(yToX.at(y).end());
 
         // std::cout << "Bottom " << startLeft->x << " " << startRight->x << " "
         //<< y << std::endl;
 
-        // Rasterize(startLeft->x, startRight->x, y, {0, 0, 255});
-        RasterizeInterpolated(startLeft->pos.x, startRight->pos.x, y,
-                              startRight->color, startLeft->color);
+        !settings.HasFlag(ETriangleSettings::INTERPOLATED)
+            ? Rasterize(startLeft->pos.x, startRight->pos.x, y, {0, 0, 255})
+            : RasterizeInterpolated(startLeft->pos.x, startRight->pos.x, y,
+                                    startRight->color, startLeft->color);
       }
     }
   }
