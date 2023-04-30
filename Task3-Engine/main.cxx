@@ -22,35 +22,35 @@ struct RotateImage : gfx_program {
 
   Vertex vertex_shader(const Vertex &v_in) override {
     Vertex out = v_in;
-    out.pos.x -= 320;
-    out.pos.y -= 240;
+    out.x -= 320;
+    out.y -= 240;
 
-    double angle = 1;
+    double angle = 3;
     // double alpha = (M_PI / 2);
     double alpha = angle * (M_PI / 180); // * uniforms_.f7 * -1;
-    std::cout << alpha << std::endl;
-    double x = out.pos.x;
-    double y = out.pos.y;
+    // std::cout << alpha << std::endl;
+    double x = out.x;
+    double y = out.y;
 
-    std::cout << "BEFORE" << std::endl;
-    std::cout << "x " << out.pos.x << " "
-              << "y " << out.pos.y << std::endl;
+    // std::cout << "BEFORE" << std::endl;
+    // std::cout << "x " << out.x << " "
+    //           << "y " << out.y << std::endl;
 
-    std::cout << "xcos " << x * std::cos(alpha) << " "
-              << "ysin " << y * std::sin(alpha) << std::endl;
+    // std::cout << "xcos " << x * std::cos(alpha) << " "
+    //           << "ysin " << y * std::sin(alpha) << std::endl;
 
-    std::cout << std::endl;
-    out.pos.x = std::ceil(x * std::cos(alpha) - y * std::sin(alpha));
-    out.pos.y = std::ceil(x * std::sin(alpha) + y * std::cos(alpha));
+    // std::cout << std::endl;
+    out.x = x * std::cos(alpha) - y * std::sin(alpha);
+    out.y = x * std::sin(alpha) + y * std::cos(alpha);
 
-    out.pos.x += 320;
-    out.pos.y += 240;
+    out.x += 320;
+    out.y += 240;
 
-    std::cout << "AFTER" << std::endl;
-    std::cout << "x " << out.pos.x << " "
-              << "y " << out.pos.y << std::endl;
+    // std::cout << "AFTER" << std::endl;
+    // std::cout << "x " << out.x << " "
+    //           << "y " << out.y << std::endl;
 
-    return out;
+    return std::move(out);
   }
 
   Color fragment_shader(const Vertex &v_in) override {
@@ -82,21 +82,31 @@ int main() {
     Position v2 = {220, 340};
     Position v3 = {420, 340};
 
-    vertexes.push_back({v1, red});
-    vertexes.push_back({v2, green});
-    vertexes.push_back({v3, blue});
+    for (int i = 0; i < 1000; i++) {
+      vertexes.push_back({320., 140., red});
+      vertexes.push_back({220., 340., green});
+      vertexes.push_back({420., 340., blue});
+    }
 
     TriangleRenderer triangleRenderer(canvas);
     gfx_program *rotateImage = new RotateImage();
-    triangleRenderer.SetGFXProgram(rotateImage);
+    // triangleRenderer.SetGFXProgram(rotateImage);
 
     BitFlag flags;
     flags.SetFlag(ETriangleSettings::RASTERIZED);
     flags.SetFlag(ETriangleSettings::INTERPOLATED);
 
+    auto start = std::chrono::steady_clock::now();
     triangleRenderer.Draw(vertexes, green, true, flags);
     canvas.RenderToSDLWindow();
+    auto end = std::chrono::steady_clock::now();
 
+    auto diff = end - start;
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end -
+                                                                       start)
+                     .count()
+              << std::endl;
     Game *consoleGame = ReloadGame(nullptr, library_name, tmp_library_file,
                                    engine, game_library_handle);
 
@@ -132,10 +142,10 @@ int main() {
 
       consoleGame->OnEvent(event);
 
-      triangleRenderer.Draw(vertexes, green, true, flags);
-      canvas.RenderToSDLWindow();
-      //  consoleGame->Update();
-      //  consoleGame->Render();
+      // triangleRenderer.Draw(vertexes, green, true, flags);
+      // canvas.RenderToSDLWindow();
+      //    consoleGame->Update();
+      //    consoleGame->Render();
     }
   }
 

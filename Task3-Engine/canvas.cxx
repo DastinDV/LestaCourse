@@ -13,7 +13,7 @@ bool operator==(const Color &l, const Color &r) {
 }
 
 bool operator<(const Vertex &vertex, const Vertex &other) {
-  return vertex.pos.x <= other.pos.x;
+  return vertex.x <= other.x;
 }
 
 void Canvas::SetPixel(size_t x, size_t y, Color color) {

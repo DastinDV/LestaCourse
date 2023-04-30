@@ -38,7 +38,7 @@ void LineRenderer::CreateBresenhamsLine(Position &from, Position &to,
 
     for (int i = 0; dx > 0 ? i <= dx : i >= dx; dx >= 0 ? i++ : i--) {
       // canvas.SetPixel(x, y, color);
-      pixels.push_back({{x, y}, {0, 0, 0}});
+      pixels.push_back({(double)x, (double)y, {0, 0, 0}});
       x = x1 + i;
       error += derror;
       if (2 * error > std::abs(dx)) {
@@ -50,7 +50,7 @@ void LineRenderer::CreateBresenhamsLine(Position &from, Position &to,
     int derror = std::abs(dx) * 2;
     for (int i = 0; dy > 0 ? i <= dy : i >= dy; dy >= 0 ? i++ : i--) {
       // canvas.SetPixel(x, y, color);
-      pixels.push_back({{x, y}, {0, 0, 0}});
+      pixels.push_back({(double)x, (double)y, {0, 0, 0}});
       y = y1 + i;
       error += derror;
       if (2 * error > std::abs(dy)) {
@@ -71,7 +71,7 @@ std::vector<Vertex> LineRenderer::Draw(Position from, Position to,
 
   for (auto &pixel : linePixels) {
     pixel.color = color;
-    canvas.SetPixel(pixel.pos.x, pixel.pos.y, pixel.color);
+    canvas.SetPixel(pixel.x, pixel.y, pixel.color);
   }
 
   return linePixels;
@@ -80,25 +80,23 @@ std::vector<Vertex> LineRenderer::Draw(Position from, Position to,
 std::vector<Vertex> LineRenderer::DrawInterpolated(Vertex from, Vertex to) {
   size_t pixelsCount = 0;
 
-  std::abs(from.pos.y - to.pos.y) >= std::abs(from.pos.x - to.pos.x)
-      ? pixelsCount =
-            static_cast<size_t>(std::round(std::abs(from.pos.y - to.pos.y)))
-      : pixelsCount =
-            static_cast<size_t>(std::round(std::abs(from.pos.x - to.pos.x)));
+  std::abs(from.y - to.y) >= std::abs(from.x - to.x)
+      ? pixelsCount = static_cast<size_t>(std::round(std::abs(from.y - to.y)))
+      : pixelsCount = static_cast<size_t>(std::round(std::abs(from.x - to.x)));
 
   std::vector<Vertex> linePixels;
+  linePixels.reserve(pixelsCount);
 
-  // Position from_ = {from.pos.x, from.pos.y};
-  // Position to_ = {from.pos.x, from.pos.y};
+  Position from_ = {from.x, from.y};
+  Position to_ = {to.x, to.y};
 
-  CreateBresenhamsLine(from.pos, to.pos, linePixels);
+  CreateBresenhamsLine(from_, to_, linePixels);
 
   for (int i = 0; i < linePixels.size(); i++) {
     Color newColor =
         Interpolate(from.color, to.color, std::abs(i), pixelsCount);
     linePixels[i].color = newColor;
-    canvas.SetPixel(linePixels[i].pos.x, linePixels[i].pos.y,
-                    linePixels[i].color);
+    canvas.SetPixel(linePixels[i].x, linePixels[i].y, linePixels[i].color);
   }
 
   return linePixels;

@@ -24,7 +24,8 @@ struct Color {
 #pragma pack(pop)
 
 struct Vertex {
-  Position pos;
+  double x;
+  double y;
   Color color;
   friend bool operator<(const Vertex &vertex, const Vertex &other);
 };
