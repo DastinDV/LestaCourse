@@ -9,6 +9,11 @@ struct Position {
   int y;
 };
 
+struct FPosition {
+  int x;
+  int y;
+};
+
 #pragma pack(push, 1)
 struct Color {
   u_int8_t r = 0;
@@ -45,4 +50,24 @@ private:
   size_t height = 0;
   std::vector<Color> pixels;
 };
+
+struct uniforms {
+  double f0 = 0;
+  double f1 = 0;
+  double f2 = 0;
+  double f3 = 0;
+  double f4 = 0;
+  double f5 = 0;
+  double f6 = 0;
+  double f7 = 0;
+  Canvas *texture0 = nullptr;
+};
+
+struct gfx_program {
+  virtual ~gfx_program() = default;
+  virtual void set_uniforms(const uniforms &) = 0;
+  virtual Vertex vertex_shader(const Vertex &v_in) = 0;
+  virtual Color fragment_shader(const Vertex &v_in) = 0;
+};
+
 } // namespace core

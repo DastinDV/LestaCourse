@@ -29,17 +29,20 @@ class TriangleRenderer {
 public:
   TriangleRenderer(Canvas &canvas);
 
-  void Draw(const std::vector<Vertex> &vertexes, const Color color,
-            bool isFilled, BitFlag settings);
-  void Draw(const std::vector<Vertex> &vertexes,
-            const std::vector<int> &indexes, const Color color);
+  void Draw(std::vector<Vertex> &vertexes, const Color color, bool isFilled,
+            BitFlag settings);
+  void Draw(std::vector<Vertex> &vertexes, const std::vector<int> &indexes,
+            const Color color);
   void Rasterize(int xLeft, int xRight, int y, const Color color);
   void RasterizeInterpolated(int xLeft, int xRight, int y,
                              const Color fromColor, const Color toColor);
+
+  void SetGFXProgram(gfx_program *program);
 
 private:
   std::unique_ptr<LineRenderer> lineRenderer;
   Canvas &canvas;
   BitFlag settings;
+  gfx_program *program = nullptr;
 };
 } // namespace core

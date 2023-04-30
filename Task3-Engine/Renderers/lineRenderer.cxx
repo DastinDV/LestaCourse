@@ -88,6 +88,9 @@ std::vector<Vertex> LineRenderer::DrawInterpolated(Vertex from, Vertex to) {
 
   std::vector<Vertex> linePixels;
 
+  // Position from_ = {from.pos.x, from.pos.y};
+  // Position to_ = {from.pos.x, from.pos.y};
+
   CreateBresenhamsLine(from.pos, to.pos, linePixels);
 
   for (int i = 0; i < linePixels.size(); i++) {

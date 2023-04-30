@@ -8,6 +8,10 @@ TriangleRenderer::TriangleRenderer(Canvas &canvas) : canvas(canvas) {
   lineRenderer = std::make_unique<LineRenderer>(canvas);
 }
 
+void TriangleRenderer::SetGFXProgram(gfx_program *program) {
+  this->program = program;
+}
+
 void TriangleRenderer::Rasterize(int xLeft, int xRight, int y, Color color) {
   if (xLeft == xRight)
     return;
@@ -23,13 +27,33 @@ void TriangleRenderer::RasterizeInterpolated(int xLeft, int xRight, int y,
                                  Vertex{{xRight, y}, toColor});
 }
 // Sequence buffer
-void TriangleRenderer::Draw(const std::vector<Vertex> &vertexes,
-                            const Color color, bool isFilled,
-                            BitFlag settings) {
+void TriangleRenderer::Draw(std::vector<Vertex> &vertexes, const Color color,
+                            bool isFilled, BitFlag settings) {
   for (int i = 0; i < vertexes.size() / 3; i++) {
 
-    std::array<Vertex, 3> nextTriangle = {
-        vertexes[i * 3 + 0], vertexes[i * 3 + 1], vertexes[i * 3 + 2]};
+    Vertex &v0_ = vertexes[i * 3 + 0];
+    Vertex &v1_ = vertexes[i * 3 + 1];
+    Vertex &v2_ = vertexes[i * 3 + 2];
+
+    std::array<Vertex, 3> nextTriangle;
+    if (program) {
+      canvas.Clear({0, 0, 0});
+      const Vertex &v0 = program->vertex_shader(vertexes[i * 3 + 0]);
+      const Vertex &v1 = program->vertex_shader(vertexes[i * 3 + 1]);
+      const Vertex &v2 = program->vertex_shader(vertexes[i * 3 + 2]);
+      nextTriangle[0] = v0;
+      nextTriangle[1] = v1;
+      nextTriangle[2] = v2;
+      v0_ = v0;
+      v1_ = v1;
+      v2_ = v2;
+    } else {
+      nextTriangle[0] = v0_;
+      nextTriangle[1] = v1_;
+      nextTriangle[2] = v2_;
+    }
+
+    // std::array<Vertex, 3> nextTriangle = {v0_, v1_, v2_};
 
     std::sort(nextTriangle.begin(), nextTriangle.end(),
               [](const Vertex &left, const Vertex &right) {
@@ -78,7 +102,7 @@ void TriangleRenderer::Draw(const std::vector<Vertex> &vertexes,
         //           << std::endl;
 
         !settings.HasFlag(ETriangleSettings::INTERPOLATED)
-            ? Rasterize(startLeft->pos.x, startRight->pos.x, y, {255, 0, 0})
+            ? Rasterize(startLeft->pos.x, startRight->pos.x, y, color)
             : RasterizeInterpolated(startLeft->pos.x, startRight->pos.x, y,
                                     startRight->color, startLeft->color);
       }
@@ -91,7 +115,7 @@ void TriangleRenderer::Draw(const std::vector<Vertex> &vertexes,
         //<< y << std::endl;
 
         !settings.HasFlag(ETriangleSettings::INTERPOLATED)
-            ? Rasterize(startLeft->pos.x, startRight->pos.x, y, {0, 0, 255})
+            ? Rasterize(startLeft->pos.x, startRight->pos.x, y, color)
             : RasterizeInterpolated(startLeft->pos.x, startRight->pos.x, y,
                                     startRight->color, startLeft->color);
       }
@@ -100,19 +124,23 @@ void TriangleRenderer::Draw(const std::vector<Vertex> &vertexes,
 }
 
 // Indexed buffer
-void TriangleRenderer::Draw(const std::vector<Vertex> &vertexes,
+void TriangleRenderer::Draw(std::vector<Vertex> &vertexes,
                             const std::vector<int> &indexes,
                             const Color color) {
 
   for (int i = 0; i < indexes.size() / 3; i++) {
     // std::cout << indexes[i * 3 + 0] << " " << indexes[i * 3 + 1] << " "
     //<< indexes[i * 3 + 2] << std::endl;
-    lineRenderer->Draw(vertexes[indexes[i * 3 + 0]].pos,
-                       vertexes[indexes[i * 3 + 1]].pos, color);
-    lineRenderer->Draw(vertexes[indexes[i * 3 + 1]].pos,
-                       vertexes[indexes[i * 3 + 2]].pos, color);
-    lineRenderer->Draw(vertexes[indexes[i * 3 + 2]].pos,
-                       vertexes[indexes[i * 3 + 0]].pos, color);
+    Position p0 = {vertexes[indexes[i * 3 + 0]].pos.x,
+                   vertexes[indexes[i * 3 + 0]].pos.y};
+    Position p1 = {vertexes[indexes[i * 3 + 1]].pos.x,
+                   vertexes[indexes[i * 3 + 1]].pos.y};
+    Position p2 = {vertexes[indexes[i * 3 + 2]].pos.x,
+                   vertexes[indexes[i * 3 + 2]].pos.y};
+
+    lineRenderer->Draw(p0, p1, color);
+    lineRenderer->Draw(p1, p2, color);
+    lineRenderer->Draw(p2, p0, color);
   }
 }
 
