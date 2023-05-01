@@ -7,11 +7,7 @@ namespace core {
 struct Position {
   int x;
   int y;
-};
-
-struct FPosition {
-  int x;
-  int y;
+  friend bool operator==(const Position &l, const Position &r);
 };
 
 #pragma pack(push, 1)
@@ -38,7 +34,7 @@ class Canvas {
 
 public:
   Canvas(size_t width, size_t height);
-  void SetPixel(size_t x, size_t y, Color color);
+  void SetPixel(size_t x, size_t y, Color &color);
   void WriteImage(const std::string &fileName);
   void RenderToSDLWindow();
   void Clear(Color color);
@@ -52,7 +48,7 @@ private:
   std::vector<Color> pixels;
 };
 
-struct uniforms {
+struct Uniforms {
   double f0 = 0;
   double f1 = 0;
   double f2 = 0;
@@ -66,7 +62,7 @@ struct uniforms {
 
 struct gfx_program {
   virtual ~gfx_program() = default;
-  virtual void set_uniforms(const uniforms &) = 0;
+  virtual void set_uniforms(const Uniforms &) = 0;
   virtual Vertex vertex_shader(const Vertex &v_in) = 0;
   virtual Color fragment_shader(const Vertex &v_in) = 0;
 };

@@ -9,7 +9,7 @@
 
 namespace core {
 
-enum class EventType { keyboard_event, quit };
+enum class EventType { keyboard_event, mouse_event, quit };
 
 enum class KeyCode { w, a, s, d, space, lctrl, rctrl, not_bind };
 
@@ -24,9 +24,15 @@ struct KeyboardInfo {
   KeyboardEventType type;
 };
 
+struct MouseInfo {
+  double xPos;
+  double yPos;
+};
+
 struct Event {
   EventType eventType;
   std::optional<KeyboardInfo> keyBoardInfo;
+  std::optional<MouseInfo> mouseInfo;
 };
 
 class IZ_DECLSPEC Engine {

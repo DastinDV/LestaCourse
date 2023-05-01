@@ -40,6 +40,8 @@ public:
   void SetGFXProgram(gfx_program *program);
 
 private:
+  Position BresenhamsHelper(Position from, Position to);
+
   std::unique_ptr<LineRenderer> lineRenderer;
   Canvas &canvas;
   BitFlag settings;

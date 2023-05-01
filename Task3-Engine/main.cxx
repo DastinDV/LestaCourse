@@ -14,9 +14,9 @@
 
 namespace core {
 struct RotateImage : gfx_program {
-  uniforms uniforms_;
+  Uniforms uniforms_;
 
-  void set_uniforms(const uniforms &a_uniforms) override {
+  void set_uniforms(const Uniforms &a_uniforms) override {
     uniforms_ = a_uniforms;
   }
 
@@ -25,7 +25,7 @@ struct RotateImage : gfx_program {
     out.x -= 320;
     out.y -= 240;
 
-    double angle = 3;
+    double angle = 40;
     // double alpha = (M_PI / 2);
     double alpha = angle * (M_PI / 180); // * uniforms_.f7 * -1;
     // std::cout << alpha << std::endl;
@@ -50,7 +50,7 @@ struct RotateImage : gfx_program {
     // std::cout << "x " << out.x << " "
     //           << "y " << out.y << std::endl;
 
-    return std::move(out);
+    return out;
   }
 
   Color fragment_shader(const Vertex &v_in) override {
@@ -59,6 +59,55 @@ struct RotateImage : gfx_program {
   }
 
 } rotateImage;
+// namespace core
+
+// struct CoolShader : gfx_program {
+//   double mouse_x{};
+//   double mouse_y{};
+//   double radius{};
+
+//   void set_uniforms(const Uniforms &a_uniforms) override {
+//     mouse_x = a_uniforms.f0;
+//     mouse_y = a_uniforms.f1;
+//     radius = a_uniforms.f2;
+//   }
+//   Vertex vertex_shader(const Vertex &v_in) override {
+//     Vertex out = v_in;
+
+//     double x = out.x;
+//     double y = out.y;
+
+//     double dx = x - mouse_x;
+//     double dy = y - mouse_y;
+//     if (dx * dx + dy * dy < radius * radius) {
+//       // un magnet from mouse
+//       double len = std::sqrt(dx * dx + dy * dy);
+//       if (len > 0) {
+//         // normalize vector from vertex to mouse pos
+//         double norm_dx = dx / len;
+//         double norm_dy = dy / len;
+//         // find position of point on radius from mouse pos in center
+//         double radius_pos_x = mouse_x + norm_dx * radius;
+//         double radius_pos_y = mouse_y + norm_dy * radius;
+//         // find middle point
+//         x = (x + radius_pos_x) / 2;
+//         y = (y + radius_pos_y) / 2;
+//       }
+//     }
+
+//     out.x = x;
+//     out.y = y;
+
+//     return out;
+//   }
+
+//   Color fragment_shader(const Vertex &v_in) override {
+//     Color out = v_in.color;
+//     return out;
+//   }
+
+// } program01;
+
 } // namespace core
 
 int main() {
@@ -82,15 +131,17 @@ int main() {
     Position v2 = {220, 340};
     Position v3 = {420, 340};
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 1; i++) {
       vertexes.push_back({320., 140., red});
       vertexes.push_back({220., 340., green});
       vertexes.push_back({420., 340., blue});
     }
 
     TriangleRenderer triangleRenderer(canvas);
+    Uniforms uniforms;
     gfx_program *rotateImage = new RotateImage();
     // triangleRenderer.SetGFXProgram(rotateImage);
+    triangleRenderer.SetGFXProgram(rotateImage);
 
     BitFlag flags;
     flags.SetFlag(ETriangleSettings::RASTERIZED);
@@ -137,6 +188,10 @@ int main() {
                   << std::endl;
       }
 
+      if (event.eventType == EventType::mouse_event &&
+          event.mouseInfo.has_value()) {
+      }
+
       if (event.eventType == EventType::quit)
         quit = true;
 
@@ -144,8 +199,10 @@ int main() {
 
       // triangleRenderer.Draw(vertexes, green, true, flags);
       // canvas.RenderToSDLWindow();
-      //    consoleGame->Update();
-      //    consoleGame->Render();
+      // canvas.Clear({0, 0, 0});
+
+      consoleGame->Update();
+      consoleGame->Render();
     }
   }
 

@@ -8,6 +8,10 @@ namespace core {
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
 
+bool operator==(const Position &l, const Position &r) {
+  return l.x == r.x && l.y == r.y;
+}
+
 bool operator==(const Color &l, const Color &r) {
   return l.r == r.r && l.g == r.g && l.b == r.b;
 }
@@ -16,7 +20,7 @@ bool operator<(const Vertex &vertex, const Vertex &other) {
   return vertex.x <= other.x;
 }
 
-void Canvas::SetPixel(size_t x, size_t y, Color color) {
+void Canvas::SetPixel(size_t x, size_t y, Color &color) {
   pixels[y * width + x] = color;
 }
 

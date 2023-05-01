@@ -88,6 +88,10 @@ int Engine::ProcessEvent(Event &event) {
       event.keyBoardInfo =
           KeyBinding(sdlEvent.key.keysym.sym, KeyboardEventType::key_released);
     }
+    if (sdlEvent.type == SDL_EVENT_MOUSE_MOTION) {
+      event.eventType = EventType::mouse_event;
+      event.mouseInfo = {sdlEvent.motion.x, sdlEvent.motion.y};
+    }
     if (sdlEvent.type == SDL_EVENT_QUIT) {
       event.eventType = EventType::quit;
     }

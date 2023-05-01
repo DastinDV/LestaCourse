@@ -21,6 +21,8 @@ Color LineRenderer::Interpolate(Color from, Color to, int curr, int count) {
 
 void LineRenderer::CreateBresenhamsLine(Position &from, Position &to,
                                         std::vector<Vertex> &pixels) {
+  if (from == to)
+    return;
   int x1 = from.x;
   int y1 = from.y;
   int x2 = to.x;
@@ -93,9 +95,10 @@ std::vector<Vertex> LineRenderer::DrawInterpolated(Vertex from, Vertex to) {
   CreateBresenhamsLine(from_, to_, linePixels);
 
   for (int i = 0; i < linePixels.size(); i++) {
-    Color newColor =
+    // Color newColor =
+    //     Interpolate(from.color, to.color, std::abs(i), pixelsCount);
+    linePixels[i].color =
         Interpolate(from.color, to.color, std::abs(i), pixelsCount);
-    linePixels[i].color = newColor;
     canvas.SetPixel(linePixels[i].x, linePixels[i].y, linePixels[i].color);
   }
 

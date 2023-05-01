@@ -26,6 +26,7 @@ void TriangleRenderer::RasterizeInterpolated(int xLeft, int xRight, int y,
   lineRenderer->DrawInterpolated(Vertex{(double)xLeft, (double)y, fromColor},
                                  Vertex{(double)xRight, (double)y, toColor});
 }
+
 // Sequence buffer
 void TriangleRenderer::Draw(std::vector<Vertex> &vertexes, const Color color,
                             bool isFilled, BitFlag settings) {
@@ -37,7 +38,7 @@ void TriangleRenderer::Draw(std::vector<Vertex> &vertexes, const Color color,
 
     std::array<Vertex, 3> nextTriangle;
     if (program) {
-      canvas.Clear({0, 0, 0});
+      // canvas.Clear({0, 0, 0});
       v0_ = program->vertex_shader(vertexes[i * 3 + 0]);
       v1_ = program->vertex_shader(vertexes[i * 3 + 1]);
       v2_ = program->vertex_shader(vertexes[i * 3 + 2]);
@@ -90,7 +91,7 @@ void TriangleRenderer::Draw(std::vector<Vertex> &vertexes, const Color color,
     //   yToX[pixel.y].insert(pixel);
 
     if (settings.HasFlag(ETriangleSettings::RASTERIZED)) {
-      for (const Vertex &pixel : line1)
+      for (auto &pixel : line1)
         yToX[pixel.y].insert(pixel);
       for (auto &pixel : line2)
         yToX[pixel.y].insert(pixel);
@@ -105,7 +106,8 @@ void TriangleRenderer::Draw(std::vector<Vertex> &vertexes, const Color color,
 
         auto startLeft = yToX.at(y).begin();
         auto startRight = prev(yToX.at(y).end());
-        // std::cout << "Up " << startLeft->x << " " << startRight->x << " " <<
+        // std::cout << "Up " << startLeft->x << " " << startRight->x << " "
+        //<<
         // y
         //           << std::endl;
 
@@ -119,7 +121,8 @@ void TriangleRenderer::Draw(std::vector<Vertex> &vertexes, const Color color,
         auto startLeft = yToX.at(y).begin();
         auto startRight = prev(yToX.at(y).end());
 
-        // std::cout << "Bottom " << startLeft->x << " " << startRight->x << " "
+        // std::cout << "Bottom " << startLeft->x << " " << startRight->x <<
+        //" "
         //<< y << std::endl;
 
         !settings.HasFlag(ETriangleSettings::INTERPOLATED)
@@ -139,12 +142,29 @@ void TriangleRenderer::Draw(std::vector<Vertex> &vertexes,
   for (int i = 0; i < indexes.size() / 3; i++) {
     // std::cout << indexes[i * 3 + 0] << " " << indexes[i * 3 + 1] << " "
     //<< indexes[i * 3 + 2] << std::endl;
-    Position p0 = {vertexes[indexes[i * 3 + 0]].x,
-                   vertexes[indexes[i * 3 + 0]].y};
-    Position p1 = {vertexes[indexes[i * 3 + 1]].x,
-                   vertexes[indexes[i * 3 + 1]].y};
-    Position p2 = {vertexes[indexes[i * 3 + 2]].x,
-                   vertexes[indexes[i * 3 + 2]].y};
+
+    Vertex &v0_ = vertexes[indexes[i * 3 + 0]];
+    Vertex &v1_ = vertexes[indexes[i * 3 + 1]];
+    Vertex &v2_ = vertexes[indexes[i * 3 + 2]];
+
+    std::array<Vertex, 3> nextTriangle;
+    if (program) {
+      // canvas.Clear({0, 0, 0});
+      v0_ = program->vertex_shader(vertexes[indexes[i * 3 + 0]]);
+      v1_ = program->vertex_shader(vertexes[indexes[i * 3 + 1]]);
+      v2_ = program->vertex_shader(vertexes[indexes[i * 3 + 2]]);
+      // v0_ = v0;
+      // v1_ = v1;
+      // v2_ = v2;
+    }
+
+    nextTriangle[0] = v0_;
+    nextTriangle[1] = v1_;
+    nextTriangle[2] = v2_;
+
+    Position p0 = {nextTriangle[0].x, nextTriangle[0].y};
+    Position p1 = {nextTriangle[1].x, nextTriangle[1].y};
+    Position p2 = {nextTriangle[2].x, nextTriangle[2].y};
 
     lineRenderer->Draw(p0, p1, color);
     lineRenderer->Draw(p1, p2, color);
