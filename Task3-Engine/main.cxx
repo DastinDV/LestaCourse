@@ -59,54 +59,6 @@ struct RotateImage : gfx_program {
   }
 
 } rotateImage;
-// namespace core
-
-// struct CoolShader : gfx_program {
-//   double mouse_x{};
-//   double mouse_y{};
-//   double radius{};
-
-//   void set_uniforms(const Uniforms &a_uniforms) override {
-//     mouse_x = a_uniforms.f0;
-//     mouse_y = a_uniforms.f1;
-//     radius = a_uniforms.f2;
-//   }
-//   Vertex vertex_shader(const Vertex &v_in) override {
-//     Vertex out = v_in;
-
-//     double x = out.x;
-//     double y = out.y;
-
-//     double dx = x - mouse_x;
-//     double dy = y - mouse_y;
-//     if (dx * dx + dy * dy < radius * radius) {
-//       // un magnet from mouse
-//       double len = std::sqrt(dx * dx + dy * dy);
-//       if (len > 0) {
-//         // normalize vector from vertex to mouse pos
-//         double norm_dx = dx / len;
-//         double norm_dy = dy / len;
-//         // find position of point on radius from mouse pos in center
-//         double radius_pos_x = mouse_x + norm_dx * radius;
-//         double radius_pos_y = mouse_y + norm_dy * radius;
-//         // find middle point
-//         x = (x + radius_pos_x) / 2;
-//         y = (y + radius_pos_y) / 2;
-//       }
-//     }
-
-//     out.x = x;
-//     out.y = y;
-
-//     return out;
-//   }
-
-//   Color fragment_shader(const Vertex &v_in) override {
-//     Color out = v_in.color;
-//     return out;
-//   }
-
-// } program01;
 
 } // namespace core
 
@@ -148,7 +100,7 @@ int main() {
     flags.SetFlag(ETriangleSettings::INTERPOLATED);
 
     auto start = std::chrono::steady_clock::now();
-    triangleRenderer.Draw(vertexes, green, true, flags);
+    triangleRenderer.Draw(vertexes, green, flags);
     canvas.RenderToSDLWindow();
     auto end = std::chrono::steady_clock::now();
 
@@ -164,7 +116,17 @@ int main() {
     consoleGame->Init();
     auto time_during_loading = std::filesystem::last_write_time(library_name);
 
+    float deltaTime = 0.0;
+    long last;
+
     while (!quit) {
+      long now = SDL_GetTicks();
+
+      if (now > last) {
+        deltaTime = ((float)(now - last)) / 1000;
+        last = now;
+      }
+
       Event event;
       engine.ProcessEvent(event);
 
@@ -201,7 +163,7 @@ int main() {
       // canvas.RenderToSDLWindow();
       // canvas.Clear({0, 0, 0});
 
-      consoleGame->Update();
+      consoleGame->Update(deltaTime);
       consoleGame->Render();
     }
   }

@@ -10,6 +10,7 @@ TriangleRenderer::TriangleRenderer(Canvas &canvas) : canvas(canvas) {
 
 void TriangleRenderer::SetGFXProgram(gfx_program *program) {
   this->program = program;
+  lineRenderer->SetGFXProgram(program);
 }
 
 void TriangleRenderer::Rasterize(int xLeft, int xRight, int y, Color color) {
@@ -29,7 +30,7 @@ void TriangleRenderer::RasterizeInterpolated(int xLeft, int xRight, int y,
 
 // Sequence buffer
 void TriangleRenderer::Draw(std::vector<Vertex> &vertexes, const Color color,
-                            bool isFilled, BitFlag settings) {
+                            BitFlag settings) {
   for (int i = 0; i < vertexes.size() / 3; i++) {
 
     Vertex &v0_ = vertexes[i * 3 + 0];
@@ -42,19 +43,15 @@ void TriangleRenderer::Draw(std::vector<Vertex> &vertexes, const Color color,
       v0_ = program->vertex_shader(vertexes[i * 3 + 0]);
       v1_ = program->vertex_shader(vertexes[i * 3 + 1]);
       v2_ = program->vertex_shader(vertexes[i * 3 + 2]);
-      nextTriangle[0] = v0_;
-      nextTriangle[1] = v1_;
-      nextTriangle[2] = v2_;
+
       // v0_ = v0;
       // v1_ = v1;
       // v2_ = v2;
-    } else {
-      nextTriangle[0] = v0_;
-      nextTriangle[1] = v1_;
-      nextTriangle[2] = v2_;
     }
 
-    // std::array<Vertex, 3> nextTriangle = {v0_, v1_, v2_};
+    nextTriangle[0] = v0_;
+    nextTriangle[1] = v1_;
+    nextTriangle[2] = v2_;
 
     std::sort(nextTriangle.begin(), nextTriangle.end(),
               [](const Vertex &left, const Vertex &right) {
@@ -82,13 +79,6 @@ void TriangleRenderer::Draw(std::vector<Vertex> &vertexes, const Color color,
     //                        {nextTriangle[0].x, nextTriangle[0].y}, color);
 
     std::unordered_map<int, std::set<Vertex>> yToX;
-
-    // for (const Vertex &pixel : line1)
-    //   yToX[pixel.y].insert(pixel);
-    // for (auto &pixel : line2)
-    //   yToX[pixel.y].insert(pixel);
-    // for (auto &pixel : line3)
-    //   yToX[pixel.y].insert(pixel);
 
     if (settings.HasFlag(ETriangleSettings::RASTERIZED)) {
       for (auto &pixel : line1)

@@ -24,6 +24,7 @@ struct Vertex {
   double y;
   Color color;
   friend bool operator<(const Vertex &vertex, const Vertex &other);
+  double delta;
 };
 
 const Color red = {255, 0, 0};

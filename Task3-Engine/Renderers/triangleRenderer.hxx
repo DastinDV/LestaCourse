@@ -29,8 +29,7 @@ class TriangleRenderer {
 public:
   TriangleRenderer(Canvas &canvas);
 
-  void Draw(std::vector<Vertex> &vertexes, const Color color, bool isFilled,
-            BitFlag settings);
+  void Draw(std::vector<Vertex> &vertexes, const Color color, BitFlag settings);
   void Draw(std::vector<Vertex> &vertexes, const std::vector<int> &indexes,
             const Color color);
   void Rasterize(int xLeft, int xRight, int y, const Color color);

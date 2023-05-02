@@ -15,7 +15,7 @@ void ConsoleGame::Render() {
   using namespace std::chrono;
 }
 
-void ConsoleGame::Update() {
+void ConsoleGame::Update(float deltaTime) {
   percentage++;
   percentage %= 100;
   using namespace std::chrono;

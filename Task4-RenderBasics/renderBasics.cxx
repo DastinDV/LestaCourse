@@ -11,7 +11,8 @@ void RenderBasicsGame::Init() {
   lineRenderer = std::make_unique<core::LineRenderer>(*canvas);
   triangleRenderer = std::make_unique<core::TriangleRenderer>(*canvas);
   coolShader = new CoolShader();
-  triangleRenderer->SetGFXProgram(coolShader);
+  spiralShader = new SpiralShader();
+  triangleRenderer->SetGFXProgram(spiralShader);
 
   InitTestFunctions();
 }
@@ -31,19 +32,27 @@ void RenderBasicsGame::Render() {
   canvas->RenderToSDLWindow();
   canvas->Clear({0, 0, 0});
 
-  std::cout << "Hello Render from renderBasics" << std::endl;
+  // std::cout << "Hello Render from renderBasics" << std::endl;
 }
 
 void RenderBasicsGame::OnEvent(core::Event &event) {
   if (event.eventType == core::EventType::mouse_event &&
       event.mouseInfo.has_value()) {
-    coolShader->set_uniforms(
-        core::Uniforms{event.mouseInfo->xPos, event.mouseInfo->yPos, 40});
+    spiralShader->set_uniforms(
+        core::Uniforms{event.mouseInfo->xPos, event.mouseInfo->yPos, 20});
+  }
+  if (event.eventType == core::EventType::keyboard_event &&
+      event.keyBoardInfo.has_value()) {
+
+    if (event.keyBoardInfo->type == core::KeyboardEventType::key_released &&
+        event.keyBoardInfo->keyCode == core::KeyCode::space)
+      spiralShader->isDrawUp = !spiralShader->isDrawUp;
   }
 }
 
-void RenderBasicsGame::Update() {
-  std::cout << "Hello Update from renderBasics" << std::endl;
+void RenderBasicsGame::Update(float deltaTime) {
+  // std::cout << "Hello Update from renderBasics" << std::endl;
+  spiralShader->set_deltaTime(deltaTime);
 }
 
 void RenderBasicsGame::InitTestFunctions() {
@@ -111,11 +120,16 @@ void RenderBasicsGame::InitTestFunctions() {
     };
 */
   // Triangles with vertexes and indexes buffers
+
+  // std::vector<core::Vertex> vertexes2;
+  // core::Position first = {0, 0};
+  // std::vector<int> indexes;
+
   std::function<void(void)> CreateIndexedBufferGrid = [this]() {
     using namespace core;
-    std::vector<Vertex> vertexes2;
-    Position first = {0, 0};
-    std::vector<int> indexes;
+    // std::vector<Vertex> vertexes2;
+    // Position first = {0, 0};
+    // std::vector<int> indexes;
 
     for (int y = 0; y < height; y += 20) {
       for (int x = 0; x < width; x += 40) {
@@ -143,17 +157,21 @@ void RenderBasicsGame::InitTestFunctions() {
         indexes.push_back(index3);
       }
     }
-
-    triangleRenderer->Draw(vertexes2, indexes, {0, 0, 255});
+    // triangleRenderer->Draw(vertexes2, indexes, {0, 0, 255});
 
     // canvas->SaveImage("indexedTriangles.ppm");
   };
 
+  CreateIndexedBufferGrid();
+  std::function<void(void)> RenderIndexedBufferGrid = [this]() {
+    triangleRenderer->Draw(vertexes2, indexes, {0, 0, 255});
+  };
+
   /*
       // Rasterization of triangles
-      std::function<void(void)> CreateSimpleTrianglesRasterization = [this]()
-     { using namespace core; std::vector<Vertex> vertexes; Position v1 = {100,
-     100}; Position v2 = {50, 300}; Position v3 = {300, 480};
+      std::function<void(void)> CreateSimpleTrianglesRasterization =
+     [this]() { using namespace core; std::vector<Vertex> vertexes; Position
+     v1 = {100, 100}; Position v2 = {50, 300}; Position v3 = {300, 480};
 
         Position v4 = {200, 200};
         Position v5 = {150, 250};
@@ -189,7 +207,10 @@ void RenderBasicsGame::InitTestFunctions() {
       tests.push_back(CreateSimpleTrianglesRasterization);
       */
 
-  tests.push_back(CreateIndexedBufferGrid);
+  tests.push_back(RenderIndexedBufferGrid);
 }
 
-RenderBasicsGame::~RenderBasicsGame() { delete coolShader; }
+RenderBasicsGame::~RenderBasicsGame() {
+  delete coolShader;
+  delete spiralShader;
+}

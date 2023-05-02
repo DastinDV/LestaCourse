@@ -8,6 +8,10 @@ namespace core {
 
 LineRenderer::LineRenderer(Canvas &canvas) : canvas(canvas) {}
 
+void LineRenderer::SetGFXProgram(gfx_program *program) {
+  this->program = program;
+}
+
 Color LineRenderer::Interpolate(Color from, Color to, int curr, int count) {
   if (from == to)
     return from;
@@ -67,12 +71,21 @@ void LineRenderer::CreateBresenhamsLine(Position &from, Position &to,
 std::vector<Vertex> LineRenderer::Draw(Position from, Position to,
                                        Color color) {
 
+  size_t pixelsCount = 0;
+
+  std::abs(from.y - to.y) >= std::abs(from.x - to.x)
+      ? pixelsCount = static_cast<size_t>(std::round(std::abs(from.y - to.y)))
+      : pixelsCount = static_cast<size_t>(std::round(std::abs(from.x - to.x)));
+
   std::vector<Vertex> linePixels;
+
+  linePixels.reserve(pixelsCount);
   // std::unordered_map<int, std::set<int>> linePixels;
   CreateBresenhamsLine(from, to, linePixels);
 
   for (auto &pixel : linePixels) {
     pixel.color = color;
+    pixel.color = program->fragment_shader(pixel);
     canvas.SetPixel(pixel.x, pixel.y, pixel.color);
   }
 

@@ -21,7 +21,8 @@ bool operator<(const Vertex &vertex, const Vertex &other) {
 }
 
 void Canvas::SetPixel(size_t x, size_t y, Color &color) {
-  pixels[y * width + x] = color;
+  if (y * width + x < pixels.size())
+    pixels[y * width + x] = color;
 }
 
 const std::vector<Color> &Canvas::GetPixels() const { return this->pixels; }

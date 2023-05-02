@@ -7,7 +7,7 @@ class ConsoleGame : public core::Game {
 public:
   ConsoleGame();
   void Render() override;
-  void Update() override;
+  void Update(float deltaTime) override;
   void Init() override;
   void OnEvent(core::Event &event) override;
 
