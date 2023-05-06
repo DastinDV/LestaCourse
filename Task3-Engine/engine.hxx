@@ -41,5 +41,12 @@ public:
 
   int Initialize();
   int ProcessEvent(Event &event);
+  int CleanUp();
+
+  void ClearScreen(float deltaTime);
+  void SwapBuffers();
+
+private:
+  void GetOpenGLVersionInfo();
 };
 } // namespace core

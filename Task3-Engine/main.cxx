@@ -1,5 +1,6 @@
 #include "./Renderers/lineRenderer.hxx"
 #include "./Renderers/triangleRenderer.hxx"
+#include "./glad/include/glad/glad.h"
 #include "canvas.hxx"
 #include "engine.hxx"
 #include "game.hxx"
@@ -40,6 +41,7 @@ int main() {
     auto time_during_loading = std::filesystem::last_write_time(library_name);
 
     float deltaTime = 0.0;
+    float timeSinceRun = 0.0;
     long last;
 
     while (!quit) {
@@ -47,6 +49,7 @@ int main() {
 
       if (now > last) {
         deltaTime = ((float)(now - last)) / 1000;
+        timeSinceRun += deltaTime;
         last = now;
       }
 
@@ -85,10 +88,13 @@ int main() {
       // triangleRenderer.Draw(vertexes, green, true, flags);
       // canvas.RenderToSDLWindow();
       // canvas.Clear({0, 0, 0});
-
-      consoleGame->Update(deltaTime);
-      consoleGame->Render();
+      engine.ClearScreen(timeSinceRun);
+      engine.SwapBuffers();
+      // consoleGame->Update(deltaTime);
+      // consoleGame->Render();
     }
+
+    engine.CleanUp();
   }
 
   return 0;

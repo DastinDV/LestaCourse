@@ -8,12 +8,14 @@ add_executable(
   canvas.cxx
   ./Renderers/lineRenderer.cxx
   ./Renderers/triangleRenderer.cxx
+  ./glad/src/glad.c
   main.cxx
   canvas.hxx
   engine.hxx
   game.hxx
   ./Renderers/lineRenderer.hxx
-  ./Renderers/triangleRenderer.hxx)
+  ./Renderers/triangleRenderer.hxx
+  ./glad/include/glad/glad.h)
 
 set_target_properties(
   Engine PROPERTIES ENABLE_EXPORTS 1 # we need to be able to link to exe
