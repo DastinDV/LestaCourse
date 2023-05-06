@@ -31,7 +31,7 @@ public:
 
   void Draw(std::vector<Vertex> &vertexes, const Color color, BitFlag settings);
   void Draw(std::vector<Vertex> &vertexes, const std::vector<int> &indexes,
-            const Color color);
+            const Color color, BitFlag settings);
   void Rasterize(int xLeft, int xRight, int y, const Color color);
   void RasterizeInterpolated(int xLeft, int xRight, int y,
                              const Color fromColor, const Color toColor);

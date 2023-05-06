@@ -81,7 +81,7 @@ struct SpiralShader : core::gfx_program {
     double dy = y - mouse_y;
 
     double distance = sqrt(std::pow(dx, 2) + std::pow(dy, 2));
-    double speed = 60.f;
+    double speed = 80.f;
     // inside circle.
     if (std::pow(distance, 2) < std::pow(radius * 3, 2)) {
       double val = /*(distance * 100 / radius) / 100*/ speed *
@@ -112,7 +112,7 @@ struct SpiralShader : core::gfx_program {
 
     double rings = radius * 4; // + 20 * std::sin((x + y + deltaTime));
 
-    if (std::pow(distance, 2) < std::pow(rings, 2)) {
+    if (std::pow(distance, 2) < std::pow(radius, 2)) {
       if (!isDrawUp) {
         out.r = 255 * intencity;
         out.g = 0;

@@ -108,10 +108,10 @@ std::vector<Vertex> LineRenderer::DrawInterpolated(Vertex from, Vertex to) {
   CreateBresenhamsLine(from_, to_, linePixels);
 
   for (int i = 0; i < linePixels.size(); i++) {
-    // Color newColor =
-    //     Interpolate(from.color, to.color, std::abs(i), pixelsCount);
     linePixels[i].color =
         Interpolate(from.color, to.color, std::abs(i), pixelsCount);
+    linePixels[i].color = program->fragment_shader(linePixels[i]);
+
     canvas.SetPixel(linePixels[i].x, linePixels[i].y, linePixels[i].color);
   }
 

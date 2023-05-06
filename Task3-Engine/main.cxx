@@ -12,56 +12,6 @@
 #include <iostream>
 #include <thread>
 
-namespace core {
-struct RotateImage : gfx_program {
-  Uniforms uniforms_;
-
-  void set_uniforms(const Uniforms &a_uniforms) override {
-    uniforms_ = a_uniforms;
-  }
-
-  Vertex vertex_shader(const Vertex &v_in) override {
-    Vertex out = v_in;
-    out.x -= 320;
-    out.y -= 240;
-
-    double angle = 40;
-    // double alpha = (M_PI / 2);
-    double alpha = angle * (M_PI / 180); // * uniforms_.f7 * -1;
-    // std::cout << alpha << std::endl;
-    double x = out.x;
-    double y = out.y;
-
-    // std::cout << "BEFORE" << std::endl;
-    // std::cout << "x " << out.x << " "
-    //           << "y " << out.y << std::endl;
-
-    // std::cout << "xcos " << x * std::cos(alpha) << " "
-    //           << "ysin " << y * std::sin(alpha) << std::endl;
-
-    // std::cout << std::endl;
-    out.x = x * std::cos(alpha) - y * std::sin(alpha);
-    out.y = x * std::sin(alpha) + y * std::cos(alpha);
-
-    out.x += 320;
-    out.y += 240;
-
-    // std::cout << "AFTER" << std::endl;
-    // std::cout << "x " << out.x << " "
-    //           << "y " << out.y << std::endl;
-
-    return out;
-  }
-
-  Color fragment_shader(const Vertex &v_in) override {
-    Color out = v_in.color;
-    return out;
-  }
-
-} rotateImage;
-
-} // namespace core
-
 int main() {
   {
     using namespace core;
@@ -78,38 +28,11 @@ int main() {
     engine.Initialize();
 
     Canvas canvas(640, 480);
-    std::vector<Vertex> vertexes;
-    Position v1 = {320, 140};
-    Position v2 = {220, 340};
-    Position v3 = {420, 340};
-
-    for (int i = 0; i < 1; i++) {
-      vertexes.push_back({320., 140., red});
-      vertexes.push_back({220., 340., green});
-      vertexes.push_back({420., 340., blue});
-    }
-
-    TriangleRenderer triangleRenderer(canvas);
-    Uniforms uniforms;
-    gfx_program *rotateImage = new RotateImage();
-    // triangleRenderer.SetGFXProgram(rotateImage);
-    triangleRenderer.SetGFXProgram(rotateImage);
 
     BitFlag flags;
     flags.SetFlag(ETriangleSettings::RASTERIZED);
     flags.SetFlag(ETriangleSettings::INTERPOLATED);
 
-    auto start = std::chrono::steady_clock::now();
-    triangleRenderer.Draw(vertexes, green, flags);
-    canvas.RenderToSDLWindow();
-    auto end = std::chrono::steady_clock::now();
-
-    auto diff = end - start;
-
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end -
-                                                                       start)
-                     .count()
-              << std::endl;
     Game *consoleGame = ReloadGame(nullptr, library_name, tmp_library_file,
                                    engine, game_library_handle);
 

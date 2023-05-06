@@ -124,18 +124,21 @@ void RenderBasicsGame::InitTestFunctions() {
   // std::vector<core::Vertex> vertexes2;
   // core::Position first = {0, 0};
   // std::vector<int> indexes;
-
+  srand(time(0));
   std::function<void(void)> CreateIndexedBufferGrid = [this]() {
     using namespace core;
     // std::vector<Vertex> vertexes2;
     // Position first = {0, 0};
     // std::vector<int> indexes;
 
+    std::array<Color, 3> colors = {red, green, blue};
+
     for (int y = 0; y < height; y += 20) {
       for (int x = 0; x < width; x += 40) {
         first.x = x;
         first.y = y;
-        vertexes2.push_back({(double)first.x, (double)first.y, red});
+        vertexes2.push_back(
+            {(double)first.x, (double)first.y, colors[rand() % 3]});
       }
     }
 
@@ -164,7 +167,10 @@ void RenderBasicsGame::InitTestFunctions() {
 
   CreateIndexedBufferGrid();
   std::function<void(void)> RenderIndexedBufferGrid = [this]() {
-    triangleRenderer->Draw(vertexes2, indexes, {0, 0, 255});
+    core::BitFlag flags;
+    // flags.SetFlag(core::ETriangleSettings::RASTERIZED);
+    // flags.SetFlag(core::ETriangleSettings::INTERPOLATED);
+    triangleRenderer->Draw(vertexes2, indexes, {0, 0, 255}, flags);
   };
 
   /*
