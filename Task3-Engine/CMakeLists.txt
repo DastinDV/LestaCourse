@@ -8,6 +8,8 @@ add_executable(
   canvas.cxx
   ./Renderers/lineRenderer.cxx
   ./Renderers/triangleRenderer.cxx
+  ./Renderers/glRenderer.cxx
+  ./OpenGL/vertexBuffer.cxx
   ./glad/src/glad.c
   main.cxx
   canvas.hxx
@@ -15,6 +17,8 @@ add_executable(
   game.hxx
   ./Renderers/lineRenderer.hxx
   ./Renderers/triangleRenderer.hxx
+  ./Renderers/glRenderer.hxx
+  ./OpenGL/vertexBuffer.hxx
   ./glad/include/glad/glad.h)
 
 set_target_properties(

@@ -100,9 +100,31 @@ int Engine::Initialize() {
 
 void Engine::ClearScreen(float deltaTime) {
   auto current_color = std::sin(0.5f * deltaTime);
-  std::cout << current_color << std::endl;
-  glClearColor(current_color, 1 - current_color, current_color, 0.0f);
+  // std::cout << current_color << std::endl;
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Engine::RenderTriangle() {
+  // clang-format off
+  const GLfloat globVertexBufferData[] = {
+      -1.0f, -1.0f, 0.0f,
+       1.0f, -1.0f, 0.0f,
+       0.0f, 1.0f, 0.0f,
+  };
+  // clang-format on
+
+  GLuint vbo;
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(globVertexBufferData),
+               globVertexBufferData, GL_STATIC_DRAW);
+
+  GLuint vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 void Engine::GetOpenGLVersionInfo() {

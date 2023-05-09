@@ -44,6 +44,7 @@ public:
   int CleanUp();
 
   void ClearScreen(float deltaTime);
+  void RenderTriangle();
   void SwapBuffers();
 
 private:

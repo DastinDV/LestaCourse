@@ -1,3 +1,4 @@
+#include "./Renderers/glRenderer.hxx"
 #include "./Renderers/lineRenderer.hxx"
 #include "./Renderers/triangleRenderer.hxx"
 #include "./glad/include/glad/glad.h"
@@ -44,6 +45,49 @@ int main() {
     float timeSinceRun = 0.0;
     long last;
 
+    GlRenderer glRenderer;
+    // clang-format off
+      std::vector<GlVertex> points = {
+          {0.0f, 0.0f, 0.0f},
+          {-0.1f, 0.0f, 0.0f},
+          {0.1f, 0.0f, 0.0f}};
+
+      std::vector<GlVertex> points1 = {
+          {0.0f, 0.1f, 0.0f},
+          {0.0f, -0.1f, 0.0f}};
+
+      std::vector<GlVertex> triangle = {
+          {-1.0f, -1.0f, 0.0f},
+          {1.0f, -1.0f, 0.0f},
+          {0.0f, 1.0f, 0.0f}};
+
+    const std::string vertexShaderSource = R"(
+              #version 330 core
+
+              layout (location = 0) in vec3 position;
+
+              void main()
+              {
+                  gl_Position = vec4(position.x / 4.0f, position.y/ 4.0f,
+                  position.z/ 4.0f, 1.0);
+              }
+     )";
+
+    const std::string fragmentShaderSource = R"(
+              #version 330 core
+
+              out vec4 FragColor;
+
+              void main()
+              {
+                  FragColor = vec4(1.0, 0.0, 0.0, 0.0);
+              }
+     )";
+    // clang-format on
+
+    int programId = CreateShader(vertexShaderSource, fragmentShaderSource);
+    glUseProgram(programId);
+
     while (!quit) {
       long now = SDL_GetTicks();
 
@@ -85,10 +129,12 @@ int main() {
 
       consoleGame->OnEvent(event);
 
-      // triangleRenderer.Draw(vertexes, green, true, flags);
-      // canvas.RenderToSDLWindow();
-      // canvas.Clear({0, 0, 0});
       engine.ClearScreen(timeSinceRun);
+
+      glRenderer.DrawPoint(points);
+      glRenderer.DrawPoint(points1);
+      glRenderer.DrawTriangle(triangle);
+
       engine.SwapBuffers();
       // consoleGame->Update(deltaTime);
       // consoleGame->Render();
