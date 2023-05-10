@@ -8,11 +8,66 @@
 
 #include <SDL3/SDL.h>
 
+#include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cmath>
 #include <filesystem>
 #include <iostream>
 #include <thread>
+
+int GetRandomNumber(int min, int max) {
+  int num = min + rand() % (max - min + 1);
+
+  return num;
+}
+
+unsigned int hash(unsigned int state) {
+  state ^= 2747636419u;
+  state *= 2654435769u;
+  state ^= state >> 16;
+  state *= 2654435769u;
+  state ^= state >> 16;
+  state *= 2654435769u;
+  return state;
+}
+
+float scaleToRange01(unsigned int state) { return state / 4294967295.0; }
+
+struct Agent {
+  core::GlVertex vertex;
+  float angle;
+  int id;
+};
+
+float degreesToRadians(float degrees) { return degrees * M_PI / 180; }
+
+void UpdatePoint(Agent &agent, float deltaTime, float count) {
+
+  // auto now = std::chrono::system_clock::now().time_since_epoch();
+  // auto count = std::chrono::duration_cast<std::chrono::seconds>(now).count();
+
+  unsigned int random = hash(agent.vertex.y * 640 + agent.vertex.x +
+                             hash(agent.id + (count + deltaTime) * 100000));
+  core::GlVertex direction;
+  direction.x = cos(degreesToRadians(agent.angle));
+  direction.y = sin(degreesToRadians(agent.angle));
+
+  core::GlVertex newPos;
+  newPos = agent.vertex + direction * 0.1f * deltaTime;
+
+  if (newPos.x < -0.9f || newPos.x >= 0.9f || newPos.y < -0.9f ||
+      newPos.y >= 0.9f) {
+    // std::cout << agent.id << " " << random << std::endl;
+    newPos.x = std::clamp(newPos.x, -0.9f, 0.9f);
+    newPos.y = std::clamp(newPos.y, -0.9f, 0.9f);
+    float randomAngle = scaleToRange01(random) * 2 * 180;
+    // std::cout << randomAngle << std::endl;
+    agent.angle = randomAngle;
+  }
+
+  agent.vertex = newPos;
+}
 
 int main() {
   {
@@ -46,47 +101,90 @@ int main() {
     long last;
 
     GlRenderer glRenderer;
-    // clang-format off
-      std::vector<GlVertex> points = {
-          {0.0f, 0.0f, 0.0f},
-          {-0.1f, 0.0f, 0.0f},
-          {0.1f, 0.0f, 0.0f}};
 
-      std::vector<GlVertex> points1 = {
-          {0.0f, 0.1f, 0.0f},
-          {0.0f, -0.1f, 0.0f}};
+    std::vector<Agent> points;
 
-      std::vector<GlVertex> triangle = {
-          {-1.0f, -1.0f, 0.0f},
-          {1.0f, -1.0f, 0.0f},
-          {0.0f, 1.0f, 0.0f}};
+    // const std::string vertexShaderSource = R"(
+    //           #version 330 core
 
-    const std::string vertexShaderSource = R"(
+    //           layout (location = 0) in vec3 position;
+
+    //           void main()
+    //           {
+    //               gl_Position = vec4(position.x / 4.0f, position.y/ 4.0f,
+    //               position.z/ 4.0f, 1.0);
+    //           }
+    //  )";
+
+    const std::string pointMovementShaderSource = R"(
               #version 330 core
-
+              
               layout (location = 0) in vec3 position;
+
+              out vec3 out_position;
 
               void main()
               {
-                  gl_Position = vec4(position.x / 4.0f, position.y/ 4.0f,
-                  position.z/ 4.0f, 1.0);
+                    gl_Position = vec4(position, 1.0);
+                    out_position = position;
               }
      )";
 
     const std::string fragmentShaderSource = R"(
               #version 330 core
-
+              
+              in vec3 out_position;
               out vec4 FragColor;
+
+              vec2 center = vec2(640.0/2.0, 480.0/2.0);
+              float radius = 100.0f;
+              float radius1 = 150.0f;
+              float radius2 = 200.0f;      
+
+              float random (vec2 pos) {
+                  return fract(sin(dot(pos.xy,
+                                      vec2(12.9898,78.233)))*43758.5453123);
+              }
 
               void main()
               {
-                  FragColor = vec4(1.0, 0.0, 0.0, 0.0);
+                  vec2 position = gl_FragCoord.xy - center;
+
+                  FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+                  if (length(position) < radius2){
+                    FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+                  }
+                  if (length(position) < radius1){
+                    FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+                  }
+                  if (length(position) < radius) {
+                     FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                  }
+
               }
      )";
     // clang-format on
 
-    int programId = CreateShader(vertexShaderSource, fragmentShaderSource);
+    int programId =
+        CreateShader(pointMovementShaderSource, fragmentShaderSource);
     glUseProgram(programId);
+
+    // int location = glGetUniformLocation(programId, "u_time");
+    // assert(location != -1);
+
+    float angle = 90;
+    float offset = 0.0f;
+
+    points.reserve(100000);
+    for (int i = 0; i < 100000; i++) {
+      Agent newAgent;
+      // if (i % 10000 == 0)
+      //   offset += 0.02f;
+      newAgent.vertex = {0.0f, 0.0f, 0.0f};
+      newAgent.angle = (float)GetRandomNumber(0, 360);
+      newAgent.id = i;
+      points.push_back(newAgent);
+    }
 
     while (!quit) {
       long now = SDL_GetTicks();
@@ -95,6 +193,14 @@ int main() {
         deltaTime = ((float)(now - last)) / 1000;
         timeSinceRun += deltaTime;
         last = now;
+        // glUniform1f(location, timeSinceRun);
+        // glUniform1f(angleLocation, angle);
+      }
+
+      std::vector<GlVertex> vertecies;
+      for (auto &point : points) {
+        UpdatePoint(point, deltaTime, timeSinceRun);
+        vertecies.push_back(point.vertex);
       }
 
       Event event;
@@ -128,13 +234,12 @@ int main() {
         quit = true;
 
       consoleGame->OnEvent(event);
-
       engine.ClearScreen(timeSinceRun);
 
-      glRenderer.DrawPoint(points);
-      glRenderer.DrawPoint(points1);
-      glRenderer.DrawTriangle(triangle);
+      glRenderer.DrawPoint(vertecies);
 
+      // glRenderer.DrawPoint(points1);
+      // glRenderer.DrawTriangle(triangle);
       engine.SwapBuffers();
       // consoleGame->Update(deltaTime);
       // consoleGame->Render();

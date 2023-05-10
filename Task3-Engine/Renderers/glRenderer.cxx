@@ -4,6 +4,14 @@
 
 namespace core {
 
+GlVertex operator+(const GlVertex &l, const GlVertex &r) {
+  return GlVertex{l.x + r.x, l.y + r.y, l.z + r.z};
+}
+
+GlVertex operator*(const GlVertex &l, float val) {
+  return GlVertex{l.x * val, l.y * val, l.z * val};
+}
+
 unsigned int CompileShader(unsigned int type, const std::string &source) {
   unsigned int id = glCreateShader(type);
   const char *src = source.c_str();
@@ -53,6 +61,9 @@ GlRenderer::GlRenderer() {
 }
 
 void GlRenderer::DrawPoint(std::vector<GlVertex> &pos) {
+  if (pos.size() == 0)
+    return;
+
   GLfloat *coordinate;
 
   int size = pos.size() * 3;

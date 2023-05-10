@@ -9,6 +9,9 @@ struct GlVertex {
   float x;
   float y;
   float z;
+
+  friend GlVertex operator+(const GlVertex &l, const GlVertex &r);
+  friend GlVertex operator*(const GlVertex &l, float val);
 };
 
 unsigned int CompileShader(unsigned int type, const std::string &source);
