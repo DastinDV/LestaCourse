@@ -22,7 +22,8 @@ std::string GetShaderSource(std::string path) {
     sstr << shaderStream.rdbuf();
     shaderCode = sstr.str();
     shaderStream.close();
-  }
+  } else
+    throw std::runtime_error("Can't find shader file!");
 
   return shaderCode;
 }

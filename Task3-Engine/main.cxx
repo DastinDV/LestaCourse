@@ -5,6 +5,7 @@
 #include "canvas.hxx"
 #include "engine.hxx"
 #include "game.hxx"
+#include "helper.hxx"
 
 #include <SDL3/SDL.h>
 
@@ -15,32 +16,6 @@
 #include <filesystem>
 #include <iostream>
 #include <thread>
-
-int GetRandomNumber(int min, int max) {
-  int num = min + rand() % (max - min + 1);
-
-  return num;
-}
-
-unsigned int hash(unsigned int state) {
-  state ^= 2747636419u;
-  state *= 2654435769u;
-  state ^= state >> 16;
-  state *= 2654435769u;
-  state ^= state >> 16;
-  state *= 2654435769u;
-  return state;
-}
-
-float scaleToRange01(unsigned int state) { return state / 4294967295.0; }
-
-struct Agent {
-  core::GlVertex vertex;
-  float angle;
-  int id;
-};
-
-float degreesToRadians(float degrees) { return degrees * M_PI / 180; }
 
 void UpdatePoint(Agent &agent, float deltaTime, float count) {
 
@@ -104,31 +79,37 @@ int main() {
 
     std::vector<Agent> points;
 
-    const std::string pointMovementShaderSource =
-        GetShaderSource(".//Shaders//vs.txt");
+    try {
+      const std::string pointMovementShaderSource =
+          GetShaderSource(".//Shaders//vs.txt");
 
-    const std::string fragmentShaderSource =
-        GetShaderSource(".//Shaders//fs.txt");
+      const std::string fragmentShaderSource =
+          GetShaderSource(".//Shaders//fs.txt");
 
-    int programId =
-        CreateShader(pointMovementShaderSource, fragmentShaderSource);
-    glUseProgram(programId);
+      int programId =
+          CreateShader(pointMovementShaderSource, fragmentShaderSource);
+      glUseProgram(programId);
 
-    // int location = glGetUniformLocation(programId, "u_time");
-    // assert(location != -1);
+      // int location = glGetUniformLocation(programId, "u_time");
+      // assert(location != -1);
 
-    float angle = 90;
-    float offset = 0.0f;
+      float angle = 90;
+      float offset = 0.0f;
 
-    points.reserve(100000);
-    for (int i = 0; i < 100000; i++) {
-      Agent newAgent;
-      // if (i % 10000 == 0)
-      //   offset += 0.02f;
-      newAgent.vertex = {0.0f, 0.0f, 0.0f};
-      newAgent.angle = (float)GetRandomNumber(0, 360);
-      newAgent.id = i;
-      points.push_back(newAgent);
+      points.reserve(100000);
+      for (int i = 0; i < 100000; i++) {
+        Agent newAgent;
+        // if (i % 10000 == 0)
+        //   offset += 0.02f;
+        newAgent.vertex = {0.0f, 0.0f, 0.0f};
+        newAgent.angle = (float)GetRandomNumber(0, 360);
+        newAgent.id = i;
+        points.push_back(newAgent);
+      }
+
+    } catch (std::runtime_error err) {
+      std::cerr << err.what() << std::endl;
+      return EXIT_FAILURE;
     }
 
     while (!quit) {
