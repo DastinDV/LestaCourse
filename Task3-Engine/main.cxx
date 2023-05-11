@@ -1,11 +1,11 @@
-#include "./Renderers/glRenderer.hxx"
-#include "./Renderers/lineRenderer.hxx"
-#include "./Renderers/triangleRenderer.hxx"
-#include "./glad/include/glad/glad.h"
 #include "canvas.hxx"
 #include "engine.hxx"
 #include "game.hxx"
+#include "glRenderer.hxx"
+#include "glad/glad.h"
 #include "helper.hxx"
+#include "lineRenderer.hxx"
+#include "triangleRenderer.hxx"
 
 #include <SDL3/SDL.h>
 

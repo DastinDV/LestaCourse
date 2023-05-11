@@ -2,9 +2,9 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "./glad/include/glad/glad.h"
 #include "canvas.hxx"
 #include "engine.hxx"
+#include "glad/glad.h"
 #include <SDL3/SDL.h>
 
 namespace core {

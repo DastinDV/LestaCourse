@@ -26,6 +26,11 @@ set_target_properties(
                                      # functions from game
 )
 
+target_include_directories(Engine PUBLIC 
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Renderers>
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/glad/include>
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/OpenGL>)
+
 target_compile_features(Engine PUBLIC cxx_std_20)
 
 find_package(SDL3 REQUIRED)

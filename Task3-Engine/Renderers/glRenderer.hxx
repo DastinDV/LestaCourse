@@ -1,5 +1,5 @@
-#include "../OpenGL/vertexBuffer.hxx"
 #include "../canvas.hxx"
+#include "vertexBuffer.hxx"
 
 #include <vector>
 

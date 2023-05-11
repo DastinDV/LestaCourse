@@ -1,5 +1,5 @@
 #include "vertexBuffer.hxx"
-#include "../glad/include/glad/glad.h"
+#include "glad/glad.h"
 #include <iostream>
 
 VertexBuffer::VertexBuffer() {
