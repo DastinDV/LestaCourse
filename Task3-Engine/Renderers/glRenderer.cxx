@@ -1,6 +1,8 @@
 #include "glRenderer.hxx"
 #include "../glad/include/glad/glad.h"
+#include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace core {
 
@@ -10,6 +12,19 @@ GlVertex operator+(const GlVertex &l, const GlVertex &r) {
 
 GlVertex operator*(const GlVertex &l, float val) {
   return GlVertex{l.x * val, l.y * val, l.z * val};
+}
+
+std::string GetShaderSource(std::string path) {
+  std::string shaderCode;
+  std::ifstream shaderStream(path, std::ios::in);
+  if (shaderStream.is_open()) {
+    std::stringstream sstr;
+    sstr << shaderStream.rdbuf();
+    shaderCode = sstr.str();
+    shaderStream.close();
+  }
+
+  return shaderCode;
 }
 
 unsigned int CompileShader(unsigned int type, const std::string &source) {

@@ -104,66 +104,11 @@ int main() {
 
     std::vector<Agent> points;
 
-    // const std::string vertexShaderSource = R"(
-    //           #version 330 core
+    const std::string pointMovementShaderSource =
+        GetShaderSource(".//Shaders//vs.txt");
 
-    //           layout (location = 0) in vec3 position;
-
-    //           void main()
-    //           {
-    //               gl_Position = vec4(position.x / 4.0f, position.y/ 4.0f,
-    //               position.z/ 4.0f, 1.0);
-    //           }
-    //  )";
-
-    const std::string pointMovementShaderSource = R"(
-              #version 330 core
-              
-              layout (location = 0) in vec3 position;
-
-              out vec3 out_position;
-
-              void main()
-              {
-                    gl_Position = vec4(position, 1.0);
-                    out_position = position;
-              }
-     )";
-
-    const std::string fragmentShaderSource = R"(
-              #version 330 core
-              
-              in vec3 out_position;
-              out vec4 FragColor;
-
-              vec2 center = vec2(640.0/2.0, 480.0/2.0);
-              float radius = 100.0f;
-              float radius1 = 150.0f;
-              float radius2 = 200.0f;      
-
-              float random (vec2 pos) {
-                  return fract(sin(dot(pos.xy,
-                                      vec2(12.9898,78.233)))*43758.5453123);
-              }
-
-              void main()
-              {
-                  vec2 position = gl_FragCoord.xy - center;
-
-                  FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-                  if (length(position) < radius2){
-                    FragColor = vec4(0.0, 0.0, 1.0, 1.0);
-                  }
-                  if (length(position) < radius1){
-                    FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-                  }
-                  if (length(position) < radius) {
-                     FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-                  }
-
-              }
-     )";
-    // clang-format on
+    const std::string fragmentShaderSource =
+        GetShaderSource(".//Shaders//fs.txt");
 
     int programId =
         CreateShader(pointMovementShaderSource, fragmentShaderSource);
