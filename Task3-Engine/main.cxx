@@ -57,7 +57,7 @@ int main() {
     void *game_library_handle{};
 
     Engine engine;
-    engine.Initialize();
+    engine.Initialize(640, 480);
 
     Canvas canvas(640, 480);
 
@@ -129,9 +129,6 @@ int main() {
         vertecies.push_back(point.vertex);
       }
 
-      Event event;
-      engine.ProcessEvent(event);
-
       auto time_current_file_time =
           std::filesystem::last_write_time(library_name);
       if (time_current_file_time != time_during_loading) {
@@ -146,10 +143,20 @@ int main() {
         }
       }
 
+      Event event;
+      engine.ProcessEvent(event);
       if (event.eventType == EventType::keyboard_event &&
           event.keyBoardInfo.has_value()) {
         std::cout << "Key pressed " << event.keyBoardInfo->keyCodeName
                   << std::endl;
+      }
+
+      if (event.eventType == EventType::window_event &&
+          event.windowInfo.has_value()) {
+        if (event.windowInfo->type == WindowEventType::resized ||
+            event.windowInfo->type == WindowEventType::maximized) {
+          engine.ResizeViewPort();
+        }
       }
 
       if (event.eventType == EventType::mouse_event &&
@@ -160,8 +167,8 @@ int main() {
         quit = true;
 
       consoleGame->OnEvent(event);
-      engine.ClearScreen(timeSinceRun);
 
+      engine.ClearScreen(timeSinceRun);
       glRenderer.DrawPoint(vertecies);
 
       // glRenderer.DrawPoint(points1);

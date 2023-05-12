@@ -9,8 +9,9 @@
 
 namespace core {
 
-enum class EventType { keyboard_event, mouse_event, quit };
+enum class EventType { keyboard_event, mouse_event, window_event, quit };
 
+// ########## Keyboard
 enum class KeyCode { w, a, s, d, space, lctrl, rctrl, not_bind };
 
 enum class KeyboardEventType {
@@ -24,6 +25,14 @@ struct KeyboardInfo {
   KeyboardEventType type;
 };
 
+// ########## Window
+enum class WindowEventType { resized, maximized };
+
+struct WindowInfo {
+  unsigned int windowId;
+  WindowEventType type;
+};
+// ########## Mouse
 struct MouseInfo {
   double xPos;
   double yPos;
@@ -33,19 +42,22 @@ struct Event {
   EventType eventType;
   std::optional<KeyboardInfo> keyBoardInfo;
   std::optional<MouseInfo> mouseInfo;
+  std::optional<WindowInfo> windowInfo;
 };
 
 class IZ_DECLSPEC Engine {
 public:
   Engine();
 
-  int Initialize();
+  int Initialize(int screenWidth, int screenHeight);
   int ProcessEvent(Event &event);
   int CleanUp();
 
+  // ###### OpenGL ######
   void ClearScreen(float deltaTime);
-  void RenderTriangle();
   void SwapBuffers();
+  void ResizeViewPort() const;
+  // ###### OpenGL ######
 
 private:
   void GetOpenGLVersionInfo();

@@ -28,7 +28,7 @@ static std::ostream &operator<<(std::ostream &out, const SDL_version &v) {
 
 Engine::Engine() {}
 
-int Engine::Initialize() {
+int Engine::Initialize(int screenWidth, int screenHeight) {
   using namespace std;
 
   SDL_version compiled = {0, 0, 0};
@@ -53,7 +53,8 @@ int Engine::Initialize() {
     return EXIT_FAILURE;
   }
 
-  window = SDL_CreateWindow("title", 640, 480, ::SDL_WINDOW_OPENGL);
+  window = SDL_CreateWindow("title", screenWidth, screenHeight,
+                            ::SDL_WINDOW_OPENGL | ::SDL_WINDOW_RESIZABLE);
 
   if (window == nullptr) {
     const char *err_message = SDL_GetError();
@@ -105,26 +106,12 @@ void Engine::ClearScreen(float deltaTime) {
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Engine::RenderTriangle() {
-  // clang-format off
-  const GLfloat globVertexBufferData[] = {
-      -1.0f, -1.0f, 0.0f,
-       1.0f, -1.0f, 0.0f,
-       0.0f, 1.0f, 0.0f,
-  };
-  // clang-format on
-
-  GLuint vbo;
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(globVertexBufferData),
-               globVertexBufferData, GL_STATIC_DRAW);
-
-  GLuint vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+void Engine::ResizeViewPort() const {
+  if (window) {
+    int w, h;
+    SDL_GetWindowSizeInPixels(window, &w, &h);
+    glViewport(0, 0, w, h);
+  }
 }
 
 void Engine::GetOpenGLVersionInfo() {
@@ -160,6 +147,15 @@ int Engine::ProcessEvent(Event &event) {
     if (sdlEvent.type == SDL_EVENT_MOUSE_MOTION) {
       event.eventType = EventType::mouse_event;
       event.mouseInfo = {sdlEvent.motion.x, sdlEvent.motion.y};
+    }
+    if (sdlEvent.type == SDL_EVENT_WINDOW_RESIZED) {
+      event.eventType = EventType::window_event;
+      event.windowInfo = {SDL_GetWindowID(window), WindowEventType::resized};
+    }
+    if (sdlEvent.type == SDL_EVENT_WINDOW_MAXIMIZED) {
+      event.eventType = EventType::window_event;
+      event.windowInfo = {SDL_GetWindowID(window), WindowEventType::maximized};
+      return 1;
     }
     if (sdlEvent.type == SDL_EVENT_QUIT) {
       event.eventType = EventType::quit;
