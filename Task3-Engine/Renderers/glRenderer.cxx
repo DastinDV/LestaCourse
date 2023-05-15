@@ -14,6 +14,63 @@ GlVertex operator*(const GlVertex &l, float val) {
   return GlVertex{l.x * val, l.y * val, l.z * val};
 }
 
+float *ParseVerticies(std::string path, char separator, int &count) {
+
+  std::vector<float> values;
+
+  float *arr = nullptr;
+
+  std::string shaderCode;
+  std::ifstream shaderStream(path, std::ios::in);
+  if (shaderStream.is_open()) {
+    std::stringstream sstr;
+    sstr << shaderStream.rdbuf();
+
+    std::string token;
+    while (std::getline(sstr, token, separator)) {
+      values.push_back(atof(token.c_str()));
+    }
+
+  } else
+    throw std::runtime_error("Can't find vertex file!");
+
+  arr = new float[values.size()];
+  int i = 0;
+  for (auto &item : values)
+    arr[i++] = item;
+
+  count = values.size();
+  return arr;
+}
+
+unsigned int *ParseIndexies(std::string path, char separator, int &count) {
+
+  std::vector<int> values;
+
+  unsigned int *arr = nullptr;
+
+  std::string shaderCode;
+  std::ifstream shaderStream(path, std::ios::in);
+  if (shaderStream.is_open()) {
+    std::stringstream sstr;
+    sstr << shaderStream.rdbuf();
+
+    std::string token;
+    while (std::getline(sstr, token, separator)) {
+      values.push_back(atoi(token.c_str()));
+    }
+
+  } else
+    throw std::runtime_error("Can't find vertex file!");
+
+  arr = new unsigned int[values.size()];
+  int i = 0;
+  for (auto &item : values)
+    arr[i++] = item;
+
+  return arr;
+}
+
 std::string GetShaderSource(std::string path) {
   std::string shaderCode;
   std::ifstream shaderStream(path, std::ios::in);
@@ -71,10 +128,7 @@ int CreateShader(const std::string &vertexShader,
   return programId;
 }
 
-GlRenderer::GlRenderer() {
-  pointBuffer = new VertexBuffer();
-  triangleBuffer = new VertexBuffer();
-}
+GlRenderer::GlRenderer() { triangleBuffer = new VertexBuffer(); }
 
 void GlRenderer::SetAttribute(int id, int size, EGlType type, int stride,
                               void *offset) {
@@ -86,35 +140,19 @@ void GlRenderer::SetBuffer(VertexBuffer *buffer) {
   this->currentBuffer = buffer;
 }
 
-void GlRenderer::DrawPoint(const float *const data, const int size) {
+void GlRenderer::DrawPoint(const int size) {
   if (size == 0)
     return;
 
   glDrawArrays(GL_POINTS, 0, size);
 }
 
-void GlRenderer::DrawTriangle(std::vector<GlVertex> &vertecies) {
-  GLfloat *coordinate;
+void GlRenderer::DrawTriangle(const int size) {
 
-  int size = vertecies.size() * 3;
-  coordinate = new GLfloat[size];
+  if (size == 0)
+    return;
 
-  int i = 0;
-  for (auto &item : vertecies) {
-    coordinate[i++] = item.x;
-    coordinate[i++] = item.y;
-    coordinate[i++] = item.z;
-  }
-
-  triangleBuffer->Bind();
-  triangleBuffer->SetData(coordinate, sizeof(GLfloat) * size);
-
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glDrawArrays(GL_TRIANGLES, 0, size);
-
-  triangleBuffer->Unbind();
-  delete[] coordinate;
 }
 
 } // namespace core

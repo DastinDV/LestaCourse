@@ -19,20 +19,21 @@ int CreateShader(const std::string &vertexShader,
                  const std::string &fragmentShader);
 
 std::string GetShaderSource(std::string path);
+float *ParseVerticies(std::string path, char separator, int &count);
+unsigned int *ParseIndexies(std::string path, char separator, int &count);
 
 enum EGlType { gl_float };
 
 class GlRenderer {
 public:
   GlRenderer();
-  void DrawPoint(const float *const data, const int size);
-  void DrawTriangle(std::vector<GlVertex> &vertecies);
+  void DrawPoint(const int size);
+  void DrawTriangle(const int size);
 
   void SetAttribute(int id, int size, EGlType type, int stride, void *offset);
   void SetBuffer(VertexBuffer *buffer);
 
   VertexBuffer *currentBuffer;
-  VertexBuffer *pointBuffer;
   VertexBuffer *triangleBuffer;
 };
 } // namespace core

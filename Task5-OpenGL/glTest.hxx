@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Task3-Engine/OpenGL/vao.hxx"
 #include "../Task3-Engine/OpenGL/vertexBuffer.hxx"
 #include "../Task3-Engine/Renderers/glRenderer.hxx"
 #include "../Task3-Engine/engine.hxx"
@@ -43,12 +44,24 @@ public:
   ~GLGame();
 
 private:
+  void InitPoints();
+  void RenderPoints();
+  void UpdatePoints(float deltaTime);
+
   core::GlRenderer *glRenderer;
   core::VertexBuffer *pointBuffer;
 
   std::vector<Agent> points;
   float *vertecies = nullptr;
+  unsigned int *indeces = nullptr;
   const int pointsNum = 100'000;
+
+  void InitIndexTriangle();
+  void RenderIndexTriangle();
+  void UpdateIndexTriangle(float deltaTime);
+
+  core::VAO *triangleVAO;
+  core::VertexBuffer *triangleBuffer;
 
   float timeSinceRun = 0.0;
 };

@@ -10,6 +10,8 @@ add_executable(
   ./Renderers/triangleRenderer.cxx
   ./Renderers/glRenderer.cxx
   ./OpenGL/vertexBuffer.cxx
+  ./OpenGL/elementBuffer.cxx
+  ./OpenGL/vao.cxx
   ./glad/src/glad.c
   main.cxx
   canvas.hxx
@@ -19,6 +21,8 @@ add_executable(
   ./Renderers/triangleRenderer.hxx
   ./Renderers/glRenderer.hxx
   ./OpenGL/vertexBuffer.hxx
+  ./OpenGL/elementBuffer.hxx
+  ./OpenGL/vao.hxx
   ./glad/include/glad/glad.h)
 
 set_target_properties(
