@@ -6,6 +6,7 @@
 #include "helper.hxx"
 #include "lineRenderer.hxx"
 #include "triangleRenderer.hxx"
+#include "vertexBuffer.hxx"
 
 #include <SDL3/SDL.h>
 
@@ -76,8 +77,12 @@ int main() {
     long last;
 
     GlRenderer glRenderer;
+    VertexBuffer *pointBuffer = new VertexBuffer();
+    glRenderer.SetBuffer(pointBuffer);
 
     std::vector<Agent> points;
+    float *vertecies = nullptr;
+    int pointsNum = 0;
 
     try {
       const std::string pointMovementShaderSource =
@@ -97,6 +102,7 @@ int main() {
       float offset = 0.0f;
 
       points.reserve(100000);
+
       for (int i = 0; i < 100000; i++) {
         Agent newAgent;
         // if (i % 10000 == 0)
@@ -107,10 +113,16 @@ int main() {
         points.push_back(newAgent);
       }
 
+      pointsNum = points.size();
+      vertecies = new float[pointsNum * 3];
+
     } catch (std::runtime_error err) {
       std::cerr << err.what() << std::endl;
       return EXIT_FAILURE;
     }
+
+    pointBuffer->Bind();
+    glRenderer.SetAttribute(0, 3, EGlType::gl_float, 0, 0);
 
     while (!quit) {
       long now = SDL_GetTicks();
@@ -123,10 +135,12 @@ int main() {
         // glUniform1f(angleLocation, angle);
       }
 
-      std::vector<GlVertex> vertecies;
+      int i = 0;
       for (auto &point : points) {
         UpdatePoint(point, deltaTime, timeSinceRun);
-        vertecies.push_back(point.vertex);
+        vertecies[i++] = point.vertex.x;
+        vertecies[i++] = point.vertex.y;
+        vertecies[i++] = point.vertex.z;
       }
 
       auto time_current_file_time =
@@ -169,7 +183,10 @@ int main() {
       consoleGame->OnEvent(event);
 
       engine.ClearScreen(timeSinceRun);
-      glRenderer.DrawPoint(vertecies);
+
+      // glRenderer.SetAttribute(0, 3, EGlType::gl_float, 0, 0);
+      pointBuffer->SetData(vertecies, pointsNum);
+      glRenderer.DrawPoint(vertecies, pointsNum);
 
       // glRenderer.DrawPoint(points1);
       // glRenderer.DrawTriangle(triangle);
@@ -178,7 +195,9 @@ int main() {
       // consoleGame->Render();
     }
 
+    pointBuffer->Unbind();
     engine.CleanUp();
+    delete[] vertecies;
   }
 
   return 0;

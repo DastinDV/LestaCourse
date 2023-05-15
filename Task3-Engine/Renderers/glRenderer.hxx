@@ -20,12 +20,18 @@ int CreateShader(const std::string &vertexShader,
 
 std::string GetShaderSource(std::string path);
 
+enum EGlType { gl_float };
+
 class GlRenderer {
 public:
   GlRenderer();
-  void DrawPoint(std::vector<GlVertex> &pos);
+  void DrawPoint(const float *const data, const int size);
   void DrawTriangle(std::vector<GlVertex> &vertecies);
 
+  void SetAttribute(int id, int size, EGlType type, int stride, void *offset);
+  void SetBuffer(VertexBuffer *buffer);
+
+  VertexBuffer *currentBuffer;
   VertexBuffer *pointBuffer;
   VertexBuffer *triangleBuffer;
 };

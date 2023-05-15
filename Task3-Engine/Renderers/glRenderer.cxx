@@ -76,31 +76,21 @@ GlRenderer::GlRenderer() {
   triangleBuffer = new VertexBuffer();
 }
 
-void GlRenderer::DrawPoint(std::vector<GlVertex> &pos) {
-  if (pos.size() == 0)
+void GlRenderer::SetAttribute(int id, int size, EGlType type, int stride,
+                              void *offset) {
+  glEnableVertexAttribArray(id);
+  glVertexAttribPointer(id, size, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+}
+
+void GlRenderer::SetBuffer(VertexBuffer *buffer) {
+  this->currentBuffer = buffer;
+}
+
+void GlRenderer::DrawPoint(const float *const data, const int size) {
+  if (size == 0)
     return;
 
-  GLfloat *coordinate;
-
-  int size = pos.size() * 3;
-  coordinate = new GLfloat[size];
-
-  int i = 0;
-  for (auto &item : pos) {
-    coordinate[i++] = item.x;
-    coordinate[i++] = item.y;
-    coordinate[i++] = item.z;
-  }
-
-  pointBuffer->Bind();
-  pointBuffer->SetData(coordinate, sizeof(GLfloat) * size);
-
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glDrawArrays(GL_POINTS, 0, size);
-
-  pointBuffer->Unbind();
-  delete[] coordinate;
 }
 
 void GlRenderer::DrawTriangle(std::vector<GlVertex> &vertecies) {
