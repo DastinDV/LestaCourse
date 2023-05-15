@@ -2,6 +2,7 @@
 #include "glad/glad.h"
 #include <iostream>
 
+namespace core {
 VertexBuffer::VertexBuffer() {
   glGenBuffers(1, &bufferId);
   std::cout << bufferId << std::endl;
@@ -22,3 +23,4 @@ void VertexBuffer::SetData(const void *data, unsigned int size) {
 void VertexBuffer::Unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
 
 VertexBuffer::~VertexBuffer() { glDeleteBuffers(1, &bufferId); }
+} // namespace core

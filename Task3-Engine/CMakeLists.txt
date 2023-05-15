@@ -41,5 +41,5 @@ target_link_libraries(Engine PRIVATE SDL3::SDL3-shared)
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Game
 #${CMAKE_BINARY_DIR}/lib/MyGame)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task4-RenderBasics
-${CMAKE_BINARY_DIR}/lib/RenderBasicsGame)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task5-OpenGL
+${CMAKE_BINARY_DIR}/lib/glTest)

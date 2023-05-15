@@ -1,5 +1,6 @@
 #pragma once
 
+namespace core {
 class VertexBuffer {
 public:
   VertexBuffer();
@@ -13,3 +14,4 @@ public:
 private:
   unsigned int bufferId;
 };
+} // namespace core
