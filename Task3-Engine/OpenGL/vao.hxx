@@ -12,7 +12,8 @@ public:
   void Unbind() const;
 
   void SetVertexBuffer(VertexBuffer *VBO);
-
+  VertexBuffer *GetVertexBuffer();
+  unsigned int GetID();
   VAO(/* args */);
   ~VAO();
 

@@ -4,8 +4,6 @@
 #include <iostream>
 #include <vector>
 
-core::Shader newShader;
-
 GLGame::GLGame() {
   glRenderer = new core::GlRenderer();
   pointBuffer = new core::VertexBuffer();
@@ -20,10 +18,19 @@ void GLGame::Update(float deltaTime) { /*UpdatePoints(deltaTime);*/
 
 void GLGame::Init() {
   /*InitPoints();*/
-  InitIndexTriangle();
+  InitShaders();
+  InitVertexObjects();
 }
 
-void GLGame::OnEvent(core::Event &event) {}
+void GLGame::OnEvent(core::Event &event) {
+  if (event.eventType == core::EventType::keyboard_event &&
+      event.keyBoardInfo.has_value()) {
+    if (event.keyBoardInfo->type == core::KeyboardEventType::key_released &&
+        event.keyBoardInfo->keyCode == core::KeyCode::space) {
+      BindNextVAO();
+    }
+  }
+}
 
 GLGame::~GLGame() {
   delete vertecies;
@@ -32,6 +39,75 @@ GLGame::~GLGame() {
 }
 
 // #################################   Points
+
+void GLGame::InitShaders() {
+  core::Shader rgbCirclesShader;
+  core::Shader colorShader;
+
+  rgbCirclesShader.CreateShaderProgramFromFile("./Shaders/vs1.txt",
+                                               "./Shaders/fs1.txt");
+
+  colorShader.CreateShaderProgramFromFile("./Shaders/vs.txt",
+                                          "./Shaders/fs.txt");
+
+  IdToShader[rgbCirclesShader.GetProgramID()] = rgbCirclesShader;
+  IdToShader[colorShader.GetProgramID()] = colorShader;
+
+  core::VAO *triangleVAO = new core::VAO();
+  core::VertexBuffer *triangleBuffer = new core::VertexBuffer();
+
+  triangleVAO->SetVertexBuffer(triangleBuffer);
+
+  core::VAO *coloredTriangleVAO = new core::VAO();
+  core::VertexBuffer *coloredTriangleBuffer = new core::VertexBuffer();
+  coloredTriangleVAO->SetVertexBuffer(coloredTriangleBuffer);
+
+  VAOIdToShaderId[triangleVAO->GetID()] = rgbCirclesShader.GetProgramID();
+  VAOIdToShaderId[coloredTriangleVAO->GetID()] = colorShader.GetProgramID();
+
+  // VAO OBJECTS
+  vertexObjects.push_back(triangleVAO);        // 0
+  vertexObjects.push_back(coloredTriangleVAO); // 1
+}
+
+void GLGame::InitVertexObjects() {
+  int vertexCount, vertex1Count = 0;
+  int indexCount = 0;
+  vertecies = core::ParseVerticies("./verticies.txt", ',', vertexCount);
+  vertecies1 = core::ParseVerticies("./verticies1.txt", ',', vertex1Count);
+  indeces = core::ParseIndexies("./indeces.txt", ',', indexCount);
+
+  core::VAO *triangleVAO = vertexObjects[0];
+  core::VAO *coloredTriangleVAO = vertexObjects[1];
+
+  triangleVAO->Bind();
+  triangleVAO->GetVertexBuffer()->SetData(vertecies,
+                                          vertexCount * 3 * sizeof(float));
+  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
+
+  RunShaderByVAOId(triangleVAO->GetID());
+  triangleVAO->Unbind();
+
+  coloredTriangleVAO->Bind();
+  coloredTriangleVAO->GetVertexBuffer()->SetData(vertecies1, vertex1Count * 6 *
+                                                                 sizeof(float));
+  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 6 * sizeof(float), 0);
+  glRenderer->SetAttribute(1, 3, core::EGlType::gl_float, 6 * sizeof(float),
+                           (void *)(3 * sizeof(float)));
+
+  RunShaderByVAOId(coloredTriangleVAO->GetID());
+  coloredTriangleVAO->Unbind();
+
+  vertexObjects.push_back(triangleVAO);
+  vertexObjects.push_back(coloredTriangleVAO);
+
+  BindNextVAO();
+}
+
+void GLGame::RunShaderByVAOId(unsigned int id) {
+  int connectedShaderId = VAOIdToShaderId.at(id);
+  IdToShader.at(connectedShaderId).Use();
+}
 
 void GLGame::InitPoints() {
   glRenderer = new core::GlRenderer();
@@ -68,47 +144,15 @@ void GLGame::UpdatePoints(float deltaTime) {
   timeSinceRun += deltaTime;
 }
 
-// ################################    Triangles
-
-void GLGame::InitIndexTriangle() {
-  // int vertexCount = 0;
-  // int indexCount = 0;
-  // vertecies = core::ParseVerticies("./verticies.txt", ',', vertexCount);
-  // indeces = core::ParseIndexies("./indeces.txt", ',', indexCount);
-
-  // triangleVAO = new core::VAO();
-  // triangleBuffer = new core::VertexBuffer();
-  // triangleVAO->SetVertexBuffer(triangleBuffer);
-
-  // triangleVAO->Bind();
-
-  // triangleBuffer->SetData(vertecies, vertexCount * 3 * sizeof(float));
-  // glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
-
-  // triangleVAO->Unbind();
-
-  int vertexCount1;
-  vertecies1 = core::ParseVerticies("./verticies1.txt", ',', vertexCount1);
-  coloredTriangleVAO = new core::VAO();
-  coloredTriangleBuffer = new core::VertexBuffer();
-  coloredTriangleVAO->SetVertexBuffer(coloredTriangleBuffer);
-
-  coloredTriangleVAO->Bind();
-  coloredTriangleBuffer->SetData(vertecies1, vertexCount1 * 6 * sizeof(float));
-  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 6 * sizeof(float), 0);
-  glRenderer->SetAttribute(1, 3, core::EGlType::gl_float, 6 * sizeof(float),
-                           (void *)(3 * sizeof(float)));
-
-  newShader.CreateShaderProgramFromFile("./Shaders/vs.txt", "./Shaders/fs.txt");
-  newShader.Use();
-
-  // coloredTriangleVAO->Unbind();
-
-  // triangleVAO->Bind();
-  // triangleBuffer->SetData(vertecies, vertexCount * 3 * sizeof(float));
-  // glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
+void GLGame::BindNextVAO() {
+  vertexObjects[currentVAOIndex]->Unbind();
+  currentVAOIndex++;
+  currentVAOIndex %= vertexObjects.size();
+  vertexObjects[currentVAOIndex]->Bind();
+  RunShaderByVAOId(vertexObjects[currentVAOIndex]->GetID());
+  std::cout << currentVAOIndex << std::endl;
 }
 
-void GLGame::RenderIndexTriangle() { glRenderer->DrawTriangle(6); }
+// ################################    Triangles
 
-void GLGame::UpdateIndexTriangle(float deltaTime) {}
+void GLGame::RenderIndexTriangle() { glRenderer->DrawTriangle(6); }

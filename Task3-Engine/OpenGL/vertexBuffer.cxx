@@ -22,5 +22,13 @@ void VertexBuffer::SetData(const void *data, unsigned int size) {
 
 void VertexBuffer::Unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
 
+void VertexBuffer::SetElementsCount(unsigned int elementCount) {
+  this->elementCount = elementCount;
+}
+
+unsigned int VertexBuffer::GetElementsCount() const {
+  return this->elementCount;
+}
+
 VertexBuffer::~VertexBuffer() { glDeleteBuffers(1, &bufferId); }
 } // namespace core

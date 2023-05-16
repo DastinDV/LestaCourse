@@ -1,11 +1,15 @@
 #pragma once
 
+#include "../Task3-Engine/OpenGL/shader.hxx"
 #include "../Task3-Engine/OpenGL/vao.hxx"
 #include "../Task3-Engine/OpenGL/vertexBuffer.hxx"
 #include "../Task3-Engine/Renderers/glRenderer.hxx"
 #include "../Task3-Engine/engine.hxx"
 #include "../Task3-Engine/game.hxx"
 #include "../Task3-Engine/helper.hxx"
+
+#include <unordered_map>
+#include <unordered_set>
 
 void UpdatePoint(Agent &agent, float deltaTime, float count) {
 
@@ -44,28 +48,31 @@ public:
   ~GLGame();
 
 private:
+  void InitShaders();
+  void InitVertexObjects();
+  void BindNextVAO();
+  void RunShaderByVAOId(unsigned int id);
+
   void InitPoints();
   void RenderPoints();
   void UpdatePoints(float deltaTime);
 
+  std::unordered_map<unsigned int, core::Shader> IdToShader;
+  std::unordered_map<unsigned int, unsigned int> VAOIdToShaderId;
+  std::vector<core::VAO *> vertexObjects;
+  int currentVAOIndex = 0;
+
   core::GlRenderer *glRenderer;
   core::VertexBuffer *pointBuffer;
 
-  std::vector<Agent> points;
   float *vertecies = nullptr;
+  float *vertecies1 = nullptr;
+
+  std::vector<Agent> points;
   unsigned int *indeces = nullptr;
   const int pointsNum = 100'000;
 
-  void InitIndexTriangle();
   void RenderIndexTriangle();
-  void UpdateIndexTriangle(float deltaTime);
-
-  core::VAO *triangleVAO;
-  core::VertexBuffer *triangleBuffer;
-
-  core::VAO *coloredTriangleVAO;
-  core::VertexBuffer *coloredTriangleBuffer;
-  float *vertecies1 = nullptr;
 
   float timeSinceRun = 0.0;
 };

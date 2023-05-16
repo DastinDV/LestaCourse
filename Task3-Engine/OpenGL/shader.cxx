@@ -72,4 +72,6 @@ void core::Shader::CreateShaderProgramFromFile(const std::string vertex_pth,
   m_Program = CreateShader(pointMovementShaderSource, fragmentShaderSource);
 }
 
+unsigned int core::Shader::GetProgramID() { return m_Program; }
+
 void core::Shader::Use() { glUseProgram(this->m_Program); }

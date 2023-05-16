@@ -11,7 +11,11 @@ public:
   void SetData(const void *data, unsigned int size);
   void Unbind() const;
 
+  void SetElementsCount(unsigned int elementCount);
+  unsigned int GetElementsCount() const;
+
 private:
+  unsigned int elementCount;
   unsigned int bufferId;
 };
 } // namespace core
