@@ -63,6 +63,10 @@ private:
   core::VAO *triangleVAO;
   core::VertexBuffer *triangleBuffer;
 
+  core::VAO *coloredTriangleVAO;
+  core::VertexBuffer *coloredTriangleBuffer;
+  float *vertecies1 = nullptr;
+
   float timeSinceRun = 0.0;
 };
 

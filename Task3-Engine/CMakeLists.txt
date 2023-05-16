@@ -12,6 +12,7 @@ add_executable(
   ./OpenGL/vertexBuffer.cxx
   ./OpenGL/elementBuffer.cxx
   ./OpenGL/vao.cxx
+  ./OpenGL/shader.cxx
   ./glad/src/glad.c
   main.cxx
   canvas.hxx
@@ -23,6 +24,7 @@ add_executable(
   ./OpenGL/vertexBuffer.hxx
   ./OpenGL/elementBuffer.hxx
   ./OpenGL/vao.hxx
+  ./OpenGL/shader.hxx
   ./glad/include/glad/glad.h)
 
 set_target_properties(

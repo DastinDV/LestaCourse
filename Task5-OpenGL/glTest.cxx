@@ -1,7 +1,10 @@
 #include "glTest.hxx"
+#include "shader.hxx"
 
 #include <iostream>
 #include <vector>
+
+core::Shader newShader;
 
 GLGame::GLGame() {
   glRenderer = new core::GlRenderer();
@@ -68,21 +71,44 @@ void GLGame::UpdatePoints(float deltaTime) {
 // ################################    Triangles
 
 void GLGame::InitIndexTriangle() {
-  int vertexCount = 0;
-  int indexCount = 0;
-  vertecies = core::ParseVerticies("./verticies.txt", ',', vertexCount);
-  indeces = core::ParseIndexies("./indeces.txt", ',', indexCount);
+  // int vertexCount = 0;
+  // int indexCount = 0;
+  // vertecies = core::ParseVerticies("./verticies.txt", ',', vertexCount);
+  // indeces = core::ParseIndexies("./indeces.txt", ',', indexCount);
 
-  triangleVAO = new core::VAO();
-  triangleBuffer = new core::VertexBuffer();
-  triangleVAO->SetVertexBuffer(triangleBuffer);
+  // triangleVAO = new core::VAO();
+  // triangleBuffer = new core::VertexBuffer();
+  // triangleVAO->SetVertexBuffer(triangleBuffer);
 
-  triangleVAO->Bind();
+  // triangleVAO->Bind();
 
-  triangleBuffer->SetData(vertecies, vertexCount * 3 * sizeof(float));
-  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
+  // triangleBuffer->SetData(vertecies, vertexCount * 3 * sizeof(float));
+  // glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
+
+  // triangleVAO->Unbind();
+
+  int vertexCount1;
+  vertecies1 = core::ParseVerticies("./verticies1.txt", ',', vertexCount1);
+  coloredTriangleVAO = new core::VAO();
+  coloredTriangleBuffer = new core::VertexBuffer();
+  coloredTriangleVAO->SetVertexBuffer(coloredTriangleBuffer);
+
+  coloredTriangleVAO->Bind();
+  coloredTriangleBuffer->SetData(vertecies1, vertexCount1 * 6 * sizeof(float));
+  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 6 * sizeof(float), 0);
+  glRenderer->SetAttribute(1, 3, core::EGlType::gl_float, 6 * sizeof(float),
+                           (void *)(3 * sizeof(float)));
+
+  newShader.CreateShaderProgramFromFile("./Shaders/vs.txt", "./Shaders/fs.txt");
+  newShader.Use();
+
+  // coloredTriangleVAO->Unbind();
+
+  // triangleVAO->Bind();
+  // triangleBuffer->SetData(vertecies, vertexCount * 3 * sizeof(float));
+  // glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
 }
 
-void GLGame::RenderIndexTriangle() { glRenderer->DrawTriangle(vertexCount); }
+void GLGame::RenderIndexTriangle() { glRenderer->DrawTriangle(6); }
 
 void GLGame::UpdateIndexTriangle(float deltaTime) {}

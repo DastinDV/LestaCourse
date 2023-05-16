@@ -5,6 +5,7 @@
 #include "glad/glad.h"
 #include "helper.hxx"
 #include "lineRenderer.hxx"
+#include "shader.hxx"
 #include "triangleRenderer.hxx"
 #include "vertexBuffer.hxx"
 
@@ -47,22 +48,6 @@ int main() {
     float deltaTime = 0.0;
     float timeSinceRun = 0.0;
     long last;
-
-    try {
-      const std::string pointMovementShaderSource =
-          GetShaderSource(".//Shaders//vs.txt");
-
-      const std::string fragmentShaderSource =
-          GetShaderSource(".//Shaders//fs.txt");
-
-      int programId =
-          CreateShader(pointMovementShaderSource, fragmentShaderSource);
-      glUseProgram(programId);
-
-    } catch (std::runtime_error err) {
-      std::cerr << err.what() << std::endl;
-      return EXIT_FAILURE;
-    }
 
     while (!quit) {
       long now = SDL_GetTicks();

@@ -34,6 +34,5 @@ public:
   void SetBuffer(VertexBuffer *buffer);
 
   VertexBuffer *currentBuffer;
-  VertexBuffer *triangleBuffer;
 };
 } // namespace core

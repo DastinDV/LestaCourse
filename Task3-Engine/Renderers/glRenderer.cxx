@@ -128,7 +128,7 @@ int CreateShader(const std::string &vertexShader,
   return programId;
 }
 
-GlRenderer::GlRenderer() { triangleBuffer = new VertexBuffer(); }
+GlRenderer::GlRenderer() {}
 
 void GlRenderer::SetAttribute(int id, int size, EGlType type, int stride,
                               void *offset) {
