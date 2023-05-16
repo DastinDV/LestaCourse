@@ -71,10 +71,10 @@ void GLGame::InitShaders() {
 }
 
 void GLGame::InitVertexObjects() {
-  int vertexCount, vertex1Count = 0;
+  int vertBufLen, vertBuf1Len = 0;
   int indexCount = 0;
-  vertecies = core::ParseVerticies("./verticies.txt", ',', vertexCount);
-  vertecies1 = core::ParseVerticies("./verticies1.txt", ',', vertex1Count);
+  vertecies = core::ParseVerticies("./verticies.txt", ',', vertBufLen);
+  vertecies1 = core::ParseVerticies("./verticies1.txt", ',', vertBuf1Len);
   indeces = core::ParseIndexies("./indeces.txt", ',', indexCount);
 
   core::VAO *triangleVAO = vertexObjects[0];
@@ -82,15 +82,17 @@ void GLGame::InitVertexObjects() {
 
   triangleVAO->Bind();
   triangleVAO->GetVertexBuffer()->SetData(vertecies,
-                                          vertexCount * 3 * sizeof(float));
+                                          vertBufLen * 3 * sizeof(float));
+  triangleVAO->GetVertexBuffer()->SetElementsCount(vertBufLen / 3);
   glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
 
   RunShaderByVAOId(triangleVAO->GetID());
   triangleVAO->Unbind();
 
   coloredTriangleVAO->Bind();
-  coloredTriangleVAO->GetVertexBuffer()->SetData(vertecies1, vertex1Count * 6 *
+  coloredTriangleVAO->GetVertexBuffer()->SetData(vertecies1, vertBuf1Len * 6 *
                                                                  sizeof(float));
+  coloredTriangleVAO->GetVertexBuffer()->SetElementsCount(vertBuf1Len / 3);
   glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 6 * sizeof(float), 0);
   glRenderer->SetAttribute(1, 3, core::EGlType::gl_float, 6 * sizeof(float),
                            (void *)(3 * sizeof(float)));
@@ -155,4 +157,7 @@ void GLGame::BindNextVAO() {
 
 // ################################    Triangles
 
-void GLGame::RenderIndexTriangle() { glRenderer->DrawTriangle(6); }
+void GLGame::RenderIndexTriangle() {
+  glRenderer->DrawTriangle(
+      vertexObjects[currentVAOIndex]->GetVertexBuffer()->GetElementsCount());
+}
