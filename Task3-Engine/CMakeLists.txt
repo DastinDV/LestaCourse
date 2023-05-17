@@ -13,11 +13,13 @@ add_executable(
   ./OpenGL/elementBuffer.cxx
   ./OpenGL/vao.cxx
   ./OpenGL/shader.cxx
+  ./OpenGL/texture.cxx
   ./glad/src/glad.c
   main.cxx
   canvas.hxx
   engine.hxx
   game.hxx
+  stb_image.h
   ./Renderers/lineRenderer.hxx
   ./Renderers/triangleRenderer.hxx
   ./Renderers/glRenderer.hxx
@@ -25,6 +27,7 @@ add_executable(
   ./OpenGL/elementBuffer.hxx
   ./OpenGL/vao.hxx
   ./OpenGL/shader.hxx
+  ./OpenGL/texture.hxx
   ./glad/include/glad/glad.h)
 
 set_target_properties(

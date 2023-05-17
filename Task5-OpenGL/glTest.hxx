@@ -114,6 +114,7 @@ private:
   float *vertecies = nullptr;
   float *vertecies1 = nullptr;
   float *vertecies2 = nullptr;
+  float *vertecies3 = nullptr;
 
   std::vector<Agent> points;
   unsigned int *indeces = nullptr;

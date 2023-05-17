@@ -1,5 +1,6 @@
 #pragma once
 
+#include "texture.hxx"
 #include "vertexBuffer.hxx"
 
 namespace core {
@@ -12,6 +13,8 @@ public:
   void Unbind() const;
 
   void SetVertexBuffer(VertexBuffer *VBO);
+  void SetTexture(Texture *texture);
+  Texture *GetTexture();
   VertexBuffer *GetVertexBuffer();
   unsigned int GetID();
   VAO(/* args */);
@@ -19,5 +22,6 @@ public:
 
   unsigned int id;
   VertexBuffer *VBO;
+  Texture *texture;
 };
 } // namespace core
