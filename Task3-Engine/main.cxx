@@ -31,7 +31,7 @@ int main() {
     void *game_library_handle{};
 
     Engine engine;
-    engine.Initialize(640, 480);
+    engine.Initialize(640, 640);
 
     Canvas canvas(640, 480);
 

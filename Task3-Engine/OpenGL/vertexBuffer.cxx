@@ -16,8 +16,14 @@ VertexBuffer::VertexBuffer(const void *data, unsigned int size) {
 
 void VertexBuffer::Bind() const { glBindBuffer(GL_ARRAY_BUFFER, bufferId); }
 
+// Allocation data buffer
 void VertexBuffer::SetData(const void *data, unsigned int size) {
   glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
+}
+
+// For replacing data without allocation
+void VertexBuffer::SetSubData(const void *data, unsigned int size) {
+  glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 }
 
 void VertexBuffer::Unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }

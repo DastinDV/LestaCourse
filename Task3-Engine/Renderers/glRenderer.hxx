@@ -14,6 +14,30 @@ struct GlVertex {
   friend GlVertex operator*(const GlVertex &l, float val);
 };
 
+struct GLTriangle {
+  GLTriangle() {
+    v[0] = GlVertex();
+    v[1] = GlVertex();
+    v[2] = GlVertex();
+  }
+
+  std::vector<float> asBuf() {
+    std::vector<float> elements;
+    elements.push_back(v[0].x);
+    elements.push_back(v[0].y);
+    elements.push_back(v[0].z);
+    elements.push_back(v[1].x);
+    elements.push_back(v[1].y);
+    elements.push_back(v[1].z);
+    elements.push_back(v[2].x);
+    elements.push_back(v[2].y);
+    elements.push_back(v[2].z);
+    return elements;
+  }
+
+  GlVertex v[3];
+};
+
 unsigned int CompileShader(unsigned int type, const std::string &source);
 int CreateShader(const std::string &vertexShader,
                  const std::string &fragmentShader);

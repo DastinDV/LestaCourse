@@ -14,6 +14,8 @@ void GLGame::Render() { /*RenderPoints();*/
 }
 
 void GLGame::Update(float deltaTime) { /*UpdatePoints(deltaTime);*/
+  if (currentVAOIndex == 2)
+    UpdateMorphing(deltaTime);
 }
 
 void GLGame::Init() {
@@ -43,6 +45,7 @@ GLGame::~GLGame() {
 void GLGame::InitShaders() {
   core::Shader rgbCirclesShader;
   core::Shader colorShader;
+  core::Shader morphShader;
 
   rgbCirclesShader.CreateShaderProgramFromFile("./Shaders/vs1.txt",
                                                "./Shaders/fs1.txt");
@@ -50,45 +53,65 @@ void GLGame::InitShaders() {
   colorShader.CreateShaderProgramFromFile("./Shaders/vs.txt",
                                           "./Shaders/fs.txt");
 
+  morphShader.CreateShaderProgramFromFile("./Shaders/morpVS.txt",
+                                          "./Shaders/morpFS.txt");
+
   IdToShader[rgbCirclesShader.GetProgramID()] = rgbCirclesShader;
   IdToShader[colorShader.GetProgramID()] = colorShader;
+  IdToShader[morphShader.GetProgramID()] = morphShader;
 
+  //////////// triangle ////////////
   core::VAO *triangleVAO = new core::VAO();
   core::VertexBuffer *triangleBuffer = new core::VertexBuffer();
 
   triangleVAO->SetVertexBuffer(triangleBuffer);
 
+  //////////// coloredTriangle ////////////
   core::VAO *coloredTriangleVAO = new core::VAO();
   core::VertexBuffer *coloredTriangleBuffer = new core::VertexBuffer();
   coloredTriangleVAO->SetVertexBuffer(coloredTriangleBuffer);
 
+  //////////// morphing ////////////
+  core::VAO *morphingVAO = new core::VAO();
+  core::VertexBuffer *morphingBuffer = new core::VertexBuffer();
+
+  morphingVAO->SetVertexBuffer(morphingBuffer);
+
   VAOIdToShaderId[triangleVAO->GetID()] = rgbCirclesShader.GetProgramID();
   VAOIdToShaderId[coloredTriangleVAO->GetID()] = colorShader.GetProgramID();
+  VAOIdToShaderId[morphingVAO->GetID()] = morphShader.GetProgramID();
 
   // VAO OBJECTS
   vertexObjects.push_back(triangleVAO);        // 0
   vertexObjects.push_back(coloredTriangleVAO); // 1
+  vertexObjects.push_back(morphingVAO);        // 2
 }
 
 void GLGame::InitVertexObjects() {
-  int vertBufLen, vertBuf1Len = 0;
+  int vertBufLen, vertBuf1Len = 0, vertBuf2Len = 0;
   int indexCount = 0;
   vertecies = core::ParseVerticies("./verticies.txt", ',', vertBufLen);
   vertecies1 = core::ParseVerticies("./verticies1.txt", ',', vertBuf1Len);
+  vertecies2 = generateStarVertices(12, 0.5);
+  vertBuf2Len = 12 * 3;
+
   indeces = core::ParseIndexies("./indeces.txt", ',', indexCount);
 
   core::VAO *triangleVAO = vertexObjects[0];
   core::VAO *coloredTriangleVAO = vertexObjects[1];
+  core::VAO *morphingVAO = vertexObjects[2];
 
+  //////////// triangle ////////////
   triangleVAO->Bind();
   triangleVAO->GetVertexBuffer()->SetData(vertecies,
-                                          vertBufLen * 3 * sizeof(float));
+                                          vertBufLen * sizeof(float));
   triangleVAO->GetVertexBuffer()->SetElementsCount(vertBufLen / 3);
   glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
 
   RunShaderByVAOId(triangleVAO->GetID());
   triangleVAO->Unbind();
 
+  //////////// coloredTriangle ////////////
   coloredTriangleVAO->Bind();
   coloredTriangleVAO->GetVertexBuffer()->SetData(vertecies1, vertBuf1Len * 6 *
                                                                  sizeof(float));
@@ -100,8 +123,19 @@ void GLGame::InitVertexObjects() {
   RunShaderByVAOId(coloredTriangleVAO->GetID());
   coloredTriangleVAO->Unbind();
 
-  vertexObjects.push_back(triangleVAO);
-  vertexObjects.push_back(coloredTriangleVAO);
+  //////////// morphing ////////////
+  morphingVAO->Bind();
+  morphingVAO->GetVertexBuffer()->SetData(vertecies2,
+                                          vertBuf2Len * sizeof(float));
+  morphingVAO->GetVertexBuffer()->SetElementsCount(vertBuf2Len);
+  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
+
+  RunShaderByVAOId(morphingVAO->GetID());
+  morphingVAO->Unbind();
+
+  // vertexObjects.push_back(triangleVAO);
+  // vertexObjects.push_back(coloredTriangleVAO);
+  // vertexObjects.push_back(coloredTriangleVAO);
 
   BindNextVAO();
 }
@@ -109,6 +143,72 @@ void GLGame::InitVertexObjects() {
 void GLGame::RunShaderByVAOId(unsigned int id) {
   int connectedShaderId = VAOIdToShaderId.at(id);
   IdToShader.at(connectedShaderId).Use();
+}
+
+void GLGame::UpdateMorphing(float deltaTime) {
+  // clang-format off
+  float targetMorphing[] = {
+    -0.5,0.5,0.0,   // 0 
+    0.5,0.5,0.0,    // 1
+    0.5,-0.5,0.0,   // 2
+    -0.5,0.5,0.0,   // 0
+    0.5,-0.5,0.0,   // 2
+    -0.5,-0.5,0.0   // 3
+  };
+
+  std::vector<core::GLTriangle> star;
+  std::vector<core::GLTriangle> square;
+
+  int triangleCount = vertexObjects[2]->GetVertexBuffer()->GetElementsCount() / 9;
+
+  for (int n = 0; n < triangleCount; n++) {
+    core::GLTriangle nextTriangle;
+    for (int i = 0; i < 3; i++){
+    nextTriangle.v[i] = core::GlVertex{vertecies2[n*9 + (i * 3)], vertecies2[n*9 + (i * 3 + 1)], vertecies2[n*9 + (i * 3 + 2)]};
+    }
+    star.push_back(nextTriangle);
+  }
+
+  for (int n = 0; n < 2; n++){
+    core::GLTriangle nextTriangle;
+    for (int i = 0; i < 3; i++){
+    nextTriangle.v[i] = core::GlVertex{targetMorphing[n*9 + (i * 3)], targetMorphing[n*9 + (i * 3 + 1)], targetMorphing[n*9 + (i * 3 + 2)]};
+    }
+    square.push_back(nextTriangle);
+  }
+
+  float alpha = (std::sin(timeSinceRun * 0.5f) + 1) / 2;
+  float newStar[triangleCount * 9];
+  int index = 0;
+  for (int i = 0; i <= triangleCount / 2; i+=2){
+    core::GLTriangle tr1 = blend(star[i], square[0], alpha);
+    core::GLTriangle tr2 = blend(star[i+1], square[1], alpha);
+
+    auto elements = tr1.asBuf();
+    auto elements2 = tr2.asBuf();
+
+    for (int j = 0; j < elements.size(); j++){
+        newStar[index++] = elements[j];
+    }
+    for (int j = 0; j < elements2.size(); j++){
+        newStar[index++] = elements2[j];
+    }
+  }
+
+  // float newStar[18];
+  // auto elements = tr1.asBuf();
+  // auto elements2 = tr2.asBuf();
+
+  // for (int i = 0; i < elements.size(); i++){
+  //     newStar[i] = elements[i];
+  // }
+  // for (int i = 0; i < elements2.size(); i++){
+  //     newStar[9 + i] = elements2[i];
+  // }
+
+  vertexObjects[2]->GetVertexBuffer()->SetSubData(newStar, triangleCount * 9 * sizeof(float));
+
+  timeSinceRun += deltaTime;
 }
 
 void GLGame::InitPoints() {

@@ -9,6 +9,7 @@ public:
 
   void Bind() const;
   void SetData(const void *data, unsigned int size);
+  void SetSubData(const void *data, unsigned int size);
   void Unbind() const;
 
   void SetElementsCount(unsigned int elementCount);

@@ -8,6 +8,7 @@
 #include "../Task3-Engine/game.hxx"
 #include "../Task3-Engine/helper.hxx"
 
+#include <iostream>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -38,6 +39,49 @@ void UpdatePoint(Agent &agent, float deltaTime, float count) {
   agent.vertex = newPos;
 }
 
+core::GlVertex blend_vertex(const core::GlVertex &vl, const core::GlVertex &vr,
+                            const float a) {
+  core::GlVertex r;
+  r.x = (1.0f - a) * vl.x + a * vr.x;
+  r.y = (1.0f - a) * vl.y + a * vr.y;
+  r.z = 0;
+  return r;
+}
+
+core::GLTriangle blend(const core::GLTriangle &tl, const core::GLTriangle &tr,
+                       const float a) {
+  core::GLTriangle r;
+  r.v[0] = blend_vertex(tl.v[0], tr.v[0], a);
+  r.v[1] = blend_vertex(tl.v[1], tr.v[1], a);
+  r.v[2] = blend_vertex(tl.v[2], tr.v[2], a);
+  return r;
+}
+
+float *generateStarVertices(int n, float radius) {
+  float *positions = new float[n * 3];
+  int triangleCount = n / 3;
+  float start_angle = M_PI_2;
+  float step = 2 * M_PI / n;
+
+  std::cout << "step " << step << std::endl;
+  int k = 0;
+  while (k < triangleCount) {
+    for (int i = 0; i < 3; i++) {
+      float x = radius * cos(start_angle + (2 * M_PI * i / 3));
+      float y = radius * sin(start_angle + (2 * M_PI * i / 3));
+      positions[k * 9 + (i * 3)] = x;
+      positions[k * 9 + (i * 3 + 1)] = y;
+      positions[k * 9 + (i * 3 + 2)] = 0.0;
+      std::cout << x << " " << y << " " << std::endl;
+    }
+    std::cout << std::endl;
+    start_angle += step;
+    k++;
+  }
+
+  return positions;
+}
+
 class GLGame : public core::Game {
 public:
   GLGame();
@@ -53,6 +97,8 @@ private:
   void BindNextVAO();
   void RunShaderByVAOId(unsigned int id);
 
+  void UpdateMorphing(float deltaTime);
+
   void InitPoints();
   void RenderPoints();
   void UpdatePoints(float deltaTime);
@@ -67,6 +113,7 @@ private:
 
   float *vertecies = nullptr;
   float *vertecies1 = nullptr;
+  float *vertecies2 = nullptr;
 
   std::vector<Agent> points;
   unsigned int *indeces = nullptr;
