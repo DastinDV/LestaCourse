@@ -15,33 +15,55 @@ void GLGame::Render() { /*RenderPoints();*/
 }
 
 void GLGame::Update(float deltaTime) { /*UpdatePoints(deltaTime);*/
+  timeSinceRun += deltaTime;
   if (currentVAOIndex == 2)
     UpdateMorphing(deltaTime);
+  if (currentVAOIndex == 3)
+    UpdateMovement(deltaTime);
 }
 
 void GLGame::Init() {
   /*InitPoints();*/
   InitShaders();
   InitVertexObjects();
+  currentBoxPos = {0.0f, 0.0f, 0.0f};
+  currentAngle = 0.0f;
 }
 
-void GLGame::OnEvent(core::Event &event) {
+void GLGame::OnEvent(core::Event &event, float deltaTime) {
   if (event.eventType == core::EventType::keyboard_event &&
       event.keyBoardInfo.has_value()) {
     if (event.keyBoardInfo->type == core::KeyboardEventType::key_released &&
         event.keyBoardInfo->keyCode == core::KeyCode::space) {
       BindNextVAO();
     }
+    if (event.keyBoardInfo->type == core::KeyboardEventType::key_pressed) {
+      if (event.keyBoardInfo->keyCode == core::KeyCode::d) {
+        currentBoxPos[0] += 10.0f * deltaTime;
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::a) {
+        currentBoxPos[0] -= 10.0f * deltaTime;
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::w) {
+        currentBoxPos[1] += 10.0f * deltaTime;
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::s) {
+        currentBoxPos[1] -= 10.0f * deltaTime;
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::e) {
+        currentAngle += 1000.0f * deltaTime;
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::q) {
+        currentAngle -= 1000.0f * deltaTime;
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::z) {
+        currentScale -= 50.0f * deltaTime;
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::x) {
+        currentScale += 50.0f * deltaTime;
+      }
+    }
   }
-}
-
-GLGame::~GLGame() {
-  delete[] vertecies;
-  delete[] vertecies1;
-  delete[] vertecies2;
-  delete[] vertecies3;
-  delete pointBuffer;
-  delete glRenderer;
 }
 
 // #################################   Points
@@ -51,6 +73,7 @@ void GLGame::InitShaders() {
   core::Shader colorShader;
   core::Shader morphShader;
   core::Shader testTextureShader;
+  core::Shader movementShader;
 
   rgbCirclesShader.CreateShaderProgramFromFile("./Shaders/vs1.txt",
                                                "./Shaders/fs1.txt");
@@ -64,6 +87,10 @@ void GLGame::InitShaders() {
   testTextureShader.CreateShaderProgramFromFile("./Shaders/textureVS.txt",
                                                 "./Shaders/textureFS.txt");
 
+  // movementShader.CreateShaderProgramFromFile("./Shaders/moveVS.txt",
+  //                                            "./Shaders/textureFS.txt");
+
+  std::cout << "Shader ID " << testTextureShader.GetProgramID() << std::endl;
   IdToShader[rgbCirclesShader.GetProgramID()] = rgbCirclesShader;
   IdToShader[colorShader.GetProgramID()] = colorShader;
   IdToShader[morphShader.GetProgramID()] = morphShader;
@@ -90,6 +117,7 @@ void GLGame::InitShaders() {
   core::Texture *texture = new core::Texture("./Textures/container.jpg");
   testTextureVAO->SetVertexBuffer(testTextureBuffer);
   testTextureVAO->SetTexture(texture);
+  testTextureShader.SetMovable(true);
 
   VAOIdToShaderId[triangleVAO->GetID()] = rgbCirclesShader.GetProgramID();
   VAOIdToShaderId[coloredTriangleVAO->GetID()] = colorShader.GetProgramID();
@@ -110,6 +138,7 @@ void GLGame::InitVertexObjects() {
   vertecies = core::ParseVerticies("./verticies.txt", ',', vertBufLen);
   vertecies1 = core::ParseVerticies("./verticies1.txt", ',', vertBuf1Len);
   vertecies3 = core::ParseVerticies("./testTextureVerticies.txt", ',', vertBuf3Len);
+  
   std::cout << "vert3LEN " << vertBuf3Len << std::endl;
 
   vertecies2 = generateStarVertices(12, 0.5);
@@ -226,20 +255,18 @@ void GLGame::UpdateMorphing(float deltaTime) {
     }
   }
 
-  // float newStar[18];
-  // auto elements = tr1.asBuf();
-  // auto elements2 = tr2.asBuf();
-
-  // for (int i = 0; i < elements.size(); i++){
-  //     newStar[i] = elements[i];
-  // }
-  // for (int i = 0; i < elements2.size(); i++){
-  //     newStar[9 + i] = elements2[i];
-  // }
-
   vertexObjects[2]->GetVertexBuffer()->SetSubData(newStar, triangleCount * 9 * sizeof(float));
+}
 
-  timeSinceRun += deltaTime;
+void GLGame::UpdateMovement(float deltaTime)
+{
+  float *result = core::Translate(currentBoxPos);
+  result = core::Rotate(currentAngle);
+  result = core::Scale(currentScale);
+
+  int vaoId = vertexObjects[currentVAOIndex]->GetID();
+  int shaderId = VAOIdToShaderId.at(vaoId);
+  IdToShader.at(shaderId).SetMatrix4fvUniform(result);
 }
 
 void GLGame::InitPoints() {
@@ -281,16 +308,23 @@ void GLGame::BindNextVAO() {
   vertexObjects[currentVAOIndex]->Unbind();
   currentVAOIndex++;
   currentVAOIndex %= vertexObjects.size();
-
+  
   RunShaderByVAOId(vertexObjects[currentVAOIndex]->GetID());
   vertexObjects[currentVAOIndex]->Bind();
-  //RunShaderByVAOId(vertexObjects[currentVAOIndex]->GetID());
   std::cout << currentVAOIndex << std::endl;
 }
-
-// ################################    Triangles
 
 void GLGame::RenderIndexTriangle() {
   glRenderer->DrawTriangle(
       vertexObjects[currentVAOIndex]->GetVertexBuffer()->GetElementsCount());
+}
+
+GLGame::~GLGame() {
+  delete[] vertecies;
+  delete[] vertecies1;
+  delete[] vertecies2;
+  delete[] vertecies3;
+  delete[] vertecies4;
+  delete pointBuffer;
+  delete glRenderer;
 }

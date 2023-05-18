@@ -88,7 +88,7 @@ public:
   void Render() override;
   void Update(float deltaTime) override;
   void Init() override;
-  void OnEvent(core::Event &event) override;
+  void OnEvent(core::Event &event, float deltaTime) override;
   ~GLGame();
 
 private:
@@ -98,6 +98,7 @@ private:
   void RunShaderByVAOId(unsigned int id);
 
   void UpdateMorphing(float deltaTime);
+  void UpdateMovement(float deltaTime);
 
   void InitPoints();
   void RenderPoints();
@@ -115,8 +116,13 @@ private:
   float *vertecies1 = nullptr;
   float *vertecies2 = nullptr;
   float *vertecies3 = nullptr;
+  float *vertecies4 = nullptr;
 
   std::vector<Agent> points;
+  std::vector<float> currentBoxPos;
+  float currentAngle = 0.0f;
+  float currentScale = 1.0f;
+
   unsigned int *indeces = nullptr;
   const int pointsNum = 100'000;
 

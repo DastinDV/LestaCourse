@@ -14,8 +14,10 @@ SDL_Renderer *renderer = nullptr;
 SDL_GLContext openGLContext = nullptr;
 
 const std::unordered_map<SDL_Keycode, KeyCode> sdlToEngineKeyBinding{
-    {SDLK_w, KeyCode::w},         {SDLK_s, KeyCode::w},
-    {SDLK_a, KeyCode::w},         {SDLK_d, KeyCode::w},
+    {SDLK_w, KeyCode::w},         {SDLK_s, KeyCode::s},
+    {SDLK_a, KeyCode::a},         {SDLK_d, KeyCode::d},
+    {SDLK_q, KeyCode::q},         {SDLK_e, KeyCode::e},
+    {SDLK_z, KeyCode::z},         {SDLK_x, KeyCode::x},
     {SDLK_LCTRL, KeyCode::lctrl}, {SDLK_RCTRL, KeyCode::rctrl},
     {SDLK_SPACE, KeyCode::space}};
 
@@ -169,5 +171,37 @@ int Engine::CleanUp() {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
+}
+
+glm::mat4 trans;
+
+// Translate vertex to a new coordinate
+float *Translate(std::vector<float> &translation) {
+  float *matrix;
+
+  trans = glm::mat4(1.0f);
+  trans = glm::translate(
+      trans, glm::vec3(translation[0], translation[1], translation[2]));
+
+  matrix = glm::value_ptr(trans);
+  return matrix;
+}
+
+// Rotate and scale verteces
+float *Rotate(float angle) {
+  float *matrix;
+  trans = glm::rotate(trans, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
+  // rot = glm::scale(rot, glm::vec3(0.5, 0.5, 0.5));
+
+  matrix = glm::value_ptr(trans);
+  return matrix;
+}
+
+float *Scale(float scaleFactor) {
+  float *matrix;
+  trans = glm::scale(trans, glm::vec3(scaleFactor, scaleFactor, scaleFactor));
+
+  matrix = glm::value_ptr(trans);
+  return matrix;
 }
 } // namespace core

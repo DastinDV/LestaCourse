@@ -74,4 +74,13 @@ void core::Shader::CreateShaderProgramFromFile(const std::string vertex_pth,
 
 unsigned int core::Shader::GetProgramID() { return m_Program; }
 
+void core::Shader::SetMatrix4fvUniform(float *mat4fv) {
+  unsigned int transformLoc = glGetUniformLocation(m_Program, "transform");
+  glUniformMatrix4fv(transformLoc, 1, GL_FALSE, mat4fv);
+}
+
+void core::Shader::SetMovable(bool val) { this->isMovable = val; }
+
+bool core::Shader::IsMovable() { return this->isMovable; }
+
 void core::Shader::Use() { glUseProgram(this->m_Program); }

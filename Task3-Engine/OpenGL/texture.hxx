@@ -18,6 +18,6 @@ private:
   int height;
   int nrChannels;
 
-  unsigned int textureId;
+  unsigned int *textureId;
 };
 }; // namespace core

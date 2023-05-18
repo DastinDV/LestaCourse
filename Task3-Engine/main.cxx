@@ -49,6 +49,13 @@ int main() {
     float timeSinceRun = 0.0;
     long last;
 
+    // glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+    // glm::mat4 trans = glm::mat4(1.0f);
+    // trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+    // vec = trans * vec;
+    // std::cout << "result translation " << vec.x << vec.y << vec.z <<
+    // std::endl;
+
     while (!quit) {
       long now = SDL_GetTicks();
 
@@ -76,8 +83,10 @@ int main() {
       engine.ProcessEvent(event);
       if (event.eventType == EventType::keyboard_event &&
           event.keyBoardInfo.has_value()) {
-        std::cout << "Key pressed " << event.keyBoardInfo->keyCodeName
-                  << std::endl;
+        if (event.keyBoardInfo->type == core::KeyboardEventType::key_pressed) {
+          std::cout << "Key pressed " << event.keyBoardInfo->keyCodeName
+                    << std::endl;
+        }
       }
 
       if (event.eventType == EventType::window_event &&
@@ -95,7 +104,7 @@ int main() {
       if (event.eventType == EventType::quit)
         quit = true;
 
-      consoleGame->OnEvent(event);
+      consoleGame->OnEvent(event, deltaTime);
 
       engine.ClearScreen(timeSinceRun);
 

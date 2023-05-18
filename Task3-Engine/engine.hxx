@@ -6,13 +6,18 @@
 
 #include <optional>
 #include <string_view>
+#include <vector>
+
+#include "../glm/glm.hpp"
+#include "../glm/gtc/matrix_transform.hpp"
+#include "../glm/gtc/type_ptr.hpp"
 
 namespace core {
 
 enum class EventType { keyboard_event, mouse_event, window_event, quit };
 
 // ########## Keyboard
-enum class KeyCode { w, a, s, d, space, lctrl, rctrl, not_bind };
+enum class KeyCode { w, a, s, d, q, e, z, x, space, lctrl, rctrl, not_bind };
 
 enum class KeyboardEventType {
   key_pressed,
@@ -44,6 +49,10 @@ struct Event {
   std::optional<MouseInfo> mouseInfo;
   std::optional<WindowInfo> windowInfo;
 };
+
+float *Translate(std::vector<float> &translation);
+float *Rotate(float angle);
+float *Scale(float scaleFactor);
 
 class IZ_DECLSPEC Engine {
 public:

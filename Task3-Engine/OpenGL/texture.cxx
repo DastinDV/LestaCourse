@@ -7,15 +7,17 @@
 #include <iostream>
 namespace core {
 void Texture::Bind() const {
-  glBindTexture(GL_TEXTURE_2D, textureId);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, *textureId);
   std::cout << "Texture bounded " << std::endl;
 }
 
 void Texture::Unbind() const { glBindTexture(GL_TEXTURE_2D, 0); }
 
 Texture::Texture(const std::string &path) {
-  glGenTextures(1, &textureId);
-  glBindTexture(GL_TEXTURE_2D, textureId);
+  textureId = new unsigned int;
+  glGenTextures(1, textureId);
+  glBindTexture(GL_TEXTURE_2D, *textureId);
   LoadTexture(path);
 }
 

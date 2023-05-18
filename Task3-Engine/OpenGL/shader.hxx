@@ -15,6 +15,9 @@ public:
   void CreateShaderProgramFromFile(const std::string vertex_pth,
                                    const std::string fragment_pth);
   unsigned int GetProgramID();
+  void SetMatrix4fvUniform(float *mat4fv);
+  void SetMovable(bool val);
+  bool IsMovable();
 
   void Use();
 
@@ -29,5 +32,6 @@ private:
   int CreateShader(const std::string &vertexShader,
                    const std::string &fragmentShader);
   unsigned int GetUniformLocation(std::string uniform_name);
+  bool isMovable;
 };
 } // namespace core
