@@ -22,6 +22,6 @@ public:
 
   unsigned int id;
   VertexBuffer *VBO;
-  Texture *texture;
+  Texture *texture = nullptr;
 };
 } // namespace core

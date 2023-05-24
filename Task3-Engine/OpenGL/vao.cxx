@@ -5,16 +5,16 @@ void core::VAO::Bind() const {
   glBindVertexArray(id);
   if (VBO)
     VBO->Bind();
-  // if (texture)
-  //   texture->Bind();
+  if (texture)
+    texture->Bind(0);
 }
 
 void core::VAO::Unbind() const {
   glBindVertexArray(0);
   if (VBO)
     VBO->Unbind();
-  // if (texture)
-  //   texture->Unbind();
+  if (texture)
+    texture->Unbind();
 }
 
 void core::VAO::SetVertexBuffer(VertexBuffer *VBO) { this->VBO = VBO; }

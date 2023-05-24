@@ -73,7 +73,6 @@ void GLGame::InitShaders() {
   core::Shader colorShader;
   core::Shader morphShader;
   core::Shader testTextureShader;
-  core::Shader movementShader;
 
   rgbCirclesShader.CreateShaderProgramFromFile("./Shaders/vs1.txt",
                                                "./Shaders/fs1.txt");
@@ -86,9 +85,6 @@ void GLGame::InitShaders() {
 
   testTextureShader.CreateShaderProgramFromFile("./Shaders/textureVS.txt",
                                                 "./Shaders/textureFS.txt");
-
-  // movementShader.CreateShaderProgramFromFile("./Shaders/moveVS.txt",
-  //                                            "./Shaders/textureFS.txt");
 
   std::cout << "Shader ID " << testTextureShader.GetProgramID() << std::endl;
   IdToShader[rgbCirclesShader.GetProgramID()] = rgbCirclesShader;
@@ -119,27 +115,37 @@ void GLGame::InitShaders() {
   testTextureVAO->SetTexture(texture);
   testTextureShader.SetMovable(true);
 
+  //////////// testTexture2 ////////////
+  core::VAO *testTexture2VAO = new core::VAO();
+  core::VertexBuffer *testTexture2Buffer = new core::VertexBuffer();
+  core::Texture *textureBrick = new core::Texture("./Textures/wall.jpg");
+  testTexture2VAO->SetVertexBuffer(testTexture2Buffer);
+  testTexture2VAO->SetTexture(textureBrick);
+  testTextureShader.SetMovable(true);
+
   VAOIdToShaderId[triangleVAO->GetID()] = rgbCirclesShader.GetProgramID();
   VAOIdToShaderId[coloredTriangleVAO->GetID()] = colorShader.GetProgramID();
   VAOIdToShaderId[morphingVAO->GetID()] = morphShader.GetProgramID();
   VAOIdToShaderId[testTextureVAO->GetID()] = testTextureShader.GetProgramID();
+  VAOIdToShaderId[testTexture2VAO->GetID()] = testTextureShader.GetProgramID();
 
   // VAO OBJECTS
   vertexObjects.push_back(triangleVAO);        // 0
   vertexObjects.push_back(coloredTriangleVAO); // 1
   vertexObjects.push_back(morphingVAO);        // 2
   vertexObjects.push_back(testTextureVAO);     // 3
+  vertexObjects.push_back(testTexture2VAO);    // 4
 }
 
 void GLGame::InitVertexObjects() {
   int vertBufLen, vertBuf1Len = 0, vertBuf2Len = 0, vertBuf3Len = 0;
+  int vertBuf4Len = 0;
   int indexCount = 0;
   // clang-format off
   vertecies = core::ParseVerticies("./verticies.txt", ',', vertBufLen);
   vertecies1 = core::ParseVerticies("./verticies1.txt", ',', vertBuf1Len);
   vertecies3 = core::ParseVerticies("./testTextureVerticies.txt", ',', vertBuf3Len);
-  
-  std::cout << "vert3LEN " << vertBuf3Len << std::endl;
+  vertecies4 = core::ParseVerticies("./testTexture2Verticies.txt", ',', vertBuf4Len);
 
   vertecies2 = generateStarVertices(12, 0.5);
   vertBuf2Len = 12 * 3;
@@ -150,6 +156,7 @@ void GLGame::InitVertexObjects() {
   core::VAO *coloredTriangleVAO = vertexObjects[1];
   core::VAO *morphingVAO = vertexObjects[2];
   core::VAO *testTextureVAO = vertexObjects[3];
+  core::VAO *testTexture2VAO = vertexObjects[4];
 
   //////////// triangle ////////////
   triangleVAO->Bind();
@@ -158,7 +165,7 @@ void GLGame::InitVertexObjects() {
   triangleVAO->GetVertexBuffer()->SetElementsCount(vertBufLen / 3);
   glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
 
-  RunShaderByVAOId(triangleVAO->GetID());
+  // RunShaderByVAOId(triangleVAO->GetID());
   triangleVAO->Unbind();
 
   //////////// coloredTriangle ////////////
@@ -170,7 +177,7 @@ void GLGame::InitVertexObjects() {
   glRenderer->SetAttribute(1, 3, core::EGlType::gl_float, 6 * sizeof(float),
                            (void *)(3 * sizeof(float)));
 
-  RunShaderByVAOId(coloredTriangleVAO->GetID());
+  // RunShaderByVAOId(coloredTriangleVAO->GetID());
   coloredTriangleVAO->Unbind();
 
   //////////// morphing ////////////
@@ -180,21 +187,35 @@ void GLGame::InitVertexObjects() {
   morphingVAO->GetVertexBuffer()->SetElementsCount(vertBuf2Len);
   glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 0, 0);
 
-  RunShaderByVAOId(morphingVAO->GetID());
+  // RunShaderByVAOId(morphingVAO->GetID());
   morphingVAO->Unbind();
 
   //////////// testTexture ////////////
   testTextureVAO->Bind();
   testTextureVAO->GetVertexBuffer()->SetData(vertecies3,
                                              (vertBuf3Len + 1) * sizeof(float));
-  testTextureVAO->GetVertexBuffer()->SetElementsCount(vertBuf3Len);
+  testTextureVAO->GetVertexBuffer()->SetElementsCount(vertBuf4Len);
   glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 8 * sizeof(float), 0);
   glRenderer->SetAttribute(1, 3, core::EGlType::gl_float, 8 * sizeof(float),
                            (void *)(3 * sizeof(float)));
-  glRenderer->SetAttribute(2, 3, core::EGlType::gl_float, 8 * sizeof(float),
+  glRenderer->SetAttribute(2, 2, core::EGlType::gl_float, 8 * sizeof(float),
                            (void *)(6 * sizeof(float)));
 
-  RunShaderByVAOId(testTextureVAO->GetID());
+  // RunShaderByVAOId(testTextureVAO->GetID());
+  testTextureVAO->Unbind();
+
+  //////////// testTexture2 ////////////
+  testTexture2VAO->Bind();
+  testTexture2VAO->GetVertexBuffer()->SetData(vertecies4, (vertBuf4Len + 1) *
+                                                              sizeof(float));
+  testTexture2VAO->GetVertexBuffer()->SetElementsCount(vertBuf4Len);
+  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 8 * sizeof(float), 0);
+  glRenderer->SetAttribute(1, 3, core::EGlType::gl_float, 8 * sizeof(float),
+                           (void *)(3 * sizeof(float)));
+  glRenderer->SetAttribute(2, 2, core::EGlType::gl_float, 8 * sizeof(float),
+                           (void *)(6 * sizeof(float)));
+
+  // RunShaderByVAOId(testTextureVAO->GetID());
   testTextureVAO->Unbind();
 
   BindNextVAO();

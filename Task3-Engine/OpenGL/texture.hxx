@@ -4,7 +4,7 @@
 namespace core {
 class Texture {
 public:
-  void Bind() const;
+  void Bind(int textureUnit) const;
   void Unbind() const;
 
   Texture(const std::string &path);
