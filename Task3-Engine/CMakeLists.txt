@@ -14,6 +14,7 @@ add_executable(
   ./OpenGL/vao.cxx
   ./OpenGL/shader.cxx
   ./OpenGL/texture.cxx
+  ./OpenGL/glDebug.cxx
   ./glad/src/glad.c
   main.cxx
   canvas.hxx
@@ -28,6 +29,7 @@ add_executable(
   ./OpenGL/vao.hxx
   ./OpenGL/shader.hxx
   ./OpenGL/texture.hxx
+  ./OpenGL/glDebug.hxx
   ./glad/include/glad/glad.h)
 
 set_target_properties(
@@ -51,5 +53,5 @@ target_link_libraries(Engine PRIVATE SDL3::SDL3-shared)
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Game
 #${CMAKE_BINARY_DIR}/lib/MyGame)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task5-OpenGL
-${CMAKE_BINARY_DIR}/lib/glTest)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../FinalProject
+${CMAKE_BINARY_DIR}/lib/MirrorGame)

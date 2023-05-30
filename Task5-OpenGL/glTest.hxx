@@ -63,7 +63,6 @@ float *generateStarVertices(int n, float radius) {
   float start_angle = M_PI_2;
   float step = 2 * M_PI / n;
 
-  std::cout << "step " << step << std::endl;
   int k = 0;
   while (k < triangleCount) {
     for (int i = 0; i < 3; i++) {
@@ -72,9 +71,7 @@ float *generateStarVertices(int n, float radius) {
       positions[k * 9 + (i * 3)] = x;
       positions[k * 9 + (i * 3 + 1)] = y;
       positions[k * 9 + (i * 3 + 2)] = 0.0;
-      std::cout << x << " " << y << " " << std::endl;
     }
-    std::cout << std::endl;
     start_angle += step;
     k++;
   }

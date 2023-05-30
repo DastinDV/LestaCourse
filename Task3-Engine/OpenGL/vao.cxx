@@ -1,5 +1,8 @@
 #include "vao.hxx"
+#include "glDebug.hxx"
 #include "glad/glad.h"
+
+#define glCheckError() glCheckError_(__FILE__, __LINE__);
 
 void core::VAO::Bind() const {
   glBindVertexArray(id);
@@ -7,6 +10,7 @@ void core::VAO::Bind() const {
     VBO->Bind();
   if (texture)
     texture->Bind(0);
+  // glCheckError();
 }
 
 void core::VAO::Unbind() const {
@@ -15,6 +19,7 @@ void core::VAO::Unbind() const {
     VBO->Unbind();
   if (texture)
     texture->Unbind();
+  // glCheckError();
 }
 
 void core::VAO::SetVertexBuffer(VertexBuffer *VBO) { this->VBO = VBO; }

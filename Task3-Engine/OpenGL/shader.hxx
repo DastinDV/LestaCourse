@@ -15,7 +15,8 @@ public:
   void CreateShaderProgramFromFile(const std::string vertex_pth,
                                    const std::string fragment_pth);
   unsigned int GetProgramID();
-  void SetMatrix4fvUniform(float *mat4fv);
+  void SetUniform1i(int val, const std::string name);
+  void SetMatrix4fvUniform(float *mat4fv, const std::string name);
   void SetMovable(bool val);
   bool IsMovable();
 

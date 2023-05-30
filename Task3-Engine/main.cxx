@@ -23,9 +23,10 @@ int main() {
   {
     using namespace core;
     bool quit;
-    const char *library_name = SDL_GetPlatform() == "Windows"
-                                   ? "libglTest-shared.dll"
-                                   : "../lib/glTest/libglTest-shared.so";
+    const char *library_name =
+        SDL_GetPlatform() == "Windows"
+            ? "libFinalProject-shared.dll"
+            : "../lib/MirrorGame/libFinalProject-shared.so";
     const char *tmp_library_file = "../lib/glTest/temp.so";
 
     void *game_library_handle{};
@@ -42,19 +43,18 @@ int main() {
     Game *consoleGame = ReloadGame(nullptr, library_name, tmp_library_file,
                                    engine, game_library_handle);
 
-    consoleGame->Init();
+    try {
+      consoleGame->Init();
+    } catch (std::runtime_error &err) {
+      std::cout << err.what() << std::endl;
+      return EXIT_FAILURE;
+    }
+
     auto time_during_loading = std::filesystem::last_write_time(library_name);
 
     float deltaTime = 0.0;
     float timeSinceRun = 0.0;
     long last;
-
-    // glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
-    // glm::mat4 trans = glm::mat4(1.0f);
-    // trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-    // vec = trans * vec;
-    // std::cout << "result translation " << vec.x << vec.y << vec.z <<
-    // std::endl;
 
     while (!quit) {
       long now = SDL_GetTicks();

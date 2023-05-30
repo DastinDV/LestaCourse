@@ -1,8 +1,12 @@
+#include "glDebug.hxx"
 #include "glad/glad.h"
 
 #include "shader.hxx"
 #include <fstream>
+#include <iostream>
 #include <sstream>
+
+#define glCheckError() core::glCheckError_(__FILE__, __LINE__);
 
 std::string core::Shader::GetShaderSource(std::string path) {
   std::string shaderCode;
@@ -23,6 +27,8 @@ unsigned int CompileShader(unsigned int type, const std::string &source) {
   const char *src = source.c_str();
   glShaderSource(id, 1, &src, nullptr);
   glCompileShader(id);
+
+  glCheckError();
 
   GLint success;
   glGetShaderiv(id, GL_COMPILE_STATUS, &success);
@@ -46,6 +52,7 @@ int core::Shader::CreateShader(const std::string &vertexShader,
   glAttachShader(programId, fsId);
   glLinkProgram(programId);
 
+  glCheckError();
   GLint success;
   glGetProgramiv(programId, GL_LINK_STATUS, &success);
   if (success == 0) {
@@ -74,13 +81,24 @@ void core::Shader::CreateShaderProgramFromFile(const std::string vertex_pth,
 
 unsigned int core::Shader::GetProgramID() { return m_Program; }
 
-void core::Shader::SetMatrix4fvUniform(float *mat4fv) {
-  unsigned int transformLoc = glGetUniformLocation(m_Program, "transform");
+void core::Shader::SetUniform1i(int val, const std::string name) {
+  unsigned int loc = glGetUniformLocation(m_Program, name.c_str());
+  std::cout << "ourTexture loc : " << loc << std::endl;
+  glUniform1i(loc, val);
+  glCheckError();
+}
+
+void core::Shader::SetMatrix4fvUniform(float *mat4fv, const std::string name) {
+  unsigned int transformLoc = glGetUniformLocation(m_Program, name.c_str());
   glUniformMatrix4fv(transformLoc, 1, GL_FALSE, mat4fv);
+  glCheckError();
 }
 
 void core::Shader::SetMovable(bool val) { this->isMovable = val; }
 
 bool core::Shader::IsMovable() { return this->isMovable; }
 
-void core::Shader::Use() { glUseProgram(this->m_Program); }
+void core::Shader::Use() {
+  glUseProgram(this->m_Program);
+  glCheckError();
+}

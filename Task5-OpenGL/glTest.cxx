@@ -37,7 +37,9 @@ void GLGame::OnEvent(core::Event &event, float deltaTime) {
         event.keyBoardInfo->keyCode == core::KeyCode::space) {
       BindNextVAO();
     }
-    if (event.keyBoardInfo->type == core::KeyboardEventType::key_pressed) {
+
+    if (currentVAOIndex == 3 &&
+        event.keyBoardInfo->type == core::KeyboardEventType::key_pressed) {
       if (event.keyBoardInfo->keyCode == core::KeyCode::d) {
         currentBoxPos[0] += 10.0f * deltaTime;
       }
@@ -73,6 +75,7 @@ void GLGame::InitShaders() {
   core::Shader colorShader;
   core::Shader morphShader;
   core::Shader testTextureShader;
+  core::Shader testTexture2Shader;
 
   rgbCirclesShader.CreateShaderProgramFromFile("./Shaders/vs1.txt",
                                                "./Shaders/fs1.txt");
@@ -86,11 +89,14 @@ void GLGame::InitShaders() {
   testTextureShader.CreateShaderProgramFromFile("./Shaders/textureVS.txt",
                                                 "./Shaders/textureFS.txt");
 
-  std::cout << "Shader ID " << testTextureShader.GetProgramID() << std::endl;
+  // testTexture2Shader.CreateShaderProgramFromFile("./Shaders/textureVS.txt",
+  //                                                "./Shaders/textureFS.txt");
+
   IdToShader[rgbCirclesShader.GetProgramID()] = rgbCirclesShader;
   IdToShader[colorShader.GetProgramID()] = colorShader;
   IdToShader[morphShader.GetProgramID()] = morphShader;
   IdToShader[testTextureShader.GetProgramID()] = testTextureShader;
+  // IdToShader[testTexture2Shader.GetProgramID()] = testTexture2Shader;
 
   //////////// triangle ////////////
   core::VAO *triangleVAO = new core::VAO();
@@ -121,7 +127,7 @@ void GLGame::InitShaders() {
   core::Texture *textureBrick = new core::Texture("./Textures/wall.jpg");
   testTexture2VAO->SetVertexBuffer(testTexture2Buffer);
   testTexture2VAO->SetTexture(textureBrick);
-  testTextureShader.SetMovable(true);
+  // testTexture2Shader.SetUniform1i(0, "ourTexture");
 
   VAOIdToShaderId[triangleVAO->GetID()] = rgbCirclesShader.GetProgramID();
   VAOIdToShaderId[coloredTriangleVAO->GetID()] = colorShader.GetProgramID();
@@ -206,6 +212,10 @@ void GLGame::InitVertexObjects() {
 
   //////////// testTexture2 ////////////
   testTexture2VAO->Bind();
+
+  int vaoId = testTexture2VAO->GetID();
+  // IdToShader.at(VAOIdToShaderId.at(vaoId)).SetUniform1i(0, "ourTexture");
+
   testTexture2VAO->GetVertexBuffer()->SetData(vertecies4, (vertBuf4Len + 1) *
                                                               sizeof(float));
   testTexture2VAO->GetVertexBuffer()->SetElementsCount(vertBuf4Len);
@@ -216,13 +226,14 @@ void GLGame::InitVertexObjects() {
                            (void *)(6 * sizeof(float)));
 
   // RunShaderByVAOId(testTextureVAO->GetID());
-  testTextureVAO->Unbind();
+  testTexture2VAO->Unbind();
 
   BindNextVAO();
 }
 
 void GLGame::RunShaderByVAOId(unsigned int id) {
   int connectedShaderId = VAOIdToShaderId.at(id);
+  std::cout << "Program ID run: " << connectedShaderId << std::endl;
   IdToShader.at(connectedShaderId).Use();
 }
 
@@ -287,7 +298,7 @@ void GLGame::UpdateMovement(float deltaTime)
 
   int vaoId = vertexObjects[currentVAOIndex]->GetID();
   int shaderId = VAOIdToShaderId.at(vaoId);
-  IdToShader.at(shaderId).SetMatrix4fvUniform(result);
+  IdToShader.at(shaderId).SetMatrix4fvUniform(result, "transform");
 }
 
 void GLGame::InitPoints() {
@@ -332,7 +343,7 @@ void GLGame::BindNextVAO() {
   
   RunShaderByVAOId(vertexObjects[currentVAOIndex]->GetID());
   vertexObjects[currentVAOIndex]->Bind();
-  std::cout << currentVAOIndex << std::endl;
+  std::cout << "VAO index " << currentVAOIndex << std::endl;
 }
 
 void GLGame::RenderIndexTriangle() {
