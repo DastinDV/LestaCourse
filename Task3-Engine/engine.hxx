@@ -53,6 +53,8 @@ struct Event {
 float *Translate(std::vector<float> &translation);
 float *Rotate(float angle);
 float *Scale(float scaleFactor);
+float *OrthoProj(float left, float right, float bottom, float top, float near,
+                 float far);
 
 class IZ_DECLSPEC Engine {
 public:

@@ -90,6 +90,7 @@ void core::Shader::SetUniform1i(int val, const std::string name) {
 
 void core::Shader::SetMatrix4fvUniform(float *mat4fv, const std::string name) {
   unsigned int transformLoc = glGetUniformLocation(m_Program, name.c_str());
+  glCheckError();
   glUniformMatrix4fv(transformLoc, 1, GL_FALSE, mat4fv);
   glCheckError();
 }

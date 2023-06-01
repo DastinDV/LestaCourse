@@ -174,6 +174,7 @@ int Engine::CleanUp() {
 }
 
 glm::mat4 trans;
+glm::mat4 proj;
 
 // Translate vertex to a new coordinate
 float *Translate(std::vector<float> &translation) {
@@ -204,4 +205,15 @@ float *Scale(float scaleFactor) {
   matrix = glm::value_ptr(trans);
   return matrix;
 }
+
+// Ortographic projection with (0,0) in upper-left.
+float *OrthoProj(float left, float right, float bottom, float top, float near,
+                 float far) {
+  float *matrix;
+  proj = glm::ortho(left, right, bottom, top, near, far);
+
+  matrix = glm::value_ptr(proj);
+  return matrix;
+}
+
 } // namespace core
