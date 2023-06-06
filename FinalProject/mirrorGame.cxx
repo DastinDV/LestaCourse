@@ -17,16 +17,22 @@ void MirrorGame::Init() {
 
   // clang-format off
   float positions[] = {
-    270.0f, 140.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-    370.0f, 140.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-    270.0f, 340.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+    640.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+    0.0f, 480.0f, 0.0f, 1.0f, 0.0f, 0.0f,
 
-    370.0f, 140.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-    370.0f, 340.0f, 0.0f, 0.0f, 0.0f, 1.0f, 
-    270.0f, 340.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+    640.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+    640.0f, 480.0f, 0.0f, 0.0f, 0.0f, 1.0f, 
+    0.0f, 480.0f, 0.0f, 0.0f, 0.0f, 1.0f,
   };
 
   // clang-format on
+
+  targetAR = static_cast<float>(targetScreenWidth) /
+             static_cast<float>(targetScreenHeight);
+  auto screen = core::GetScreenSize();
+  screenWidth = screen.first;
+  screenHeight = screen.second;
 
   colorShader.CreateShaderProgramFromFile(
       "./../../FinalProject/Assets/Shaders/vs.txt",
@@ -42,14 +48,67 @@ void MirrorGame::Init() {
 
   colorShader.Use();
 
-  float *proj = core::OrthoProj(0.0f, 640.0f, 640.0f, 0.0f, 0.0f, 100.0f);
-  colorShader.SetMatrix4fvUniform(proj, "u_projection");
+  ResizeScreen();
 }
 
 void MirrorGame::Render() { glRenderer.DrawTriangle(6); }
 
 void MirrorGame::Update(float deltaTime) {}
 
-void MirrorGame::OnEvent(core::Event &event, float deltaTime) {}
+void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
+  if (event.eventType == core::EventType::window_event &&
+      event.windowInfo.has_value()) {
+    if (event.windowInfo->type == core::WindowEventType::resized ||
+        event.windowInfo->type == core::WindowEventType::maximized) {
+      screenWidth = event.windowInfo->width;
+      screenHeight = event.windowInfo->height;
+      ResizeScreen();
+    }
+  }
+}
 
 MirrorGame::~MirrorGame() {}
+
+void MirrorGame::ResizeScreen() {
+  aspectRatio =
+      static_cast<float>(screenWidth) / static_cast<float>(screenHeight);
+  // targetScreenHeight = targetScreenWidth * aspectRatio;
+  std::cout << "Window size = " << screenWidth << " " << screenHeight
+            << std::endl;
+  std::cout << "Aspect ratio = " << aspectRatio << std::endl;
+
+  colorShader.Use();
+
+  if (aspectRatio >= targetAR) {
+    float factor = aspectRatio / targetAR;
+    std::cout << "right = " << factor * targetScreenWidth << " " << screenWidth
+              << std::endl;
+    std::cout << "targetScreenHeight = " << targetScreenHeight << std::endl;
+    float *proj =
+        core::OrthoProj(factor * 0.0f, factor * targetScreenWidth,
+                        targetScreenHeight, 0.0f, nearPlain, farPlain);
+    std::vector<float> translate = {
+        (((factor * targetScreenWidth) - (targetScreenWidth)) /
+         (factor * targetScreenWidth)),
+        0.0f, 0.0f};
+    float *result = core::Translate(translate);
+    std::cout << "translate " << translate[0] << " " << translate[1] << " "
+              << translate[2] << std::endl;
+    colorShader.SetMatrix4fvUniform(result, "u_translate");
+    colorShader.SetMatrix4fvUniform(proj, "u_projection");
+  } else {
+    float factor = targetAR / aspectRatio;
+    std::cout << "Factor " << factor << std::endl;
+    float *proj =
+        core::OrthoProj(0.0f, targetScreenWidth, factor * targetScreenHeight,
+                        factor * 0.0f, nearPlain, farPlain);
+    std::vector<float> translate = {
+        0.0f,
+        (-((factor * targetScreenHeight) - (targetScreenHeight)) /
+         (factor * targetScreenHeight)),
+        0.0f};
+    float *result = core::Translate(translate);
+    colorShader.SetMatrix4fvUniform(proj, "u_projection");
+    colorShader.SetMatrix4fvUniform(result, "u_translate");
+  }
+}

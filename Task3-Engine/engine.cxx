@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <unordered_map>
@@ -103,15 +104,12 @@ int Engine::Initialize(int screenWidth, int screenHeight) {
 
 void Engine::ClearScreen(float deltaTime) {
   auto current_color = std::sin(0.5f * deltaTime);
-  // std::cout << current_color << std::endl;
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Engine::ResizeViewPort() const {
+void Engine::ResizeViewPort(int w, int h) const {
   if (window) {
-    int w, h;
-    SDL_GetWindowSizeInPixels(window, &w, &h);
     glViewport(0, 0, w, h);
   }
 }
@@ -152,11 +150,17 @@ int Engine::ProcessEvent(Event &event) {
     }
     if (sdlEvent.type == SDL_EVENT_WINDOW_RESIZED) {
       event.eventType = EventType::window_event;
-      event.windowInfo = {SDL_GetWindowID(window), WindowEventType::resized};
+      int w, h;
+      SDL_GetWindowSize(window, &w, &h);
+      event.windowInfo = {SDL_GetWindowID(window), WindowEventType::resized, w,
+                          h};
     }
     if (sdlEvent.type == SDL_EVENT_WINDOW_MAXIMIZED) {
       event.eventType = EventType::window_event;
-      event.windowInfo = {SDL_GetWindowID(window), WindowEventType::maximized};
+      int w, h;
+      SDL_GetWindowSize(window, &w, &h);
+      event.windowInfo = {SDL_GetWindowID(window), WindowEventType::maximized,
+                          w, h};
       return 1;
     }
     if (sdlEvent.type == SDL_EVENT_QUIT) {
@@ -214,6 +218,12 @@ float *OrthoProj(float left, float right, float bottom, float top, float near,
 
   matrix = glm::value_ptr(proj);
   return matrix;
+}
+
+std::pair<int, int> GetScreenSize() {
+  int w, h;
+  SDL_GetWindowSize(window, &w, &h);
+  return std::pair<int, int>(w, h);
 }
 
 } // namespace core

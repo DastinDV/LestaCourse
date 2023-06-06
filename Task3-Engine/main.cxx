@@ -31,8 +31,11 @@ int main() {
 
     void *game_library_handle{};
 
+    const int screenWidth = 640;
+    const int screenHeight = 480;
+
     Engine engine;
-    engine.Initialize(640, 640);
+    engine.Initialize(screenWidth, screenHeight);
 
     Canvas canvas(640, 480);
 
@@ -93,7 +96,8 @@ int main() {
           event.windowInfo.has_value()) {
         if (event.windowInfo->type == WindowEventType::resized ||
             event.windowInfo->type == WindowEventType::maximized) {
-          engine.ResizeViewPort();
+          engine.ResizeViewPort(event.windowInfo->width,
+                                event.windowInfo->height);
         }
       }
 

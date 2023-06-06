@@ -36,6 +36,8 @@ enum class WindowEventType { resized, maximized };
 struct WindowInfo {
   unsigned int windowId;
   WindowEventType type;
+  int width;
+  int height;
 };
 // ########## Mouse
 struct MouseInfo {
@@ -55,6 +57,7 @@ float *Rotate(float angle);
 float *Scale(float scaleFactor);
 float *OrthoProj(float left, float right, float bottom, float top, float near,
                  float far);
+std::pair<int, int> GetScreenSize();
 
 class IZ_DECLSPEC Engine {
 public:
@@ -67,7 +70,7 @@ public:
   // ###### OpenGL ######
   void ClearScreen(float deltaTime);
   void SwapBuffers();
-  void ResizeViewPort() const;
+  void ResizeViewPort(int w, int h) const;
   // ###### OpenGL ######
 
 private:
