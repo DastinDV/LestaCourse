@@ -17,6 +17,7 @@ public:
   unsigned int GetProgramID();
   void SetUniform1i(int val, const std::string name);
   void SetMatrix4fvUniform(float *mat4fv, const std::string name);
+  void SetVec4fvUniform(float *vec4fv, const std::string name);
   void SetMovable(bool val);
   bool IsMovable();
 

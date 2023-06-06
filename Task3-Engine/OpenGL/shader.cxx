@@ -95,6 +95,13 @@ void core::Shader::SetMatrix4fvUniform(float *mat4fv, const std::string name) {
   glCheckError();
 }
 
+void core::Shader::SetVec4fvUniform(float *vec4fv, const std::string name) {
+  unsigned int transformLoc = glGetUniformLocation(m_Program, name.c_str());
+  glCheckError();
+  glUniform4fv(transformLoc, 1, vec4fv);
+  glCheckError();
+}
+
 void core::Shader::SetMovable(bool val) { this->isMovable = val; }
 
 bool core::Shader::IsMovable() { return this->isMovable; }

@@ -40,4 +40,10 @@ int Map::LoadMap(const std::string &filePath) {
   return EXIT_SUCCESS;
 }
 
+int *Map::GetMap() { return this->map; }
+
+int Map::GetMapWidth() const { return this->mapWidth; }
+
+int Map::GetMapHeight() const { return this->mapHeight; }
+
 Map::~Map() { delete[] map; }

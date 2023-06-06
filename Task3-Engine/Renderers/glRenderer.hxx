@@ -10,6 +10,10 @@ struct GlVertex {
   float y;
   float z;
 
+  float r;
+  float g;
+  float b;
+
   friend GlVertex operator+(const GlVertex &l, const GlVertex &r);
   friend GlVertex operator*(const GlVertex &l, float val);
 };

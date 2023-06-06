@@ -15,43 +15,35 @@ void MirrorGame::Init() {
 
   std::cout << "FinalGame Init!" << std::endl;
 
-  // clang-format off
-  float positions[] = {
-    0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-    640.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-    0.0f, 480.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-
-    640.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-    640.0f, 480.0f, 0.0f, 0.0f, 0.0f, 1.0f, 
-    0.0f, 480.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-  };
-
-  // clang-format on
-
   targetAR = static_cast<float>(targetScreenWidth) /
              static_cast<float>(targetScreenHeight);
   auto screen = core::GetScreenSize();
   screenWidth = screen.first;
   screenHeight = screen.second;
 
-  colorShader.CreateShaderProgramFromFile(
-      "./../../FinalProject/Assets/Shaders/vs.txt",
-      "./../../FinalProject/Assets/Shaders/fs.txt");
-
-  buffer.Bind();
-  buffer.SetData(positions, 6 * 6 * sizeof(float));
-  buffer.SetElementsCount(6);
-
-  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 6 * sizeof(float), 0);
-  glRenderer.SetAttribute(1, 3, core::EGlType::gl_float, 6 * sizeof(float),
-                          (void *)(3 * sizeof(float)));
-
-  colorShader.Use();
+  CreateTiles();
+  PushToBuffers();
 
   ResizeScreen();
 }
 
-void MirrorGame::Render() { glRenderer.DrawTriangle(6); }
+void MirrorGame::Render() {
+  roadShader.Use();
+  roadBuffer.Bind();
+  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
+  glRenderer.DrawTriangle(roadBuffer.GetElementsCount());
+  roadShader.SetVec4fvUniform(RedColor, "u_color");
+
+  mirrorsBuffer.Bind();
+  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
+  glRenderer.DrawTriangle(mirrorsBuffer.GetElementsCount());
+  roadShader.SetVec4fvUniform(GreenColor, "u_color");
+
+  exitBuffer.Bind();
+  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
+  glRenderer.DrawTriangle(exitBuffer.GetElementsCount());
+  roadShader.SetVec4fvUniform(BlueColor, "u_color");
+}
 
 void MirrorGame::Update(float deltaTime) {}
 
@@ -77,7 +69,7 @@ void MirrorGame::ResizeScreen() {
             << std::endl;
   std::cout << "Aspect ratio = " << aspectRatio << std::endl;
 
-  colorShader.Use();
+  roadShader.Use();
 
   if (aspectRatio >= targetAR) {
     float factor = aspectRatio / targetAR;
@@ -94,8 +86,8 @@ void MirrorGame::ResizeScreen() {
     float *result = core::Translate(translate);
     std::cout << "translate " << translate[0] << " " << translate[1] << " "
               << translate[2] << std::endl;
-    colorShader.SetMatrix4fvUniform(result, "u_translate");
-    colorShader.SetMatrix4fvUniform(proj, "u_projection");
+    roadShader.SetMatrix4fvUniform(result, "u_translate");
+    roadShader.SetMatrix4fvUniform(proj, "u_projection");
   } else {
     float factor = targetAR / aspectRatio;
     std::cout << "Factor " << factor << std::endl;
@@ -108,7 +100,129 @@ void MirrorGame::ResizeScreen() {
          (factor * targetScreenHeight)),
         0.0f};
     float *result = core::Translate(translate);
-    colorShader.SetMatrix4fvUniform(proj, "u_projection");
-    colorShader.SetMatrix4fvUniform(result, "u_translate");
+    roadShader.SetMatrix4fvUniform(proj, "u_projection");
+    roadShader.SetMatrix4fvUniform(result, "u_translate");
   }
+}
+
+void MirrorGame::CreateTiles() {
+
+  int mapWidth = map.GetMapWidth();
+  int mapHeight = map.GetMapHeight();
+
+  int *a_tiles = map.GetMap();
+
+  float x = 0;
+  float y = 0;
+  for (int i = 0; i < mapHeight; i++) {
+    for (int j = 0; j < mapWidth; j++) {
+      Tile newTile;
+      newTile.tileType = static_cast<ETileType>(a_tiles[i * mapWidth + j]);
+
+      if (newTile.tileType == ETileType::ROAD)
+        roadTileCount++;
+      if (newTile.tileType == ETileType::VERTICAL ||
+          newTile.tileType == ETileType::HORIZONTAL ||
+          newTile.tileType == ETileType::CROSS)
+        mirrorsTileCount++;
+      // Left-Up part of Tile
+      //   --------
+      //  |....... |
+      //  |.....   |
+      //  |..      |
+      //   --------
+      newTile.one.v[0].x = x;
+      newTile.one.v[0].y = y;
+
+      newTile.one.v[1].x = x + tileSize;
+      newTile.one.v[1].y = y;
+
+      newTile.one.v[2].x = x;
+      newTile.one.v[2].y = y + tileSize;
+
+      // Right-Down part of Tile
+      //   --------
+      //  |     ...|
+      //  |   .....|
+      //  | .......|
+      //   --------
+      newTile.two.v[0].x = x + tileSize;
+      newTile.two.v[0].y = y;
+
+      newTile.two.v[1].x = x + tileSize;
+      newTile.two.v[1].y = y + tileSize;
+
+      newTile.two.v[2].x = x;
+      newTile.two.v[2].y = y + tileSize;
+
+      tiles.push_back(newTile);
+      x += tileSize;
+    }
+    x = 0;
+    y += tileSize;
+  }
+}
+
+void MirrorGame::PushToBuffers() {
+
+  int roadI = 0, mirrorI = 0, exitI = 0;
+  roadVertecies = new float[roadTileCount * 6 * 3];
+  mirrorsVertecies = new float[mirrorsTileCount * 6 * 3];
+  exitVertecies = new float[6 * 3];
+
+  for (int i = 0; i < tiles.size(); i++) {
+    if (tiles[i].tileType == ETileType::EMPTY)
+      continue;
+
+    else if (tiles[i].tileType == ETileType::ROAD) {
+      for (auto pos : tiles[i].one.asBuf()) {
+        roadVertecies[roadI++] = pos;
+      }
+      for (auto pos : tiles[i].two.asBuf()) {
+        roadVertecies[roadI++] = pos;
+      }
+    } else if (tiles[i].tileType == ETileType::VERTICAL ||
+               tiles[i].tileType == ETileType::HORIZONTAL ||
+               tiles[i].tileType == ETileType::CROSS) {
+      for (auto pos : tiles[i].one.asBuf()) {
+        mirrorsVertecies[mirrorI++] = pos;
+      }
+      for (auto pos : tiles[i].two.asBuf()) {
+        mirrorsVertecies[mirrorI++] = pos;
+      }
+    } else if (tiles[i].tileType == ETileType::EXIT) {
+      for (auto pos : tiles[i].one.asBuf()) {
+        exitVertecies[exitI++] = pos;
+      }
+      for (auto pos : tiles[i].two.asBuf()) {
+        exitVertecies[exitI++] = pos;
+      }
+    }
+  }
+
+  roadShader.CreateShaderProgramFromFile(
+      "./../../FinalProject/Assets/Shaders/tileVS.txt",
+      "./../../FinalProject/Assets/Shaders/roadFS.txt");
+
+  // Road tiles positions
+  roadBuffer.Bind();
+  roadBuffer.SetData(roadVertecies, roadTileCount * 2 * 9 * sizeof(float));
+  roadBuffer.SetElementsCount(roadTileCount * 6);
+  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
+  roadBuffer.Unbind();
+
+  // // Mirrors tiles positions
+  mirrorsBuffer.Bind();
+  mirrorsBuffer.SetData(mirrorsVertecies,
+                        mirrorsTileCount * 2 * 9 * sizeof(float));
+  mirrorsBuffer.SetElementsCount(mirrorsTileCount * 6);
+  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
+  mirrorsBuffer.Unbind();
+
+  // // Exit tiles positions
+  exitBuffer.Bind();
+  exitBuffer.SetData(exitVertecies, exitTileCount * 2 * 9 * sizeof(float));
+  exitBuffer.SetElementsCount(exitTileCount * 6);
+  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
+  exitBuffer.Unbind();
 }

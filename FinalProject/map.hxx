@@ -4,6 +4,9 @@ class Map {
 
 public:
   int LoadMap(const std::string &filePath);
+  int *GetMap();
+  int GetMapWidth() const;
+  int GetMapHeight() const;
   ~Map();
 
 private:
