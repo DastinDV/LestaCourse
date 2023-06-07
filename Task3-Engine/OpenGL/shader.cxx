@@ -88,6 +88,13 @@ void core::Shader::SetUniform1i(int val, const std::string name) {
   glCheckError();
 }
 
+void core::Shader::SetUniform1f(float val, const std::string name) {
+  unsigned int transformLoc = glGetUniformLocation(m_Program, name.c_str());
+  glCheckError();
+  glUniform1f(transformLoc, val);
+  glCheckError();
+}
+
 void core::Shader::SetMatrix4fvUniform(float *mat4fv, const std::string name) {
   unsigned int transformLoc = glGetUniformLocation(m_Program, name.c_str());
   glCheckError();
@@ -99,6 +106,13 @@ void core::Shader::SetVec4fvUniform(float *vec4fv, const std::string name) {
   unsigned int transformLoc = glGetUniformLocation(m_Program, name.c_str());
   glCheckError();
   glUniform4fv(transformLoc, 1, vec4fv);
+  glCheckError();
+}
+
+void core::Shader::SetVec2fvUniform(float *vec2fv, const std::string name) {
+  unsigned int transformLoc = glGetUniformLocation(m_Program, name.c_str());
+  glCheckError();
+  glUniform2fv(transformLoc, 1, vec2fv);
   glCheckError();
 }
 

@@ -20,6 +20,8 @@ void MirrorGame::Init() {
   auto screen = core::GetScreenSize();
   screenWidth = screen.first;
   screenHeight = screen.second;
+  screenSize[0] = screenWidth;
+  screenSize[1] = screenHeight;
 
   CreateTiles();
   PushToBuffers();
@@ -39,13 +41,14 @@ void MirrorGame::Render() {
   glRenderer.DrawTriangle(mirrorsBuffer.GetElementsCount());
   roadShader.SetVec4fvUniform(GreenColor, "u_color");
 
+  exitShader.Use();
   exitBuffer.Bind();
   glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
   glRenderer.DrawTriangle(exitBuffer.GetElementsCount());
-  roadShader.SetVec4fvUniform(BlueColor, "u_color");
+  exitShader.SetUniform1f(timeSinceRun, "u_time");
 }
 
-void MirrorGame::Update(float deltaTime) {}
+void MirrorGame::Update(float deltaTime) { timeSinceRun += deltaTime; }
 
 void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
   if (event.eventType == core::EventType::window_event &&
@@ -88,6 +91,11 @@ void MirrorGame::ResizeScreen() {
               << translate[2] << std::endl;
     roadShader.SetMatrix4fvUniform(result, "u_translate");
     roadShader.SetMatrix4fvUniform(proj, "u_projection");
+
+    exitShader.Use();
+    exitShader.SetMatrix4fvUniform(result, "u_translate");
+    exitShader.SetMatrix4fvUniform(proj, "u_projection");
+    exitShader.SetVec2fvUniform(screenSize, "u_windowSize");
   } else {
     float factor = targetAR / aspectRatio;
     std::cout << "Factor " << factor << std::endl;
@@ -99,9 +107,15 @@ void MirrorGame::ResizeScreen() {
         (-((factor * targetScreenHeight) - (targetScreenHeight)) /
          (factor * targetScreenHeight)),
         0.0f};
+
     float *result = core::Translate(translate);
     roadShader.SetMatrix4fvUniform(proj, "u_projection");
     roadShader.SetMatrix4fvUniform(result, "u_translate");
+
+    exitShader.Use();
+    exitShader.SetMatrix4fvUniform(result, "u_translate");
+    exitShader.SetMatrix4fvUniform(proj, "u_projection");
+    exitShader.SetVec2fvUniform(screenSize, "u_windowSize");
   }
 }
 
@@ -203,6 +217,10 @@ void MirrorGame::PushToBuffers() {
   roadShader.CreateShaderProgramFromFile(
       "./../../FinalProject/Assets/Shaders/tileVS.txt",
       "./../../FinalProject/Assets/Shaders/roadFS.txt");
+
+  exitShader.CreateShaderProgramFromFile(
+      "./../../FinalProject/Assets/Shaders/tileVS.txt",
+      "./../../FinalProject/Assets/Shaders/exitFS.txt");
 
   // Road tiles positions
   roadBuffer.Bind();

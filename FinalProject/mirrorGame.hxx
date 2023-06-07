@@ -9,6 +9,7 @@
 core::VertexBuffer buffer;
 core::Shader colorShader;
 core::Shader roadShader;
+core::Shader exitShader;
 
 core::VertexBuffer roadBuffer;
 core::VertexBuffer mirrorsBuffer;
@@ -17,6 +18,7 @@ core::VertexBuffer exitBuffer;
 float RedColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
 float GreenColor[] = {0.0f, 1.0f, 0.0f, 1.0f};
 float BlueColor[] = {0.0f, 0.0f, 1.0f, 1.0f};
+float screenSize[2] = {0.0f, 0.0f};
 
 enum class ETileType { EMPTY, ROAD, EXIT, VERTICAL, HORIZONTAL, CROSS };
 
@@ -66,6 +68,8 @@ private:
   float *roadVertecies;
   float *exitVertecies;
   float *mirrorsVertecies;
+
+  float timeSinceRun = 0.0;
 };
 
 IZ_DECLSPEC core::Game *CreateGame() { return new MirrorGame(); }
