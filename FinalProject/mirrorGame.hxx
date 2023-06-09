@@ -18,7 +18,9 @@ core::VertexBuffer exitBuffer;
 float RedColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
 float GreenColor[] = {0.0f, 1.0f, 0.0f, 1.0f};
 float BlueColor[] = {0.0f, 0.0f, 1.0f, 1.0f};
-float screenSize[2] = {0.0f, 0.0f};
+float u_screenSize[2] = {0.0f, 0.0f};
+float u_exitPos[2] = {0.0f, 0.0f};
+float u_tileSize = 32.0f;
 
 enum class ETileType { EMPTY, ROAD, EXIT, VERTICAL, HORIZONTAL, CROSS };
 
@@ -44,6 +46,7 @@ private:
   void ResizeScreen();
   void CreateTiles();
   void PushToBuffers();
+  void InitUniforms();
 
   core::GlRenderer glRenderer;
   Map map;

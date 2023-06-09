@@ -6,9 +6,13 @@ uniform mat4 u_projection;
 uniform mat4 u_translate;
 
 out vec3 out_position;
+out vec3 out_translate;
 
 void main()
 {
     gl_Position = u_translate * u_projection * vec4(position, 1.0);
     out_position = gl_Position.xyz;
+    out_translate.x = u_translate[0][3];
+    out_translate.y = u_translate[1][3];
+    out_translate.z = 0;
 }

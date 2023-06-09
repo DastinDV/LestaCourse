@@ -1,12 +1,14 @@
 #version 330 core
                           
 in vec3 out_position;
+in vec3 out_translate;
 
 out vec4 FragColor;
 
 uniform vec2 u_windowSize;
 uniform float u_time;
-//uniform factor;
+uniform vec2 u_tileCoordinate;
+uniform float u_tileSize;
 
 vec3 palette(float t){
     vec3 a = vec3(0.5, 0.5, 0.5);
@@ -19,24 +21,51 @@ vec3 palette(float t){
 
 void main()
 {
-    // normalize exit object to [0;1]
-    float val = 1 / 32.0;
+    float aspectRatio =  u_windowSize.x / u_windowSize.y;
+    float targetAR = 640.0 / 480.0;
+    float factor = 1.0;
 
-    float uvX = (gl_FragCoord.x - 160.0) * val;
-    float uvY = (gl_FragCoord.y - 416.0) * val;
-    vec2 uv = vec2(uvX, uvY);
+    float translateX = 0.0;
+    float translateY = 0.0;
+    float posX = u_tileCoordinate.x;
+    float posY = 480 - u_tileCoordinate.y;
+    float sizeX = u_tileSize;
+    float sizeY = u_tileSize;
 
-    uv = uv - 0.5;
-    uv = uv * 2;
+    if (aspectRatio >= targetAR){
+        factor = aspectRatio / targetAR;
+        translateX = ((factor * 640.0)- 640.0) / 2;
+        posX = (posX + translateX) / (640.0 * factor);
+        posY = posY / 480.0;
+        sizeX = 32.0 / (640 * factor);
+        sizeY = 32.0 / 480;
+    } else {
+        factor = targetAR / aspectRatio;
+        translateY = ((factor * 480.0) - 480.0) / 2;
+        posX = posX / 640.0;
+        posY = (posY + translateY) / (480 * factor);
+        sizeX = 32.0 / 640;
+        sizeY = 32.0 / (480 * factor);
+    }
 
-    float d = length(uv);
+    vec2 uv = gl_FragCoord.xy / u_windowSize.xy;
 
-    vec3 color = palette(d + u_time);
-    d = sin(d * 8. + u_time)/8.;
-    d = abs(d);
-    d = 0.02 / d;
+    float uvX = ( uv.x - posX ) * 1 / sizeX; 
+    float uvY = ( uv.y - posY ) * 1 / sizeY;
 
-    color *= d;
-    FragColor = vec4(color, 1.0);
+    vec2 uvTile = vec2(uvX, uvY);
+
+    uvTile = uvTile - 0.5;
+    uvTile = uvTile * 2;
+
+    vec3 col = vec3(0.0, 1.0, 1.0);
+
+    float d = length(uvTile);
+
+    d = sin(d*9. + u_time) / 9.;
+    d = 0.03 / d;
+    col *= d;
+
+    FragColor = vec4(col, 1.0);
 }
 

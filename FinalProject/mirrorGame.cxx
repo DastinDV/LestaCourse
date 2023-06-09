@@ -20,11 +20,12 @@ void MirrorGame::Init() {
   auto screen = core::GetScreenSize();
   screenWidth = screen.first;
   screenHeight = screen.second;
-  screenSize[0] = screenWidth;
-  screenSize[1] = screenHeight;
+  u_screenSize[0] = static_cast<float>(screenWidth);
+  u_screenSize[1] = static_cast<float>(screenHeight);
 
   CreateTiles();
   PushToBuffers();
+  InitUniforms();
 
   ResizeScreen();
 }
@@ -68,6 +69,8 @@ void MirrorGame::ResizeScreen() {
   aspectRatio =
       static_cast<float>(screenWidth) / static_cast<float>(screenHeight);
   // targetScreenHeight = targetScreenWidth * aspectRatio;
+  u_screenSize[0] = static_cast<float>(screenWidth);
+  u_screenSize[1] = static_cast<float>(screenHeight);
   std::cout << "Window size = " << screenWidth << " " << screenHeight
             << std::endl;
   std::cout << "Aspect ratio = " << aspectRatio << std::endl;
@@ -76,9 +79,11 @@ void MirrorGame::ResizeScreen() {
 
   if (aspectRatio >= targetAR) {
     float factor = aspectRatio / targetAR;
+    std::cout << "factor = " << factor << std::endl;
+    std::cout << "left = " << factor * targetScreenWidth - targetScreenWidth
+              << std::endl;
     std::cout << "right = " << factor * targetScreenWidth << " " << screenWidth
               << std::endl;
-    std::cout << "targetScreenHeight = " << targetScreenHeight << std::endl;
     float *proj =
         core::OrthoProj(factor * 0.0f, factor * targetScreenWidth,
                         targetScreenHeight, 0.0f, nearPlain, farPlain);
@@ -95,10 +100,14 @@ void MirrorGame::ResizeScreen() {
     exitShader.Use();
     exitShader.SetMatrix4fvUniform(result, "u_translate");
     exitShader.SetMatrix4fvUniform(proj, "u_projection");
-    exitShader.SetVec2fvUniform(screenSize, "u_windowSize");
+    exitShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
+    exitShader.SetVec2fvUniform(u_exitPos, "u_tileCoordinate");
+    std::cout << std::endl;
   } else {
     float factor = targetAR / aspectRatio;
-    std::cout << "Factor " << factor << std::endl;
+    std::cout << "factor =" << factor << std::endl;
+    std::cout << "bottom = " << factor * targetScreenHeight << " "
+              << screenWidth << std::endl;
     float *proj =
         core::OrthoProj(0.0f, targetScreenWidth, factor * targetScreenHeight,
                         factor * 0.0f, nearPlain, farPlain);
@@ -108,6 +117,8 @@ void MirrorGame::ResizeScreen() {
          (factor * targetScreenHeight)),
         0.0f};
 
+    std::cout << "translate " << translate[0] << " " << translate[1] << " "
+              << translate[2] << std::endl;
     float *result = core::Translate(translate);
     roadShader.SetMatrix4fvUniform(proj, "u_projection");
     roadShader.SetMatrix4fvUniform(result, "u_translate");
@@ -115,7 +126,9 @@ void MirrorGame::ResizeScreen() {
     exitShader.Use();
     exitShader.SetMatrix4fvUniform(result, "u_translate");
     exitShader.SetMatrix4fvUniform(proj, "u_projection");
-    exitShader.SetVec2fvUniform(screenSize, "u_windowSize");
+    exitShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
+    exitShader.SetVec2fvUniform(u_exitPos, "u_tileCoordinate");
+    std::cout << std::endl;
   }
 }
 
@@ -243,4 +256,16 @@ void MirrorGame::PushToBuffers() {
   exitBuffer.SetElementsCount(exitTileCount * 6);
   glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
   exitBuffer.Unbind();
+
+  // for uniform to scale shader for an exit tile.
+  u_exitPos[0] = exitVertecies[6];
+  u_exitPos[1] = exitVertecies[7];
+  std::cout << "exit coordinate in world = " << u_exitPos[0] << " "
+            << u_exitPos[1] << std::endl;
+}
+
+void MirrorGame::InitUniforms() {
+  exitShader.Use();
+  exitShader.SetUniform1f(this->tileSize, "u_tileSize");
+  exitShader.SetVec2fvUniform(u_exitPos, "u_tileCoordinate");
 }
