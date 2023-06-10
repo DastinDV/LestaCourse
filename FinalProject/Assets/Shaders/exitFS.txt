@@ -37,15 +37,15 @@ void main()
         translateX = ((factor * 640.0)- 640.0) / 2;
         posX = (posX + translateX) / (640.0 * factor);
         posY = posY / 480.0;
-        sizeX = 32.0 / (640 * factor);
-        sizeY = 32.0 / 480;
+        sizeX = sizeX / (640 * factor);
+        sizeY = sizeY / 480;
     } else {
         factor = targetAR / aspectRatio;
         translateY = ((factor * 480.0) - 480.0) / 2;
         posX = posX / 640.0;
         posY = (posY + translateY) / (480 * factor);
-        sizeX = 32.0 / 640;
-        sizeY = 32.0 / (480 * factor);
+        sizeX = sizeX / 640;
+        sizeY = sizeY / (480 * factor);
     }
 
     vec2 uv = gl_FragCoord.xy / u_windowSize.xy;

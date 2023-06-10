@@ -6,12 +6,11 @@
 
 #include "map.hxx"
 
-core::VertexBuffer buffer;
-core::Shader colorShader;
 core::Shader roadShader;
 core::Shader exitShader;
+core::Shader mirrorShader;
 
-core::VertexBuffer roadBuffer;
+std::vector<core::VertexBuffer *> roadBuffers;
 core::VertexBuffer mirrorsBuffer;
 core::VertexBuffer exitBuffer;
 
@@ -20,6 +19,9 @@ float GreenColor[] = {0.0f, 1.0f, 0.0f, 1.0f};
 float BlueColor[] = {0.0f, 0.0f, 1.0f, 1.0f};
 float u_screenSize[2] = {0.0f, 0.0f};
 float u_exitPos[2] = {0.0f, 0.0f};
+float u_mirrorPos[2] = {0.0f, 0.0f};
+std::vector<std::vector<float>> u_roadPos;
+
 float u_tileSize = 32.0f;
 
 enum class ETileType { EMPTY, ROAD, EXIT, VERTICAL, HORIZONTAL, CROSS };
@@ -68,7 +70,7 @@ private:
   int mirrorsTileCount = 0;
   int exitTileCount = 1;
 
-  float *roadVertecies;
+  std::vector<float *> roadVertecies;
   float *exitVertecies;
   float *mirrorsVertecies;
 

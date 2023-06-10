@@ -118,6 +118,7 @@ int main() {
     }
 
     engine.CleanUp();
+    delete consoleGame;
   }
 
   return 0;
