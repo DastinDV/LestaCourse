@@ -21,6 +21,10 @@ int Map::LoadMap(const std::string &filePath) {
       } else if (lineCounter == 1) {
         iss >> buf >> mapHeight;
         map = new int[mapHeight * mapWidth];
+      } else if (lineCounter == 2) {
+        iss >> buf >> playerPosX;
+      } else if (lineCounter == 3) {
+        iss >> buf >> playerPosY;
       } else {
         std::string nextTileID;
         while (getline(iss, nextTileID, ' ')) {
@@ -45,5 +49,9 @@ int *Map::GetMap() { return this->map; }
 int Map::GetMapWidth() const { return this->mapWidth; }
 
 int Map::GetMapHeight() const { return this->mapHeight; }
+
+int Map::GetPlayerTilePosX() const { return this->playerPosX; }
+
+int Map::GetPlayerTilePosY() const { return this->playerPosY; }
 
 Map::~Map() { delete[] map; }

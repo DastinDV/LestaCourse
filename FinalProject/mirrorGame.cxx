@@ -10,6 +10,7 @@ MirrorGame::MirrorGame() { std::cout << "FinalGame created!" << std::endl; }
 
 void MirrorGame::Init() {
   const std::string path = "./../../FinalProject/Assets/map1.txt";
+  glRenderer = new core::GlRenderer();
 
   if (map.LoadMap(path))
     throw std::runtime_error("Couldn't load map");
@@ -36,27 +37,29 @@ void MirrorGame::Render() {
   roadShader.Use();
   for (int i = 0; i < roadTileCount; i++) {
     roadBuffers[i]->Bind();
-    glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
-                            0);
+    glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
+                             0);
     float u_tilePos[2];
     u_tilePos[0] = u_roadPos[i][0];
     u_tilePos[1] = u_roadPos[i][1];
     roadShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
-    glRenderer.DrawTriangle(roadBuffers[i]->GetElementsCount());
+    glRenderer->DrawTriangle(roadBuffers[i]->GetElementsCount());
     roadBuffers[i]->Unbind();
   }
 
   mirrorShader.Use();
   mirrorsBuffer.Bind();
-  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
-  glRenderer.DrawTriangle(mirrorsBuffer.GetElementsCount());
+  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
+  glRenderer->DrawTriangle(mirrorsBuffer.GetElementsCount());
   mirrorShader.SetUniform1f(timeSinceRun, "u_time");
 
   exitShader.Use();
   exitBuffer.Bind();
-  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
-  glRenderer.DrawTriangle(exitBuffer.GetElementsCount());
+  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
+  glRenderer->DrawTriangle(exitBuffer.GetElementsCount());
   exitShader.SetUniform1f(timeSinceRun, "u_time");
+
+  player->Render(glRenderer);
 }
 
 void MirrorGame::Update(float deltaTime) { timeSinceRun += deltaTime; }
@@ -69,6 +72,24 @@ void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
       screenWidth = event.windowInfo->width;
       screenHeight = event.windowInfo->height;
       ResizeScreen();
+    }
+  }
+
+  if (event.eventType == core::EventType::keyboard_event &&
+      event.keyBoardInfo.has_value()) {
+    if (event.keyBoardInfo->type == core::KeyboardEventType::key_pressed) {
+      if (event.keyBoardInfo->keyCode == core::KeyCode::d) {
+        player->Move(tiles, {1, 0});
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::a) {
+        player->Move(tiles, {-1, 0});
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::w) {
+        player->Move(tiles, {0, -1});
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::s) {
+        player->Move(tiles, {0, 1});
+      }
     }
   }
 }
@@ -130,6 +151,12 @@ void MirrorGame::ResizeScreen() {
     exitShader.SetMatrix4fvUniform(proj, "u_projection");
     exitShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
     exitShader.SetVec2fvUniform(u_exitPos, "u_tileCoordinate");
+
+    playerShader.Use();
+    playerShader.SetMatrix4fvUniform(result, "u_translate");
+    playerShader.SetMatrix4fvUniform(proj, "u_projection");
+    // playerShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
+    // playerShader.SetVec2fvUniform(u_mirrorPos, "u_tileCoordinate");
     std::cout << std::endl;
   } else {
     float factor = targetAR / aspectRatio;
@@ -163,6 +190,10 @@ void MirrorGame::ResizeScreen() {
     exitShader.SetMatrix4fvUniform(proj, "u_projection");
     exitShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
     exitShader.SetVec2fvUniform(u_exitPos, "u_tileCoordinate");
+
+    playerShader.Use();
+    playerShader.SetMatrix4fvUniform(result, "u_translate");
+    playerShader.SetMatrix4fvUniform(proj, "u_projection");
     std::cout << std::endl;
   }
 }
@@ -219,10 +250,37 @@ void MirrorGame::CreateTiles() {
 
       tiles.push_back(newTile);
       x += tileSize;
+
+      if (i == map.GetPlayerTilePosY() && j == map.GetPlayerTilePosX())
+        CreatePlayer(newTile);
     }
     x = 0;
     y += tileSize;
   }
+}
+
+void MirrorGame::CreatePlayer(Tile playerTile) {
+
+  playerShader.CreateShaderProgramFromFile(
+      "./../../FinalProject/Assets/Shaders/tileVS.txt",
+      "./../../FinalProject/Assets/Shaders/playerFS.txt");
+
+  player = new Player(map.GetPlayerTilePosX(), map.GetPlayerTilePosY());
+  player->SetShader(playerShader);
+
+  float *playerVertecies = player->GetVertecies();
+
+  int k = 0;
+  for (auto pos : playerTile.one.asBuf()) {
+    playerVertecies[k++] = pos;
+  }
+  for (auto pos : playerTile.two.asBuf()) {
+    playerVertecies[k++] = pos;
+  }
+
+  player->Init();
+  player->SetMapSizeInTiles(map.GetMapWidth(), map.GetMapHeight());
+  // player->SetTransform({playerVertecies[0], playerVertecies[1], 0.0});
 }
 
 void MirrorGame::PushToBuffers() {
@@ -289,8 +347,8 @@ void MirrorGame::PushToBuffers() {
     roadBuffer->Bind();
     roadBuffer->SetData(roadVertecies[i], 1 * 2 * 9 * sizeof(float));
     roadBuffer->SetElementsCount(1 * 6);
-    glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
-                            0);
+    glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
+                             0);
     roadBuffers.push_back(roadBuffer);
     roadBuffer->Unbind();
   }
@@ -300,7 +358,7 @@ void MirrorGame::PushToBuffers() {
   mirrorsBuffer.SetData(mirrorsVertecies,
                         mirrorsTileCount * 2 * 9 * sizeof(float));
   mirrorsBuffer.SetElementsCount(mirrorsTileCount * 6);
-  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
+  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
   mirrorsBuffer.Unbind();
 
   u_mirrorPos[0] = mirrorsVertecies[6];
@@ -310,7 +368,7 @@ void MirrorGame::PushToBuffers() {
   exitBuffer.Bind();
   exitBuffer.SetData(exitVertecies, exitTileCount * 2 * 9 * sizeof(float));
   exitBuffer.SetElementsCount(exitTileCount * 6);
-  glRenderer.SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
+  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
   exitBuffer.Unbind();
 
   // for uniform to scale shader for an exit tile.
@@ -321,14 +379,20 @@ void MirrorGame::PushToBuffers() {
 }
 
 void MirrorGame::InitUniforms() {
+
+  float *transform = core::Translate(u_defaultTransform);
+
   roadShader.Use();
   roadShader.SetUniform1f(this->tileSize, "u_tileSize");
+  roadShader.SetMatrix4fvUniform(transform, "u_transform");
 
   exitShader.Use();
   exitShader.SetUniform1f(this->tileSize, "u_tileSize");
   exitShader.SetVec2fvUniform(u_exitPos, "u_tileCoordinate");
+  exitShader.SetMatrix4fvUniform(transform, "u_transform");
 
   mirrorShader.Use();
   mirrorShader.SetUniform1f(this->tileSize, "u_tileSize");
   mirrorShader.SetVec2fvUniform(u_mirrorPos, "u_tileCoordinate");
+  mirrorShader.SetMatrix4fvUniform(transform, "u_transform");
 }

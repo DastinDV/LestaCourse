@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
 project(FinalProject)
 
-add_library(FinalProject-shared SHARED map.cxx mirrorGame.cxx map.hxx mirrorGame.hxx)
+add_library(
+  FinalProject-shared SHARED
+  map.cxx
+  mirrorGame.cxx
+  player.cxx
+  map.hxx
+  mirrorGame.hxx
+  player.hxx
+  common.hxx)
 
 target_compile_features(FinalProject-shared PUBLIC cxx_std_20)
 

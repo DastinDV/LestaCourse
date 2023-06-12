@@ -3,12 +3,14 @@
 #include "../Renderers/glRenderer.hxx"
 #include "../Task3-Engine/engine.hxx"
 #include "../Task3-Engine/game.hxx"
-
+#include "common.hxx"
 #include "map.hxx"
+#include "player.hxx"
 
 core::Shader roadShader;
 core::Shader exitShader;
 core::Shader mirrorShader;
+core::Shader playerShader;
 
 std::vector<core::VertexBuffer *> roadBuffers;
 core::VertexBuffer mirrorsBuffer;
@@ -20,19 +22,10 @@ float BlueColor[] = {0.0f, 0.0f, 1.0f, 1.0f};
 float u_screenSize[2] = {0.0f, 0.0f};
 float u_exitPos[2] = {0.0f, 0.0f};
 float u_mirrorPos[2] = {0.0f, 0.0f};
+std::vector<float> u_defaultTransform = {0.0f, 0.0f, 0.0f};
 std::vector<std::vector<float>> u_roadPos;
 
 float u_tileSize = 32.0f;
-
-enum class ETileType { EMPTY, ROAD, EXIT, VERTICAL, HORIZONTAL, CROSS };
-
-struct Tile {
-  core::GLTriangle one;
-  core::GLTriangle two;
-
-  ETileType tileType;
-  bool isWalkable = false;
-};
 
 class MirrorGame : public core::Game {
 public:
@@ -47,10 +40,11 @@ public:
 private:
   void ResizeScreen();
   void CreateTiles();
+  void CreatePlayer(Tile playerTile);
   void PushToBuffers();
   void InitUniforms();
 
-  core::GlRenderer glRenderer;
+  core::GlRenderer *glRenderer;
   Map map;
 
   float targetScreenWidth = 640.0f;
@@ -73,6 +67,7 @@ private:
   std::vector<float *> roadVertecies;
   float *exitVertecies;
   float *mirrorsVertecies;
+  Player *player;
 
   float timeSinceRun = 0.0;
 };
