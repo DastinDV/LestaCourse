@@ -12,7 +12,6 @@ core::Shader exitShader;
 core::Shader mirrorShader;
 core::Shader playerShader;
 
-std::vector<core::VertexBuffer *> roadBuffers;
 core::VertexBuffer mirrorsBuffer;
 core::VertexBuffer exitBuffer;
 
@@ -23,7 +22,6 @@ float u_screenSize[2] = {0.0f, 0.0f};
 float u_exitPos[2] = {0.0f, 0.0f};
 float u_mirrorPos[2] = {0.0f, 0.0f};
 std::vector<float> u_defaultTransform = {0.0f, 0.0f, 0.0f};
-std::vector<std::vector<float>> u_roadPos;
 
 float u_tileSize = 32.0f;
 

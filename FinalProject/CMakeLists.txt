@@ -6,9 +6,11 @@ add_library(
   map.cxx
   mirrorGame.cxx
   player.cxx
+  mirror.cxx
   map.hxx
   mirrorGame.hxx
   player.hxx
+  mirror.hxx
   common.hxx)
 
 target_compile_features(FinalProject-shared PUBLIC cxx_std_20)

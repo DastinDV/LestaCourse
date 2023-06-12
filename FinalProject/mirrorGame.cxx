@@ -35,16 +35,30 @@ void MirrorGame::Init() {
 void MirrorGame::Render() {
 
   roadShader.Use();
-  for (int i = 0; i < roadTileCount; i++) {
-    roadBuffers[i]->Bind();
-    glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
-                             0);
-    float u_tilePos[2];
-    u_tilePos[0] = u_roadPos[i][0];
-    u_tilePos[1] = u_roadPos[i][1];
-    roadShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
-    glRenderer->DrawTriangle(roadBuffers[i]->GetElementsCount());
-    roadBuffers[i]->Unbind();
+  // for (int i = 0; i < roadTileCount; i++) {
+  //   roadBuffers[i]->Bind();
+  //   glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 *
+  //   sizeof(float),
+  //                            0);
+  //   float u_tilePos[2];
+  //   u_tilePos[0] = u_roadPos[i][0];
+  //   u_tilePos[1] = u_roadPos[i][1];
+  //   roadShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
+  //   glRenderer->DrawTriangle(roadBuffers[i]->GetElementsCount());
+  //   roadBuffers[i]->Unbind();
+  // }
+
+  for (int i = 0; i < tiles.size(); i++) {
+    if (tiles[i].tileType == ETileType::ROAD) {
+      tiles[i].buf->Bind();
+      glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
+                               0);
+      float u_tilePos[2];
+      u_tilePos[0] = tiles[i].tilePos[0];
+      u_tilePos[1] = tiles[i].tilePos[1];
+      roadShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
+      glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
+    }
   }
 
   mirrorShader.Use();
@@ -96,8 +110,6 @@ void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
 
 MirrorGame::~MirrorGame() {
   std::cout << "Destroy game " << std::endl;
-  for (auto &roadBuffer : roadBuffers)
-    delete roadBuffer;
 
   for (auto &vertecies : roadVertecies)
     delete[] vertecies;
@@ -213,6 +225,8 @@ void MirrorGame::CreateTiles() {
   for (int i = 0; i < mapHeight; i++) {
     for (int j = 0; j < mapWidth; j++) {
       Tile newTile;
+      newTile.i = i;
+      newTile.j = j;
       newTile.tileType = static_cast<ETileType>(a_tiles[i * mapWidth + j]);
 
       if (newTile.tileType == ETileType::ROAD)
@@ -305,6 +319,20 @@ void MirrorGame::PushToBuffers() {
       for (auto pos : tiles[i].two.asBuf()) {
         tileRoadVertecies[k++] = pos;
       }
+
+      tiles[i].buf = new core::VertexBuffer();
+      tiles[i].buf->Bind();
+      tiles[i].buf->SetData(tileRoadVertecies, 1 * 2 * 9 * sizeof(float));
+      tiles[i].buf->SetElementsCount(1 * 6);
+      glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
+                               0);
+      tiles[i].buf->Unbind();
+
+      std::vector<float> pos;
+      pos.push_back(tileRoadVertecies[6]);
+      pos.push_back(tileRoadVertecies[7]);
+      tiles[i].tilePos = pos;
+
       roadVertecies.push_back(tileRoadVertecies);
     } else if (tiles[i].tileType == ETileType::VERTICAL ||
                tiles[i].tileType == ETileType::HORIZONTAL ||
@@ -337,24 +365,25 @@ void MirrorGame::PushToBuffers() {
       "./../../FinalProject/Assets/Shaders/tileVS.txt",
       "./../../FinalProject/Assets/Shaders/mirrorFS.txt");
 
-  for (int i = 0; i < roadTileCount; i++) {
-    std::vector<float> pos;
-    pos.push_back(roadVertecies[i][6]);
-    pos.push_back(roadVertecies[i][7]);
-    u_roadPos.push_back(pos);
-  }
+  // for (int i = 0; i < roadTileCount; i++) {
+  //   std::vector<float> pos;
+  //   pos.push_back(roadVertecies[i][6]);
+  //   pos.push_back(roadVertecies[i][7]);
+  //   u_roadPos.push_back(pos);
+  // }
 
-  // Road tiles positions
-  for (int i = 0; i < roadTileCount; i++) {
-    core::VertexBuffer *roadBuffer = new core::VertexBuffer();
-    roadBuffer->Bind();
-    roadBuffer->SetData(roadVertecies[i], 1 * 2 * 9 * sizeof(float));
-    roadBuffer->SetElementsCount(1 * 6);
-    glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
-                             0);
-    roadBuffers.push_back(roadBuffer);
-    roadBuffer->Unbind();
-  }
+  // // Road tiles positions
+  // for (int i = 0; i < roadTileCount; i++) {
+  //   core::VertexBuffer *roadBuffer = new core::VertexBuffer();
+  //   roadBuffer->Bind();
+  //   roadBuffer->SetData(roadVertecies[i], 1 * 2 * 9 * sizeof(float));
+  //   roadBuffer->SetElementsCount(1 * 6);
+  //   glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 *
+  //   sizeof(float),
+  //                            0);
+  //   roadBuffers.push_back(roadBuffer);
+  //   roadBuffer->Unbind();
+  // }
 
   // Mirrors tiles positions
   mirrorsBuffer.Bind();

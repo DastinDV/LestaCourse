@@ -13,15 +13,8 @@ void Player::Init() {
   //  нужно ли тут сетать атрибут? Или ток перед отрисовкой
   buf.Unbind();
 
-  std::vector<float> defaultTransform = {0.0, 0.0, 0.0};
-  std::vector<float> adjust = {(-16.0 / (640.0 * xSizeCorrection)),
-                               (-64.0 / (480.0 * ySizeCorrection)), 0.0};
-  float *result = core::Translate(defaultTransform);
-  result = core::Translate(adjust);
-  result = core::Scale(scale);
-  // result = core::Translate(adjust);
   shader.Use();
-  shader.SetMatrix4fvUniform(result, "u_transform");
+  AdjustWorldCoordinates();
 }
 
 void Player::Move(std::vector<Tile> &tiles, std::vector<float> direction) {
@@ -50,22 +43,8 @@ void Player::Move(std::vector<Tile> &tiles, std::vector<float> direction) {
             << std::endl;
   std::cout << "Player worldPos = " << worldPos[0] << " " << worldPos[1]
             << std::endl;
-  float *result = core::Translate(localPos);
-  std::vector<float> adjust = {(localPos[0] - 16.0), (localPos[1] - 64.0), 0.0};
-  result = core::Translate(adjust);
-  result = core::Scale(scale);
-  std::cout << "matrix position = " << result[3 * 4 + 0] << " "
-            << result[3 * 4 + 1] << " " << result[3 * 4 + 2] << std::endl;
 
-  result[3 * 4 + 0] /= (640.0 * xSizeCorrection);
-  result[3 * 4 + 1] /= (480.0 * ySizeCorrection);
-
-  // for (int i = 0; i < 4; i++) {
-  //   for (int j = 0; j < 4; j++) {
-  //     std::cout << result[i * 4 + j] << std::endl;
-  //   }
-  // }
-  shader.SetMatrix4fvUniform(result, "u_transform");
+  AdjustWorldCoordinates();
 }
 
 void Player::Render(core::GlRenderer *glRenderer) {
@@ -100,7 +79,8 @@ void Player::SetYSizeCorrection(float factor) {
 
 void Player::AdjustWorldCoordinates() {
   float *result = core::Translate(localPos);
-  std::vector<float> adjust = {(localPos[0] - 16.0), (localPos[1] - 64.0), 0.0};
+  std::vector<float> adjust = {(localPos[0] - (float)16.0),
+                               (localPos[1] - (float)64.0), 0.0};
   result = core::Translate(adjust);
   result = core::Scale(scale);
 
