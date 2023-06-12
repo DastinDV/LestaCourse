@@ -119,7 +119,7 @@ void MirrorGame::ResizeScreen() {
   roadShader.Use();
 
   if (aspectRatio >= targetAR) {
-    float factor = aspectRatio / targetAR;
+    factor = aspectRatio / targetAR;
     std::cout << "factor = " << factor << std::endl;
     std::cout << "left = " << factor * targetScreenWidth - targetScreenWidth
               << std::endl;
@@ -155,11 +155,12 @@ void MirrorGame::ResizeScreen() {
     playerShader.Use();
     playerShader.SetMatrix4fvUniform(result, "u_translate");
     playerShader.SetMatrix4fvUniform(proj, "u_projection");
-    // playerShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
-    // playerShader.SetVec2fvUniform(u_mirrorPos, "u_tileCoordinate");
+    player->SetXSizeCorrection(factor);
+    player->AdjustWorldCoordinates();
+
     std::cout << std::endl;
   } else {
-    float factor = targetAR / aspectRatio;
+    factor = targetAR / aspectRatio;
     std::cout << "factor =" << factor << std::endl;
     std::cout << "bottom = " << factor * targetScreenHeight << " "
               << screenWidth << std::endl;
@@ -194,6 +195,8 @@ void MirrorGame::ResizeScreen() {
     playerShader.Use();
     playerShader.SetMatrix4fvUniform(result, "u_translate");
     playerShader.SetMatrix4fvUniform(proj, "u_projection");
+    player->SetYSizeCorrection(factor);
+    player->AdjustWorldCoordinates();
     std::cout << std::endl;
   }
 }
@@ -280,7 +283,7 @@ void MirrorGame::CreatePlayer(Tile playerTile) {
 
   player->Init();
   player->SetMapSizeInTiles(map.GetMapWidth(), map.GetMapHeight());
-  // player->SetTransform({playerVertecies[0], playerVertecies[1], 0.0});
+  player->SetWorldTransform({playerVertecies[0], playerVertecies[1], 0.0});
 }
 
 void MirrorGame::PushToBuffers() {

@@ -19,11 +19,16 @@ public:
   void SetShader(core::Shader shader);
 
   void SetMapSizeInTiles(int mapWidth, int mapHeight);
-  void SetTransform(std::vector<float> pos);
+  void SetWorldTransform(std::vector<float> worldPos);
+  void SetXSizeCorrection(float factor);
+  void SetYSizeCorrection(float factor);
+
+  void AdjustWorldCoordinates();
 
 private:
   core::VertexBuffer buf;
-  std::vector<float> pos = {0.0, 0.0, 0.0};
+  std::vector<float> localPos = {0.0, 0.0, 0.0};
+  std::vector<float> worldPos = {0.0, 0.0, 0.0};
 
   int tilePosX;
   int tilePosY;
@@ -31,7 +36,13 @@ private:
   int mapWidth;
   int mapHeight;
 
-  float tileSize = 32.0;
+  float tileSizeX = 32.0;
+  float tileSizeY = 32.0;
+
+  float xSizeCorrection = 1.0;
+  float ySizeCorrection = 1.0;
+  float scale = 0.5;
+
   float *playerVertecies;
   std::vector<float> direction;
   core::Shader shader;

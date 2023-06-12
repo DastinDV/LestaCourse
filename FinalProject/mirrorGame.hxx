@@ -56,6 +56,7 @@ private:
   int screenHeight;
   float aspectRatio;
   float targetAR;
+  float factor;
 
   float tileSize = 32.0f;
   std::vector<Tile> tiles;

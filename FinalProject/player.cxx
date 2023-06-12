@@ -14,7 +14,12 @@ void Player::Init() {
   buf.Unbind();
 
   std::vector<float> defaultTransform = {0.0, 0.0, 0.0};
+  std::vector<float> adjust = {(-16.0 / (640.0 * xSizeCorrection)),
+                               (-64.0 / (480.0 * ySizeCorrection)), 0.0};
   float *result = core::Translate(defaultTransform);
+  result = core::Translate(adjust);
+  result = core::Scale(scale);
+  // result = core::Translate(adjust);
   shader.Use();
   shader.SetMatrix4fvUniform(result, "u_transform");
 }
@@ -35,22 +40,31 @@ void Player::Move(std::vector<Tile> &tiles, std::vector<float> direction) {
   tilePosX = nextTilePos[0];
   tilePosY = nextTilePos[1];
 
-  pos[0] += ((direction[0] * 64.0));
-  pos[1] += ((-direction[1] * 64.0));
+  localPos[0] += ((direction[0] * tileSizeX * 2));
+  localPos[1] += ((-direction[1] * tileSizeY * 2));
 
-  std::cout << "Player position = " << pos[0] << " " << pos[1] << std::endl;
-  float *result = core::Translate(pos);
+  worldPos[0] += (direction[0] * tileSizeX);
+  worldPos[1] += (-direction[1] * tileSizeX);
+
+  std::cout << "Player localPos = " << localPos[0] << " " << localPos[1]
+            << std::endl;
+  std::cout << "Player worldPos = " << worldPos[0] << " " << worldPos[1]
+            << std::endl;
+  float *result = core::Translate(localPos);
+  std::vector<float> adjust = {(localPos[0] - 16.0), (localPos[1] - 64.0), 0.0};
+  result = core::Translate(adjust);
+  result = core::Scale(scale);
   std::cout << "matrix position = " << result[3 * 4 + 0] << " "
             << result[3 * 4 + 1] << " " << result[3 * 4 + 2] << std::endl;
 
-  result[3 * 4 + 0] /= 640.0;
-  result[3 * 4 + 1] /= 480.0;
+  result[3 * 4 + 0] /= (640.0 * xSizeCorrection);
+  result[3 * 4 + 1] /= (480.0 * ySizeCorrection);
 
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      std::cout << result[i * 4 + j] << std::endl;
-    }
-  }
+  // for (int i = 0; i < 4; i++) {
+  //   for (int j = 0; j < 4; j++) {
+  //     std::cout << result[i * 4 + j] << std::endl;
+  //   }
+  // }
   shader.SetMatrix4fvUniform(result, "u_transform");
 }
 
@@ -70,4 +84,28 @@ void Player::SetMapSizeInTiles(int mapWidth, int mapHeight) {
   this->mapHeight = mapHeight;
 }
 
-void Player::SetTransform(std::vector<float> pos) { this->pos = pos; }
+void Player::SetWorldTransform(std::vector<float> worldPos) {
+  this->worldPos = worldPos;
+}
+
+void Player::SetXSizeCorrection(float factor) {
+  this->xSizeCorrection = factor;
+  this->ySizeCorrection = 1.0;
+}
+
+void Player::SetYSizeCorrection(float factor) {
+  this->ySizeCorrection = factor;
+  this->xSizeCorrection = 1.0;
+}
+
+void Player::AdjustWorldCoordinates() {
+  float *result = core::Translate(localPos);
+  std::vector<float> adjust = {(localPos[0] - 16.0), (localPos[1] - 64.0), 0.0};
+  result = core::Translate(adjust);
+  result = core::Scale(scale);
+
+  result[3 * 4 + 0] /= (640.0 * xSizeCorrection);
+  result[3 * 4 + 1] /= (480.0 * ySizeCorrection);
+
+  shader.SetMatrix4fvUniform(result, "u_transform");
+}
