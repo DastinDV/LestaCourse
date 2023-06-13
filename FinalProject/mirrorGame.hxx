@@ -5,6 +5,7 @@
 #include "../Task3-Engine/game.hxx"
 #include "common.hxx"
 #include "map.hxx"
+#include "mirror.hxx"
 #include "player.hxx"
 
 core::Shader roadShader;
@@ -12,15 +13,11 @@ core::Shader exitShader;
 core::Shader mirrorShader;
 core::Shader playerShader;
 
-core::VertexBuffer mirrorsBuffer;
-core::VertexBuffer exitBuffer;
-
 float RedColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
 float GreenColor[] = {0.0f, 1.0f, 0.0f, 1.0f};
 float BlueColor[] = {0.0f, 0.0f, 1.0f, 1.0f};
 float u_screenSize[2] = {0.0f, 0.0f};
 float u_exitPos[2] = {0.0f, 0.0f};
-float u_mirrorPos[2] = {0.0f, 0.0f};
 std::vector<float> u_defaultTransform = {0.0f, 0.0f, 0.0f};
 
 float u_tileSize = 32.0f;
@@ -39,6 +36,7 @@ private:
   void ResizeScreen();
   void CreateTiles();
   void CreatePlayer(Tile playerTile);
+  void CreateMirror(Tile mirrorTile);
   void PushToBuffers();
 
   void CreateShaders();
@@ -65,10 +63,9 @@ private:
   int mirrorsTileCount = 0;
   int exitTileCount = 1;
 
-  std::vector<float *> roadVertecies;
   float *exitVertecies;
-  float *mirrorsVertecies;
   Player *player;
+  Mirror *mirror;
 
   float timeSinceRun = 0.0;
 };
