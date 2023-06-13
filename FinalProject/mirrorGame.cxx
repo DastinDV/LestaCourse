@@ -27,6 +27,8 @@ void MirrorGame::Init() {
 
   CreateTiles();
   PushToBuffers();
+
+  CreateShaders();
   InitUniforms();
 
   ResizeScreen();
@@ -34,22 +36,10 @@ void MirrorGame::Init() {
 
 void MirrorGame::Render() {
 
-  roadShader.Use();
-  // for (int i = 0; i < roadTileCount; i++) {
-  //   roadBuffers[i]->Bind();
-  //   glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 *
-  //   sizeof(float),
-  //                            0);
-  //   float u_tilePos[2];
-  //   u_tilePos[0] = u_roadPos[i][0];
-  //   u_tilePos[1] = u_roadPos[i][1];
-  //   roadShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
-  //   glRenderer->DrawTriangle(roadBuffers[i]->GetElementsCount());
-  //   roadBuffers[i]->Unbind();
-  // }
-
   for (int i = 0; i < tiles.size(); i++) {
     if (tiles[i].tileType == ETileType::ROAD) {
+      roadShader.Use();
+
       tiles[i].buf->Bind();
       glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
                                0);
@@ -59,19 +49,23 @@ void MirrorGame::Render() {
       roadShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
       glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
     }
+    if (tiles[i].tileType == ETileType::VERTICAL) {
+      mirrorShader.Use();
+      tiles[i].buf->Bind();
+      glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
+                               0);
+      mirrorShader.SetUniform1f(timeSinceRun, "u_time");
+      glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
+    }
+    if (tiles[i].tileType == ETileType::EXIT) {
+      exitShader.Use();
+      tiles[i].buf->Bind();
+      glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
+                               0);
+      exitShader.SetUniform1f(timeSinceRun, "u_time");
+      glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
+    }
   }
-
-  mirrorShader.Use();
-  mirrorsBuffer.Bind();
-  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
-  glRenderer->DrawTriangle(mirrorsBuffer.GetElementsCount());
-  mirrorShader.SetUniform1f(timeSinceRun, "u_time");
-
-  exitShader.Use();
-  exitBuffer.Bind();
-  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
-  glRenderer->DrawTriangle(exitBuffer.GetElementsCount());
-  exitShader.SetUniform1f(timeSinceRun, "u_time");
 
   player->Render(glRenderer);
 }
@@ -343,6 +337,17 @@ void MirrorGame::PushToBuffers() {
       for (auto pos : tiles[i].two.asBuf()) {
         mirrorsVertecies[mirrorI++] = pos;
       }
+
+      tiles[i].buf = new core::VertexBuffer();
+      tiles[i].buf->Bind();
+      tiles[i].buf->SetData(mirrorsVertecies, 1 * 2 * 9 * sizeof(float));
+      tiles[i].buf->SetElementsCount(1 * 6);
+      glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
+                               0);
+      tiles[i].buf->Unbind();
+
+      u_mirrorPos[0] = mirrorsVertecies[6];
+      u_mirrorPos[1] = mirrorsVertecies[7];
     } else if (tiles[i].tileType == ETileType::EXIT) {
       for (auto pos : tiles[i].one.asBuf()) {
         exitVertecies[exitI++] = pos;
@@ -350,9 +355,27 @@ void MirrorGame::PushToBuffers() {
       for (auto pos : tiles[i].two.asBuf()) {
         exitVertecies[exitI++] = pos;
       }
+
+      tiles[i].buf = new core::VertexBuffer();
+      tiles[i].buf->Bind();
+      tiles[i].buf->SetData(exitVertecies,
+                            exitTileCount * 2 * 9 * sizeof(float));
+      tiles[i].buf->SetElementsCount(exitTileCount * 6);
+      glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
+                               0);
+      tiles[i].buf->Unbind();
+
+      // for uniform to scale shader for an exit tile.
+      u_exitPos[0] = exitVertecies[6];
+      u_exitPos[1] = exitVertecies[7];
     }
   }
 
+  std::cout << "exit coordinate in world = " << u_exitPos[0] << " "
+            << u_exitPos[1] << std::endl;
+}
+
+void MirrorGame::CreateShaders() {
   roadShader.CreateShaderProgramFromFile(
       "./../../FinalProject/Assets/Shaders/tileVS.txt",
       "./../../FinalProject/Assets/Shaders/roadFS.txt");
@@ -364,50 +387,6 @@ void MirrorGame::PushToBuffers() {
   mirrorShader.CreateShaderProgramFromFile(
       "./../../FinalProject/Assets/Shaders/tileVS.txt",
       "./../../FinalProject/Assets/Shaders/mirrorFS.txt");
-
-  // for (int i = 0; i < roadTileCount; i++) {
-  //   std::vector<float> pos;
-  //   pos.push_back(roadVertecies[i][6]);
-  //   pos.push_back(roadVertecies[i][7]);
-  //   u_roadPos.push_back(pos);
-  // }
-
-  // // Road tiles positions
-  // for (int i = 0; i < roadTileCount; i++) {
-  //   core::VertexBuffer *roadBuffer = new core::VertexBuffer();
-  //   roadBuffer->Bind();
-  //   roadBuffer->SetData(roadVertecies[i], 1 * 2 * 9 * sizeof(float));
-  //   roadBuffer->SetElementsCount(1 * 6);
-  //   glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 *
-  //   sizeof(float),
-  //                            0);
-  //   roadBuffers.push_back(roadBuffer);
-  //   roadBuffer->Unbind();
-  // }
-
-  // Mirrors tiles positions
-  mirrorsBuffer.Bind();
-  mirrorsBuffer.SetData(mirrorsVertecies,
-                        mirrorsTileCount * 2 * 9 * sizeof(float));
-  mirrorsBuffer.SetElementsCount(mirrorsTileCount * 6);
-  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
-  mirrorsBuffer.Unbind();
-
-  u_mirrorPos[0] = mirrorsVertecies[6];
-  u_mirrorPos[1] = mirrorsVertecies[7];
-
-  // Exit tiles positions
-  exitBuffer.Bind();
-  exitBuffer.SetData(exitVertecies, exitTileCount * 2 * 9 * sizeof(float));
-  exitBuffer.SetElementsCount(exitTileCount * 6);
-  glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float), 0);
-  exitBuffer.Unbind();
-
-  // for uniform to scale shader for an exit tile.
-  u_exitPos[0] = exitVertecies[6];
-  u_exitPos[1] = exitVertecies[7];
-  std::cout << "exit coordinate in world = " << u_exitPos[0] << " "
-            << u_exitPos[1] << std::endl;
 }
 
 void MirrorGame::InitUniforms() {

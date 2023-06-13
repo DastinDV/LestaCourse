@@ -40,6 +40,8 @@ private:
   void CreateTiles();
   void CreatePlayer(Tile playerTile);
   void PushToBuffers();
+
+  void CreateShaders();
   void InitUniforms();
 
   core::GlRenderer *glRenderer;
