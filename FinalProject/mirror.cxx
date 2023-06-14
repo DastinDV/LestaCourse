@@ -2,7 +2,8 @@
 #include <iostream>
 #include <math.h>
 
-Mirror::Mirror(Tile &mirror) : mirror(mirror) {}
+Mirror::Mirror(Tile &mirror, std::vector<Tile> &tiles)
+    : mirror(mirror), tiles(tiles) {}
 
 void Mirror::Update(float dt) {
   if (isReflect) {
@@ -10,21 +11,32 @@ void Mirror::Update(float dt) {
     int xMirrorPos = mirror.j;
     int yMirrorPos = mirror.i;
 
-    int radius = 3;
+    int radius = 2;
 
     float alpha = (std::sin(accumulateTime * 0.5f) + 1) / 2;
-    std::cout << alpha << std::endl;
 
     if (alpha > 0.999 || alpha < 0.001) {
       forwardMove = !forwardMove;
       isReflect = false;
+
+      for (int i = yMirrorPos - radius; i < yMirrorPos + radius + 1; i++) {
+        for (int j = xMirrorPos - radius, k = 0; j < xMirrorPos; j++, k++) {
+          // Возможно понадобится не заменять и координаты тайла i j
+          auto fromPos = tiles[i * mapWidth + j].tilePos;
+          auto toPos = tiles[i * mapWidth + xMirrorPos + radius - k].tilePos;
+          std::swap(tiles[i * mapWidth + j],
+                    tiles[i * mapWidth + xMirrorPos + radius - k]);
+          tiles[i * mapWidth + j].tilePos = fromPos;
+          tiles[i * mapWidth + xMirrorPos + radius - k].tilePos = toPos;
+        }
+      }
     }
-    //  float alpha = manhatten_distance();
+
     //   Left to right reflection
     for (int i = yMirrorPos - radius; i < yMirrorPos + radius + 1; i++) {
-      for (int j = xMirrorPos - radius; j < xMirrorPos; j++) {
+      for (int j = xMirrorPos - radius, k = 0; j < xMirrorPos; j++, k++) {
         auto fromTile = tiles[i * mapWidth + j];
-        auto toTile = tiles[i * mapWidth + j + radius + 1];
+        auto toTile = tiles[i * mapWidth + xMirrorPos + radius - k];
 
         core::GLTriangle tr1 = blend(fromTile.one, toTile.two, alpha);
         core::GLTriangle tr2 = blend(fromTile.two, toTile.one, alpha);
@@ -50,9 +62,9 @@ void Mirror::Update(float dt) {
 
     // right to left reflection
     for (int i = yMirrorPos - radius; i < yMirrorPos + radius + 1; i++) {
-      for (int j = xMirrorPos + radius; j > xMirrorPos; j--) {
+      for (int j = xMirrorPos + radius, k = 0; j > xMirrorPos; j--, k++) {
         auto fromTile = tiles[i * mapWidth + j];
-        auto toTile = tiles[i * mapWidth + j - radius - 1];
+        auto toTile = tiles[i * mapWidth + xMirrorPos - radius + k];
 
         core::GLTriangle tr1 = blend(fromTile.one, toTile.two, alpha);
         core::GLTriangle tr2 = blend(fromTile.two, toTile.one, alpha);
@@ -78,10 +90,7 @@ void Mirror::Update(float dt) {
   }
 }
 
-void Mirror::Reflect(std::vector<Tile> &tiles) {
-  this->tiles = tiles;
-  isReflect = true;
-}
+void Mirror::Reflect(std::vector<Tile> &tiles) { isReflect = true; }
 
 void Mirror::SetMapSizeInTiles(int mapWidth, int mapHeight) {
   this->mapWidth = mapWidth;

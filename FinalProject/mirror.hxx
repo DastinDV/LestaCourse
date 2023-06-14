@@ -6,7 +6,7 @@
 
 class Mirror {
 public:
-  Mirror(Tile &mirror);
+  Mirror(Tile &mirror, std::vector<Tile> &tiles);
 
   void Update(float dt);
   void Reflect(std::vector<Tile> &tiles);
@@ -20,5 +20,5 @@ private:
   float accumulateTime;
   bool forwardMove = true;
   Tile mirror;
-  std::vector<Tile> tiles;
+  std::vector<Tile> &tiles;
 };

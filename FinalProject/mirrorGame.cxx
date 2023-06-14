@@ -66,6 +66,10 @@ void MirrorGame::Render() {
       tiles[i].buf->Bind();
       glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
                                0);
+      float u_tilePos[2];
+      u_tilePos[0] = tiles[i].tilePos[0];
+      u_tilePos[1] = tiles[i].tilePos[1];
+      exitShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
       exitShader.SetUniform1f(timeSinceRun, "u_time");
       glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
     }
@@ -118,7 +122,6 @@ MirrorGame::~MirrorGame() {
 
   delete[] exitVertecies;
   delete player;
-  // delete[] mirrorsVertecies;
 }
 
 void MirrorGame::ResizeScreen() {
@@ -318,7 +321,7 @@ void MirrorGame::CreatePlayer(Tile playerTile) {
 }
 
 void MirrorGame::CreateMirror(Tile mirrorTile) {
-  mirror = new Mirror(mirrorTile);
+  mirror = new Mirror(mirrorTile, tiles);
   mirror->SetMapSizeInTiles(map.GetMapWidth(), map.GetMapHeight());
 }
 
@@ -413,10 +416,13 @@ void MirrorGame::PushToBuffers() {
 
       tiles[i].buf->Unbind();
       tiles[i].vertecies = exitVertecies;
+      std::vector<float> pos;
+      pos.push_back(exitVertecies[6]);
+      pos.push_back(exitVertecies[7]);
 
       // for uniform to scale shader for an exit tile.
-      u_exitPos[0] = exitVertecies[6];
-      u_exitPos[1] = exitVertecies[7];
+      tiles[i].tilePos = pos;
+      tiles[i].tilePos = pos;
     }
   }
 
