@@ -47,6 +47,14 @@ void MirrorGame::Render() {
       u_tilePos[0] = tiles[i].tilePos[0];
       u_tilePos[1] = tiles[i].tilePos[1];
       roadShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
+      roadShader.SetUniform1f(timeSinceRun, "u_time");
+      if (tiles[i].isFlicker)
+        roadShader.SetUniform1i(1, "u_isFlicker");
+      else
+        roadShader.SetUniform1i(0, "u_isFlicker");
+      // roadShader.SetVec4fvUniform(tiles[i].u_borderColor.data(),
+      //                             "u_borderColor");
+
       glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
     }
     if (tiles[i].tileType == ETileType::VERTICAL) {
@@ -323,6 +331,24 @@ void MirrorGame::CreatePlayer(Tile playerTile) {
 void MirrorGame::CreateMirror(Tile mirrorTile) {
   mirror = new Mirror(mirrorTile, tiles);
   mirror->SetMapSizeInTiles(map.GetMapWidth(), map.GetMapHeight());
+  int xMirrorPos = mirrorTile.j;
+  int yMirrorPos = mirrorTile.i;
+  int radius = mirror->GetRadius();
+
+  for (int i = yMirrorPos - radius; i < yMirrorPos + radius + 1; i++) {
+    for (int j = xMirrorPos - radius, k = 0; j < xMirrorPos; j++, k++) {
+      if (tiles[i * map.GetMapWidth() + j].tileType == ETileType::ROAD) {
+        tiles[i * map.GetMapWidth() + j].isFlicker = true;
+      }
+    }
+  }
+  for (int i = yMirrorPos - radius; i < yMirrorPos + radius + 1; i++) {
+    for (int j = xMirrorPos + radius, k = 0; j > xMirrorPos; j--, k++) {
+      if (tiles[i * map.GetMapWidth() + j].tileType == ETileType::ROAD) {
+        tiles[i * map.GetMapWidth() + j].isFlicker = true;
+      }
+    }
+  }
 }
 
 void MirrorGame::PushToBuffers() {
@@ -370,6 +396,8 @@ void MirrorGame::PushToBuffers() {
       pos.push_back(tileRoadVertecies[6]);
       pos.push_back(tileRoadVertecies[7]);
       tiles[i].tilePos = pos;
+      // std::copy(std::begin(NeonBlueColor), std::end(NeonBlueColor),
+      //           std::begin(tiles[i].u_borderColor));
 
     } else if (tiles[i].tileType == ETileType::VERTICAL ||
                tiles[i].tileType == ETileType::HORIZONTAL ||
@@ -396,6 +424,8 @@ void MirrorGame::PushToBuffers() {
       pos.push_back(mirrorsVertecies[6]);
       pos.push_back(mirrorsVertecies[7]);
       tiles[i].tilePos = pos;
+      // std::copy(std::begin(NeonBlueColor), std::end(NeonBlueColor),
+      //           std::begin(tiles[i].u_borderColor));
 
       CreateMirror(tiles[i]);
     } else if (tiles[i].tileType == ETileType::EXIT) {
@@ -423,6 +453,8 @@ void MirrorGame::PushToBuffers() {
       // for uniform to scale shader for an exit tile.
       tiles[i].tilePos = pos;
       tiles[i].tilePos = pos;
+      // std::copy(std::begin(NeonBlueColor), std::end(NeonBlueColor),
+      //           std::begin(tiles[i].u_borderColor));
     }
   }
 
@@ -451,6 +483,8 @@ void MirrorGame::InitUniforms() {
   roadShader.Use();
   roadShader.SetUniform1f(this->tileSize, "u_tileSize");
   roadShader.SetMatrix4fvUniform(transform, "u_transform");
+  roadShader.SetVec4fvUniform(NeonBlueColor, "u_borderColor");
+  roadShader.SetUniform1i(0, "u_isFlicker");
 
   exitShader.Use();
   exitShader.SetUniform1f(this->tileSize, "u_tileSize");

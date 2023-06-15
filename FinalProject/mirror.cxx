@@ -11,8 +11,6 @@ void Mirror::Update(float dt) {
     int xMirrorPos = mirror.j;
     int yMirrorPos = mirror.i;
 
-    int radius = 2;
-
     float alpha = (std::sin(accumulateTime * 0.5f) + 1) / 2;
 
     if (alpha > 0.999 || alpha < 0.001) {
@@ -96,3 +94,7 @@ void Mirror::SetMapSizeInTiles(int mapWidth, int mapHeight) {
   this->mapWidth = mapWidth;
   this->mapHeight = mapHeight;
 }
+
+int Mirror::GetRadius() const { return radius; }
+
+void Mirror::SetRadius(const int radius) { this->radius = radius; }

@@ -16,8 +16,12 @@ core::Shader playerShader;
 float RedColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
 float GreenColor[] = {0.0f, 1.0f, 0.0f, 1.0f};
 float BlueColor[] = {0.0f, 0.0f, 1.0f, 1.0f};
+float NeonBlueColor[] = {0.0, 1.0f, 1.0f, 1.0f};
+float NeonGoldColor[] = {255.0, 255.0, 1.0, 1.0f};
+
 float u_screenSize[2] = {0.0f, 0.0f};
 float u_exitPos[2] = {0.0f, 0.0f};
+
 std::vector<float> u_defaultTransform = {0.0f, 0.0f, 0.0f};
 
 float u_tileSize = 32.0f;

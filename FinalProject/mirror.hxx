@@ -11,10 +11,14 @@ public:
   void Update(float dt);
   void Reflect(std::vector<Tile> &tiles);
   void SetMapSizeInTiles(int mapWidth, int mapHeight);
+  int GetRadius() const;
+  void SetRadius(const int radius);
 
 private:
   int mapWidth;
   int mapHeight;
+
+  int radius = 1;
 
   bool isReflect;
   float accumulateTime;

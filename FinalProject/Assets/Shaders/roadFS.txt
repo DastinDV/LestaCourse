@@ -8,8 +8,13 @@ uniform vec2 u_windowSize;
 uniform float u_time;
 uniform vec2 u_tileCoordinate;
 uniform float u_tileSize;
+uniform vec4 u_borderColor;
+uniform int u_isFlicker;
 
 out vec4 FragColor;
+
+vec3 colorWhite = vec3(1.0,1.0,1.0);
+vec3 colorGold = vec3(1.000,0.833,0.224);
 
 void main()
 {
@@ -52,13 +57,22 @@ void main()
 
     vec3 neonBlue = vec3(0.0, 1.0, 1.0);
 
-    FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+    if (u_isFlicker == 0){
+        FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+    } else {
+        vec3 color = vec3(0.0);
+        float pct = abs(sin(u_time * 2.0));
 
-    if (uvTile.x <= -0.95 || uvTile.x >= 0.95){
-        FragColor = vec4(neonBlue, 1.0);
+        color = mix(colorWhite, colorGold, pct);
+
+        FragColor = vec4(color,1.0);
     }
-    if (uvTile.y <= -0.95 || uvTile.y >= 0.95){
-        FragColor =  vec4(neonBlue, 1.0);
+
+    if (uvTile.x <= -0.9 || uvTile.x >= 0.9){
+        FragColor = vec4(u_borderColor.xyz, 1.0);
+    }
+    if (uvTile.y <= -0.9 || uvTile.y >= 0.9){
+        FragColor =  vec4(u_borderColor.xyz, 1.0);
     }
 }
 

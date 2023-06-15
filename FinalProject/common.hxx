@@ -3,6 +3,7 @@
 #include "../Renderers/glRenderer.hxx"
 #include "../Task3-Engine/engine.hxx"
 
+#include <array>
 #include <math.h>
 
 static core::GlVertex blend_vertex(const core::GlVertex &vl,
@@ -40,4 +41,5 @@ struct Tile {
   std::vector<float> tilePos;
   float *vertecies;
   bool isWalkable = false;
+  bool isFlicker = false;
 };

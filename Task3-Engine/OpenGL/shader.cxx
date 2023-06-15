@@ -83,7 +83,7 @@ unsigned int core::Shader::GetProgramID() { return m_Program; }
 
 void core::Shader::SetUniform1i(int val, const std::string name) {
   unsigned int loc = glGetUniformLocation(m_Program, name.c_str());
-  std::cout << "ourTexture loc : " << loc << std::endl;
+  glCheckError();
   glUniform1i(loc, val);
   glCheckError();
 }
