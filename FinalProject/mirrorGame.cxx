@@ -52,8 +52,6 @@ void MirrorGame::Render() {
         roadShader.SetUniform1i(1, "u_isFlicker");
       else
         roadShader.SetUniform1i(0, "u_isFlicker");
-      // roadShader.SetVec4fvUniform(tiles[i].u_borderColor.data(),
-      //                             "u_borderColor");
 
       glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
     }
@@ -89,7 +87,9 @@ void MirrorGame::Render() {
 void MirrorGame::Update(float deltaTime) {
   timeSinceRun += deltaTime;
   mirrorShader.Use();
-  mirror->Update(deltaTime);
+  if (currentMirror) {
+    currentMirror->Update(deltaTime);
+  }
 }
 
 void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
@@ -119,7 +119,33 @@ void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
         player->Move(tiles, {0, 1});
       }
       if (event.keyBoardInfo->keyCode == core::KeyCode::q) {
-        mirror->Reflect(tiles);
+        if (currentMirror)
+          currentMirror->Reflect(tiles);
+      }
+    }
+  }
+
+  if (event.eventType == core::EventType::mouse_event &&
+      event.mouseInfo.has_value()) {
+    if (event.mouseInfo->type == core::MouseEventType::button_down) {
+      std::cout << "Clicked " << std::endl;
+      std::cout << "Clicked pos = " << event.mouseInfo->xPos << " "
+                << event.mouseInfo->yPos << std::endl;
+
+      auto tilePos = GetTilePosByClickPos(event.mouseInfo->xPos,
+                                          event.mouseInfo->yPos, 32.0, 32.0);
+      std::cout << "Clicked tilePos = " << tilePos.first << " "
+                << tilePos.second << std::endl;
+      auto it = std::find_if(
+          mirrors.begin(), mirrors.end(), [&tilePos](const Mirror *nextMirror) {
+            return nextMirror->GetTilePos().first == tilePos.first &&
+                   nextMirror->GetTilePos().second == tilePos.second;
+          });
+
+      if (it != mirrors.end()) {
+        std::cout << "Changed mirror " << std::endl;
+        currentMirror = *it;
+        HighlightTiles(currentMirror);
       }
     }
   }
@@ -130,6 +156,9 @@ MirrorGame::~MirrorGame() {
 
   delete[] exitVertecies;
   delete player;
+  for (auto &item : mirrors) {
+    delete item;
+  }
 }
 
 void MirrorGame::ResizeScreen() {
@@ -329,11 +358,19 @@ void MirrorGame::CreatePlayer(Tile playerTile) {
 }
 
 void MirrorGame::CreateMirror(Tile mirrorTile) {
-  mirror = new Mirror(mirrorTile, tiles);
+  Mirror *mirror = new Mirror(mirrorTile, tiles);
   mirror->SetMapSizeInTiles(map.GetMapWidth(), map.GetMapHeight());
-  int xMirrorPos = mirrorTile.j;
-  int yMirrorPos = mirrorTile.i;
+  mirrors.push_back(mirror);
+}
+
+void MirrorGame::HighlightTiles(Mirror *mirror) {
+  int xMirrorPos = mirror->GetTilePos().first;
+  int yMirrorPos = mirror->GetTilePos().second;
+
   int radius = mirror->GetRadius();
+
+  std::for_each(tiles.begin(), tiles.end(),
+                [](Tile &nextTile) { nextTile.isFlicker = false; });
 
   for (int i = yMirrorPos - radius; i < yMirrorPos + radius + 1; i++) {
     for (int j = xMirrorPos - radius, k = 0; j < xMirrorPos; j++, k++) {
@@ -354,7 +391,6 @@ void MirrorGame::CreateMirror(Tile mirrorTile) {
 void MirrorGame::PushToBuffers() {
 
   int roadI = 0, mirrorI = 0, exitI = 0;
-  // mirrorsVertecies = new float[mirrorsTileCount * 6 * 3];
   exitVertecies = new float[6 * 3];
 
   for (int i = 0; i < tiles.size(); i++) {
@@ -396,19 +432,17 @@ void MirrorGame::PushToBuffers() {
       pos.push_back(tileRoadVertecies[6]);
       pos.push_back(tileRoadVertecies[7]);
       tiles[i].tilePos = pos;
-      // std::copy(std::begin(NeonBlueColor), std::end(NeonBlueColor),
-      //           std::begin(tiles[i].u_borderColor));
 
     } else if (tiles[i].tileType == ETileType::VERTICAL ||
                tiles[i].tileType == ETileType::HORIZONTAL ||
                tiles[i].tileType == ETileType::CROSS) {
       float *mirrorsVertecies = new float[18];
-
+      int k = 0;
       for (auto pos : tiles[i].one.asBuf()) {
-        mirrorsVertecies[mirrorI++] = pos;
+        mirrorsVertecies[k++] = pos;
       }
       for (auto pos : tiles[i].two.asBuf()) {
-        mirrorsVertecies[mirrorI++] = pos;
+        mirrorsVertecies[k++] = pos;
       }
 
       tiles[i].buf = new core::VertexBuffer();
@@ -424,8 +458,6 @@ void MirrorGame::PushToBuffers() {
       pos.push_back(mirrorsVertecies[6]);
       pos.push_back(mirrorsVertecies[7]);
       tiles[i].tilePos = pos;
-      // std::copy(std::begin(NeonBlueColor), std::end(NeonBlueColor),
-      //           std::begin(tiles[i].u_borderColor));
 
       CreateMirror(tiles[i]);
     } else if (tiles[i].tileType == ETileType::EXIT) {
@@ -453,8 +485,6 @@ void MirrorGame::PushToBuffers() {
       // for uniform to scale shader for an exit tile.
       tiles[i].tilePos = pos;
       tiles[i].tilePos = pos;
-      // std::copy(std::begin(NeonBlueColor), std::end(NeonBlueColor),
-      //           std::begin(tiles[i].u_borderColor));
     }
   }
 

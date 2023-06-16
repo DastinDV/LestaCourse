@@ -40,9 +40,13 @@ struct WindowInfo {
   int height;
 };
 // ########## Mouse
+
+enum class MouseEventType { button_down, button_up, mouse_motion };
+
 struct MouseInfo {
-  double xPos;
-  double yPos;
+  float xPos;
+  float yPos;
+  MouseEventType type;
 };
 
 struct Event {

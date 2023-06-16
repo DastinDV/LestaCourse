@@ -146,7 +146,15 @@ int Engine::ProcessEvent(Event &event) {
     }
     if (sdlEvent.type == SDL_EVENT_MOUSE_MOTION) {
       event.eventType = EventType::mouse_event;
-      event.mouseInfo = {sdlEvent.motion.x, sdlEvent.motion.y};
+      event.mouseInfo = {sdlEvent.motion.x, sdlEvent.motion.y,
+                         MouseEventType::mouse_motion};
+    }
+    if (sdlEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+      if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
+        event.eventType = EventType::mouse_event;
+        event.mouseInfo = {sdlEvent.button.x, sdlEvent.button.y,
+                           MouseEventType::button_down};
+      }
     }
     if (sdlEvent.type == SDL_EVENT_WINDOW_RESIZED) {
       event.eventType = EventType::window_event;

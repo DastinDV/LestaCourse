@@ -101,8 +101,10 @@ int main() {
         }
       }
 
-      if (event.eventType == EventType::mouse_event &&
+      if (event.eventType == core::EventType::mouse_event &&
           event.mouseInfo.has_value()) {
+        if (event.mouseInfo->type == core::MouseEventType::button_down) {
+        }
       }
 
       if (event.eventType == EventType::quit)

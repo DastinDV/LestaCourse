@@ -3,7 +3,10 @@
 #include <math.h>
 
 Mirror::Mirror(Tile &mirror, std::vector<Tile> &tiles)
-    : mirror(mirror), tiles(tiles) {}
+    : mirror(mirror), tiles(tiles) {
+  this->tilePosX = mirror.j;
+  this->tilePosY = mirror.i;
+}
 
 void Mirror::Update(float dt) {
   if (isReflect) {
@@ -36,8 +39,8 @@ void Mirror::Update(float dt) {
         auto fromTile = tiles[i * mapWidth + j];
         auto toTile = tiles[i * mapWidth + xMirrorPos + radius - k];
 
-        core::GLTriangle tr1 = blend(fromTile.one, toTile.two, alpha);
-        core::GLTriangle tr2 = blend(fromTile.two, toTile.one, alpha);
+        core::GLTriangle tr1 = blend(fromTile.one, toTile.one, alpha);
+        core::GLTriangle tr2 = blend(fromTile.two, toTile.two, alpha);
         auto elements = tr1.asBuf();
         auto elements2 = tr2.asBuf();
 
@@ -64,8 +67,8 @@ void Mirror::Update(float dt) {
         auto fromTile = tiles[i * mapWidth + j];
         auto toTile = tiles[i * mapWidth + xMirrorPos - radius + k];
 
-        core::GLTriangle tr1 = blend(fromTile.one, toTile.two, alpha);
-        core::GLTriangle tr2 = blend(fromTile.two, toTile.one, alpha);
+        core::GLTriangle tr1 = blend(fromTile.one, toTile.one, alpha);
+        core::GLTriangle tr2 = blend(fromTile.two, toTile.two, alpha);
         auto elements = tr1.asBuf();
         auto elements2 = tr2.asBuf();
 
@@ -98,3 +101,7 @@ void Mirror::SetMapSizeInTiles(int mapWidth, int mapHeight) {
 int Mirror::GetRadius() const { return radius; }
 
 void Mirror::SetRadius(const int radius) { this->radius = radius; }
+
+std::pair<int, int> Mirror::GetTilePos() const {
+  return std::pair<int, int>(this->tilePosX, this->tilePosY);
+}

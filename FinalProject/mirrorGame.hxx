@@ -37,13 +37,14 @@ public:
   ~MirrorGame();
 
 private:
-  void ResizeScreen();
   void CreateTiles();
+  void CreateShaders();
   void CreatePlayer(Tile playerTile);
   void CreateMirror(Tile mirrorTile);
-  void PushToBuffers();
 
-  void CreateShaders();
+  void HighlightTiles(Mirror *mirror);
+  void PushToBuffers();
+  void ResizeScreen();
   void InitUniforms();
 
   core::GlRenderer *glRenderer;
@@ -69,7 +70,9 @@ private:
 
   float *exitVertecies;
   Player *player;
-  Mirror *mirror;
+  Mirror *currentMirror;
+
+  std::vector<Mirror *> mirrors;
 
   float timeSinceRun = 0.0;
 };

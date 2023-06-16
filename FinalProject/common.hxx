@@ -28,6 +28,11 @@ static float manhatten_distance(float from, float to) {
   return std::sqrt(std::abs(std::pow(from, 2) - std::pow(to, 2)));
 }
 
+static std::pair<int, int> GetTilePosByClickPos(float x, float y, float w,
+                                                float h) {
+  return std::pair<int, int>(x / 32, y / 32);
+}
+
 enum class ETileType { EMPTY, ROAD, EXIT, VERTICAL, HORIZONTAL, CROSS };
 
 struct Tile {

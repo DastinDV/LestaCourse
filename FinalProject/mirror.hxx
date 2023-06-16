@@ -14,11 +14,16 @@ public:
   int GetRadius() const;
   void SetRadius(const int radius);
 
+  std::pair<int, int> GetTilePos() const;
+
 private:
   int mapWidth;
   int mapHeight;
 
-  int radius = 1;
+  int tilePosX;
+  int tilePosY;
+
+  int radius = 2;
 
   bool isReflect;
   float accumulateTime;
