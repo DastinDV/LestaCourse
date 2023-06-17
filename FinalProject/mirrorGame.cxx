@@ -54,6 +54,7 @@ void MirrorGame::Render() {
         roadShader.SetUniform1i(0, "u_isFlicker");
 
       glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
+      tiles[i].buf->Unbind();
     }
     if (tiles[i].tileType == ETileType::VERTICAL) {
       mirrorShader.Use();
@@ -66,6 +67,7 @@ void MirrorGame::Render() {
       mirrorShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
       mirrorShader.SetUniform1f(timeSinceRun, "u_time");
       glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
+      tiles[i].buf->Unbind();
     }
     if (tiles[i].tileType == ETileType::EXIT) {
       exitShader.Use();
@@ -78,6 +80,7 @@ void MirrorGame::Render() {
       exitShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
       exitShader.SetUniform1f(timeSinceRun, "u_time");
       glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
+      tiles[i].buf->Unbind();
     }
   }
 
@@ -88,7 +91,7 @@ void MirrorGame::Update(float deltaTime) {
   timeSinceRun += deltaTime;
   mirrorShader.Use();
   if (currentMirror) {
-    currentMirror->Update(deltaTime);
+    currentMirror->Update(deltaTime, mirrors);
   }
 }
 
@@ -134,8 +137,10 @@ void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
 
       auto tilePos = GetTilePosByClickPos(event.mouseInfo->xPos,
                                           event.mouseInfo->yPos, 32.0, 32.0);
+
       std::cout << "Clicked tilePos = " << tilePos.first << " "
                 << tilePos.second << std::endl;
+
       auto it = std::find_if(
           mirrors.begin(), mirrors.end(), [&tilePos](const Mirror *nextMirror) {
             return nextMirror->GetTilePos().first == tilePos.first &&
@@ -403,7 +408,15 @@ void MirrorGame::PushToBuffers() {
       for (auto pos : tiles[i].two.asBuf()) {
         emptyVertecies[k++] = pos;
       }
+
+      tiles[i].buf = new core::VertexBuffer();
+      tiles[i].buf->Bind();
+      tiles[i].buf->SetData(emptyVertecies, 1 * 2 * 9 * sizeof(float));
+      tiles[i].buf->SetElementsCount(1 * 6);
+      glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
+                               0);
       tiles[i].vertecies = emptyVertecies;
+      tiles[i].buf->Unbind();
 
       std::vector<float> pos;
       pos.push_back(emptyVertecies[6]);
@@ -478,6 +491,7 @@ void MirrorGame::PushToBuffers() {
 
       tiles[i].buf->Unbind();
       tiles[i].vertecies = exitVertecies;
+
       std::vector<float> pos;
       pos.push_back(exitVertecies[6]);
       pos.push_back(exitVertecies[7]);

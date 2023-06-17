@@ -43,6 +43,7 @@ struct Tile {
   int j = 0;
   ETileType tileType;
   core::VertexBuffer *buf;
+
   std::vector<float> tilePos;
   float *vertecies;
   bool isWalkable = false;

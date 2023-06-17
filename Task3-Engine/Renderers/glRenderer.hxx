@@ -40,6 +40,20 @@ struct GLTriangle {
     return elements;
   }
 
+  void fillGlVertecies(float *data, int offset = 0) {
+    v[0].x = data[0 + offset];
+    v[0].y = data[1 + offset];
+    v[0].z = data[2 + offset];
+
+    v[1].x = data[3 + offset];
+    v[1].y = data[4 + offset];
+    v[1].z = data[5 + offset];
+
+    v[2].x = data[6 + offset];
+    v[2].y = data[7 + offset];
+    v[2].z = data[8 + offset];
+  }
+
   GlVertex v[3];
 };
 
