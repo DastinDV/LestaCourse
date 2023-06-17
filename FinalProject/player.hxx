@@ -24,6 +24,8 @@ public:
   void SetYSizeCorrection(float factor);
 
   void AdjustWorldCoordinates();
+  int GetXTilePos();
+  int GetYTilePos();
 
 private:
   core::VertexBuffer buf;

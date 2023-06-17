@@ -2,8 +2,8 @@
 #include <iostream>
 #include <math.h>
 
-Mirror::Mirror(Tile &mirror, std::vector<Tile> &tiles)
-    : mirror(mirror), tiles(tiles) {
+Mirror::Mirror(Tile &mirror, std::vector<Tile> &tiles, Player *player)
+    : mirror(mirror), tiles(tiles), player(player) {
   this->tilePosX = mirror.j;
   this->tilePosY = mirror.i;
 }
@@ -66,6 +66,26 @@ void Mirror::Update(float dt, std::vector<Mirror *> &mirrors) {
 
           std::swap(tiles[i * mapWidth + j].tileType,
                     tiles[i * mapWidth + xMirrorPos + radius - k].tileType);
+
+          if (tiles[i * mapWidth + j].i == player->GetYTilePos() &&
+              tiles[i * mapWidth + j].j == player->GetXTilePos()) {
+            float xDiff =
+                std::abs(tiles[i * mapWidth + j].j -
+                         tiles[i * mapWidth + xMirrorPos + radius - k].j);
+            player->Move(tiles, {xDiff, 0});
+          }
+        }
+      }
+
+      for (int i = yMirrorPos - radius; i < yMirrorPos + radius + 1; i++) {
+        for (int j = xMirrorPos + radius, k = 0; j > xMirrorPos; j--, k++) {
+          if (tiles[i * mapWidth + j].i == player->GetYTilePos() &&
+              tiles[i * mapWidth + j].j == player->GetXTilePos()) {
+            float xDiff =
+                std::abs(tiles[i * mapWidth + j].j -
+                         tiles[i * mapWidth + xMirrorPos - radius + k].j);
+            player->Move(tiles, {-xDiff, 0});
+          }
         }
       }
     }
@@ -98,10 +118,6 @@ void Mirror::Update(float dt, std::vector<Mirror *> &mirrors) {
         auto fromTile = tiles[i * mapWidth + j];
         auto toTile = tiles[i * mapWidth + xMirrorPos - radius + k];
 
-        std::cout << "FromTile " << fromTile.j << " " << fromTile.i
-                  << std::endl;
-        std::cout << "FromTile " << fromTile.j << " " << fromTile.i
-                  << std::endl;
         core::GLTriangle tr1 = blend(fromTile.one, toTile.one, alpha);
         core::GLTriangle tr2 = blend(fromTile.two, toTile.two, alpha);
         auto elements = tr1.asBuf();

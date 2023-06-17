@@ -363,7 +363,7 @@ void MirrorGame::CreatePlayer(Tile playerTile) {
 }
 
 void MirrorGame::CreateMirror(Tile mirrorTile) {
-  Mirror *mirror = new Mirror(mirrorTile, tiles);
+  Mirror *mirror = new Mirror(mirrorTile, tiles, player);
   mirror->SetMapSizeInTiles(map.GetMapWidth(), map.GetMapHeight());
   mirrors.push_back(mirror);
 }

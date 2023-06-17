@@ -24,6 +24,8 @@ void Player::Move(std::vector<Tile> &tiles, std::vector<float> direction) {
 
   std::cout << "NextTile: " << nextTilePos[0] << " " << nextTilePos[1]
             << std::endl;
+  std::cout << "Direction: " << direction[0] << " " << direction[1]
+            << std::endl;
   int x = nextTilePos[0];
   int y = nextTilePos[1];
 
@@ -78,6 +80,7 @@ void Player::SetYSizeCorrection(float factor) {
 }
 
 void Player::AdjustWorldCoordinates() {
+  shader.Use();
   float *result = core::Translate(localPos);
   std::vector<float> adjust = {(localPos[0] - (float)16.0),
                                (localPos[1] - (float)64.0), 0.0};
@@ -89,3 +92,7 @@ void Player::AdjustWorldCoordinates() {
 
   shader.SetMatrix4fvUniform(result, "u_transform");
 }
+
+int Player::GetXTilePos() { return this->tilePosX; }
+
+int Player::GetYTilePos() { return this->tilePosY; }

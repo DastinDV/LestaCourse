@@ -4,11 +4,12 @@
 #include "vertexBuffer.hxx"
 
 #include "common.hxx"
+#include "player.hxx"
 #include <vector>
 
 class Mirror {
 public:
-  Mirror(Tile &mirror, std::vector<Tile> &tiles);
+  Mirror(Tile &mirror, std::vector<Tile> &tiles, Player *player);
 
   void Update(float dt, std::vector<Mirror *> &mirrors);
   void Reflect(std::vector<Tile> &tiles);
@@ -33,4 +34,5 @@ private:
   bool forwardMove = true;
   Tile mirror;
   std::vector<Tile> &tiles;
+  Player *player;
 };
