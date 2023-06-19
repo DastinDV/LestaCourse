@@ -228,6 +228,23 @@ float *OrthoProj(float left, float right, float bottom, float top, float near,
   return matrix;
 }
 
+std::vector<float> Unproject(std::vector<float> win, std::vector<float> model,
+                             float xCorrection, float yCorrection, int width,
+                             int height) {
+  glm::vec3 g_win(win[0], win[1], win[2]);
+  proj = glm::ortho(0.0, xCorrection * 640.0, 0.0, yCorrection * 480.0, 0.0,
+                    100.0);
+  trans = glm::mat4(1.0f);
+  trans = glm::translate(trans, glm::vec3(model[0], model[1], model[2]));
+  glm::vec4 viewport(0.0f, 0.0f, (float)width, (float)height);
+  glm::vec3 result = glm::unProject(g_win, trans, proj, viewport);
+
+  std::cout << "unproject " << result[0] << " " << result[1] << " " << result[2]
+            << std::endl;
+
+  return {result[0], result[1], result[2]};
+}
+
 std::pair<int, int> GetScreenSize() {
   int w, h;
   SDL_GetWindowSize(window, &w, &h);

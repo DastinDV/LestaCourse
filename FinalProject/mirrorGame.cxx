@@ -131,16 +131,17 @@ void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
   if (event.eventType == core::EventType::mouse_event &&
       event.mouseInfo.has_value()) {
     if (event.mouseInfo->type == core::MouseEventType::button_down) {
-      std::cout << "Clicked " << std::endl;
       std::cout << "Clicked pos = " << event.mouseInfo->xPos << " "
                 << event.mouseInfo->yPos << std::endl;
 
-      auto tilePos = GetTilePosByClickPos(event.mouseInfo->xPos,
-                                          event.mouseInfo->yPos, 32.0, 32.0);
+      auto tilePos = GetTilePosByClickPos(
+          event.mouseInfo->xPos, event.mouseInfo->yPos, 32.0, 32.0, screenWidth,
+          screenHeight, xSizeCorrection, ySizeCorrection);
 
       std::cout << "Clicked tilePos = " << tilePos.first << " "
                 << tilePos.second << std::endl;
 
+      std::cout << std::endl;
       auto it = std::find_if(
           mirrors.begin(), mirrors.end(), [&tilePos](const Mirror *nextMirror) {
             return nextMirror->GetTilePos().first == tilePos.first &&
@@ -225,6 +226,7 @@ void MirrorGame::ResizeScreen() {
     player->SetXSizeCorrection(factor);
     player->AdjustWorldCoordinates();
 
+    xSizeCorrection = factor;
     std::cout << std::endl;
   } else {
     factor = targetAR / aspectRatio;
@@ -271,6 +273,8 @@ void MirrorGame::ResizeScreen() {
     playerShader.SetMatrix4fvUniform(proj, "u_projection");
     player->SetYSizeCorrection(factor);
     player->AdjustWorldCoordinates();
+
+    ySizeCorrection = factor;
     std::cout << std::endl;
   }
 }

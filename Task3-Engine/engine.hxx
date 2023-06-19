@@ -61,6 +61,11 @@ float *Rotate(float angle);
 float *Scale(float scaleFactor);
 float *OrthoProj(float left, float right, float bottom, float top, float near,
                  float far);
+
+std::vector<float> Unproject(std::vector<float> win, std::vector<float> model,
+                             float xCorrection, float yCorrection,
+                             int screenWidth, int screenHeight);
+
 std::pair<int, int> GetScreenSize();
 
 class IZ_DECLSPEC Engine {

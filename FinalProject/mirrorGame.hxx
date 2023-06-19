@@ -60,6 +60,8 @@ private:
   float aspectRatio;
   float targetAR;
   float factor;
+  float xSizeCorrection = 1.0;
+  float ySizeCorrection = 1.0;
 
   float tileSize = 32.0f;
   std::vector<Tile> tiles;
