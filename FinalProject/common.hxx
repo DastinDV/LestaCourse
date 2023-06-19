@@ -41,9 +41,6 @@ static std::pair<int, int> GetTilePosByClickPos(float x, float y, float w,
   float yTranslate =
       ((480.0 * ySizeCorrection) - 480.0f) / (480.0 * ySizeCorrection);
 
-  std::cout << "xTranslate " << xTranslate << std::endl;
-  std::cout << "yTranslate " << yTranslate << std::endl;
-
   // Тайлы не имеют трансформа относительно своей позиции.
   std::vector<float> model = {0.0f, 0.0f, 0.0f};
   auto result = core::Unproject(screenCoord, model, xSizeCorrection,
@@ -59,6 +56,17 @@ static std::pair<int, int> GetTilePosByClickPos(float x, float y, float w,
 }
 
 enum class ETileType { EMPTY, ROAD, EXIT, VERTICAL, HORIZONTAL, CROSS };
+enum class EGameState { PLAY, PAUSE, NEXTLVL, WIN, MENU };
+
+class GameState {
+public:
+  GameState() { currentGameState = EGameState::PLAY; }
+  void SetGameState(EGameState newState) { this->currentGameState = newState; }
+  EGameState GetGameState() { return currentGameState; }
+
+private:
+  EGameState currentGameState;
+};
 
 struct Tile {
   core::GLTriangle one;

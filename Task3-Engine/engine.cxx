@@ -18,9 +18,9 @@ const std::unordered_map<SDL_Keycode, KeyCode> sdlToEngineKeyBinding{
     {SDLK_w, KeyCode::w},         {SDLK_s, KeyCode::s},
     {SDLK_a, KeyCode::a},         {SDLK_d, KeyCode::d},
     {SDLK_q, KeyCode::q},         {SDLK_e, KeyCode::e},
-    {SDLK_z, KeyCode::z},         {SDLK_x, KeyCode::x},
-    {SDLK_LCTRL, KeyCode::lctrl}, {SDLK_RCTRL, KeyCode::rctrl},
-    {SDLK_SPACE, KeyCode::space}};
+    {SDLK_r, KeyCode::r},         {SDLK_z, KeyCode::z},
+    {SDLK_x, KeyCode::x},         {SDLK_LCTRL, KeyCode::lctrl},
+    {SDLK_RCTRL, KeyCode::rctrl}, {SDLK_SPACE, KeyCode::space}};
 
 static std::ostream &operator<<(std::ostream &out, const SDL_version &v) {
   out << static_cast<int>(v.major) << '.';

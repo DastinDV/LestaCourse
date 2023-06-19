@@ -9,14 +9,6 @@
 MirrorGame::MirrorGame() { std::cout << "FinalGame created!" << std::endl; }
 
 void MirrorGame::Init() {
-  const std::string path = "./../../FinalProject/Assets/map1.txt";
-  glRenderer = new core::GlRenderer();
-
-  if (map.LoadMap(path))
-    throw std::runtime_error("Couldn't load map");
-
-  std::cout << "FinalGame Init!" << std::endl;
-
   targetAR = static_cast<float>(targetScreenWidth) /
              static_cast<float>(targetScreenHeight);
   auto screen = core::GetScreenSize();
@@ -25,13 +17,12 @@ void MirrorGame::Init() {
   u_screenSize[0] = static_cast<float>(screenWidth);
   u_screenSize[1] = static_cast<float>(screenHeight);
 
-  CreateTiles();
-  PushToBuffers();
-
+  glRenderer = new core::GlRenderer();
   CreateShaders();
-  InitUniforms();
 
-  ResizeScreen();
+  LoadLVL(currentLVL);
+
+  std::cout << "FinalGame Init!" << std::endl;
 }
 
 void MirrorGame::Render() {
@@ -93,6 +84,11 @@ void MirrorGame::Update(float deltaTime) {
   if (currentMirror) {
     currentMirror->Update(deltaTime, mirrors);
   }
+
+  if (gameState.GetGameState() == EGameState::NEXTLVL) {
+    LoadLVL(currentLVL++);
+    gameState.SetGameState(EGameState::PLAY);
+  }
 }
 
 void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
@@ -124,6 +120,16 @@ void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
       if (event.keyBoardInfo->keyCode == core::KeyCode::q) {
         if (currentMirror)
           currentMirror->Reflect(tiles);
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::e) {
+        if (currentMirror)
+          currentMirror->SetRadius(currentMirror->GetRadius() + 1);
+        HighlightTiles(currentMirror);
+      }
+      if (event.keyBoardInfo->keyCode == core::KeyCode::r) {
+        if (currentMirror)
+          currentMirror->SetRadius(currentMirror->GetRadius() - 1);
+        HighlightTiles(currentMirror);
       }
     }
   }
@@ -347,8 +353,11 @@ void MirrorGame::CreatePlayer(Tile playerTile) {
   playerShader.CreateShaderProgramFromFile(
       "./../../FinalProject/Assets/Shaders/tileVS.txt",
       "./../../FinalProject/Assets/Shaders/playerFS.txt");
+  if (player)
+    delete player;
 
-  player = new Player(map.GetPlayerTilePosX(), map.GetPlayerTilePosY());
+  player =
+      new Player(map.GetPlayerTilePosX(), map.GetPlayerTilePosY(), &gameState);
   player->SetShader(playerShader);
 
   float *playerVertecies = player->GetVertecies();
@@ -370,6 +379,25 @@ void MirrorGame::CreateMirror(Tile mirrorTile) {
   Mirror *mirror = new Mirror(mirrorTile, tiles, player);
   mirror->SetMapSizeInTiles(map.GetMapWidth(), map.GetMapHeight());
   mirrors.push_back(mirror);
+}
+
+void MirrorGame::LoadLVL(int lvl) {
+  for (auto &tile : tiles) {
+    delete tile.buf;
+    delete tile.vertecies;
+  }
+  tiles.clear();
+
+  std::string path = pathToMaps + std::to_string(currentLVL) + ".txt";
+
+  if (map.LoadMap(path))
+    throw std::runtime_error("Couldn't load map");
+
+  CreateTiles();
+  PushToBuffers();
+
+  InitUniforms();
+  ResizeScreen();
 }
 
 void MirrorGame::HighlightTiles(Mirror *mirror) {

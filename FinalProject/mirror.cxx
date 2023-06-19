@@ -17,6 +17,7 @@ void Mirror::Update(float dt, std::vector<Mirror *> &mirrors) {
     // float alpha = (std::sin(accumulateTime * 0.5f) + 1) / 2 + 1;
     float alpha = 1;
     if (alpha > 0.999 || alpha < 0.001) {
+      bool wasMoved = false;
       forwardMove = !forwardMove;
       isReflect = false;
 
@@ -28,6 +29,11 @@ void Mirror::Update(float dt, std::vector<Mirror *> &mirrors) {
           auto toTilePos =
               std::make_pair(tiles[i * mapWidth + xMirrorPos + radius - k].j,
                              tiles[i * mapWidth + xMirrorPos + radius - k].i);
+
+          if (tiles[i * mapWidth + j].tileType == ETileType::EXIT ||
+              tiles[i * mapWidth + xMirrorPos + radius - k].tileType ==
+                  ETileType::EXIT)
+            continue;
 
           if (tiles[i * mapWidth + j].tileType == ETileType::VERTICAL) {
             auto it = std::find_if(
@@ -73,18 +79,21 @@ void Mirror::Update(float dt, std::vector<Mirror *> &mirrors) {
                 std::abs(tiles[i * mapWidth + j].j -
                          tiles[i * mapWidth + xMirrorPos + radius - k].j);
             player->Move(tiles, {xDiff, 0});
+            wasMoved = true;
           }
         }
       }
 
-      for (int i = yMirrorPos - radius; i < yMirrorPos + radius + 1; i++) {
-        for (int j = xMirrorPos + radius, k = 0; j > xMirrorPos; j--, k++) {
-          if (tiles[i * mapWidth + j].i == player->GetYTilePos() &&
-              tiles[i * mapWidth + j].j == player->GetXTilePos()) {
-            float xDiff =
-                std::abs(tiles[i * mapWidth + j].j -
-                         tiles[i * mapWidth + xMirrorPos - radius + k].j);
-            player->Move(tiles, {-xDiff, 0});
+      if (!wasMoved) {
+        for (int i = yMirrorPos - radius; i < yMirrorPos + radius + 1; i++) {
+          for (int j = xMirrorPos + radius, k = 0; j > xMirrorPos; j--, k++) {
+            if (tiles[i * mapWidth + j].i == player->GetYTilePos() &&
+                tiles[i * mapWidth + j].j == player->GetXTilePos()) {
+              float xDiff =
+                  std::abs(tiles[i * mapWidth + j].j -
+                           tiles[i * mapWidth + xMirrorPos - radius + k].j);
+              player->Move(tiles, {-xDiff, 0});
+            }
           }
         }
       }
@@ -145,7 +154,9 @@ void Mirror::SetMapSizeInTiles(int mapWidth, int mapHeight) {
 
 int Mirror::GetRadius() const { return radius; }
 
-void Mirror::SetRadius(const int radius) { this->radius = radius; }
+void Mirror::SetRadius(const int radius) {
+  this->radius = std::clamp(radius, 1, 3);
+}
 
 std::pair<int, int> Mirror::GetTilePos() const {
   return std::pair<int, int>(this->tilePosX, this->tilePosY);

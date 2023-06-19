@@ -3,6 +3,7 @@
 #include "../Renderers/glRenderer.hxx"
 #include "../Task3-Engine/engine.hxx"
 #include "../Task3-Engine/game.hxx"
+
 #include "common.hxx"
 #include "map.hxx"
 #include "mirror.hxx"
@@ -42,6 +43,7 @@ private:
   void CreatePlayer(Tile playerTile);
   void CreateMirror(Tile mirrorTile);
 
+  void LoadLVL(int lvl);
   void HighlightTiles(Mirror *mirror);
   void PushToBuffers();
   void ResizeScreen();
@@ -49,6 +51,9 @@ private:
 
   core::GlRenderer *glRenderer;
   Map map;
+  GameState gameState;
+
+  int currentLVL = 1;
 
   float targetScreenWidth = 640.0f;
   float targetScreenHeight = 480.0f;
@@ -77,6 +82,7 @@ private:
   std::vector<Mirror *> mirrors;
 
   float timeSinceRun = 0.0;
+  const std::string pathToMaps = "./../../FinalProject/Assets/map";
 };
 
 IZ_DECLSPEC core::Game *CreateGame() { return new MirrorGame(); }

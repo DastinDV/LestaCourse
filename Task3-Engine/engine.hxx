@@ -17,7 +17,7 @@ namespace core {
 enum class EventType { keyboard_event, mouse_event, window_event, quit };
 
 // ########## Keyboard
-enum class KeyCode { w, a, s, d, q, e, z, x, space, lctrl, rctrl, not_bind };
+enum class KeyCode { w, a, s, d, q, e, r, z, x, space, lctrl, rctrl, not_bind };
 
 enum class KeyboardEventType {
   key_pressed,

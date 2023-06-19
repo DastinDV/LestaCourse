@@ -2,7 +2,8 @@
 #include <iostream>
 #include <vector>
 
-Player::Player(float posX, float posY) : tilePosX(posX), tilePosY(posY) {
+Player::Player(float posX, float posY, GameState *gameState)
+    : tilePosX(posX), tilePosY(posY), gameState(gameState) {
   playerVertecies = new float[18];
 }
 
@@ -29,8 +30,16 @@ void Player::Move(std::vector<Tile> &tiles, std::vector<float> direction) {
   int x = nextTilePos[0];
   int y = nextTilePos[1];
 
-  if (tiles[y * mapWidth + x].tileType != ETileType::ROAD)
+  std::cout << "NextTile Type = "
+            << static_cast<int>(tiles[y * mapWidth + x].tileType) << std::endl;
+  if (tiles[y * mapWidth + x].tileType != ETileType::ROAD &&
+      tiles[y * mapWidth + x].tileType != ETileType::EXIT)
     return;
+
+  if (tiles[y * mapWidth + x].tileType == ETileType::EXIT) {
+    gameState->SetGameState(EGameState::NEXTLVL);
+    std::cout << "Finish!" << std::endl;
+  }
 
   tilePosX = nextTilePos[0];
   tilePosY = nextTilePos[1];
@@ -46,6 +55,7 @@ void Player::Move(std::vector<Tile> &tiles, std::vector<float> direction) {
   std::cout << "Player worldPos = " << worldPos[0] << " " << worldPos[1]
             << std::endl;
 
+  std::cout << std::endl;
   AdjustWorldCoordinates();
 }
 
@@ -96,3 +106,5 @@ void Player::AdjustWorldCoordinates() {
 int Player::GetXTilePos() { return this->tilePosX; }
 
 int Player::GetYTilePos() { return this->tilePosY; }
+
+Player::~Player() { delete[] playerVertecies; }

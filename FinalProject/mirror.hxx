@@ -27,7 +27,7 @@ private:
   int tilePosX;
   int tilePosY;
 
-  int radius = 2;
+  int radius = 1;
 
   bool isReflect = false;
   float accumulateTime;

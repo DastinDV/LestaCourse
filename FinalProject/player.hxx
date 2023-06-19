@@ -9,7 +9,7 @@
 
 class Player {
 public:
-  Player(float posX, float posY);
+  Player(float posX, float posY, GameState *gameState);
 
   void Init();
   void Move(std::vector<Tile> &tiles, std::vector<float> direction);
@@ -26,6 +26,8 @@ public:
   void AdjustWorldCoordinates();
   int GetXTilePos();
   int GetYTilePos();
+
+  ~Player();
 
 private:
   core::VertexBuffer buf;
@@ -48,4 +50,6 @@ private:
   float *playerVertecies;
   std::vector<float> direction;
   core::Shader shader;
+
+  GameState *gameState;
 };

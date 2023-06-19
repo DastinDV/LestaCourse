@@ -5,6 +5,10 @@
 
 int Map::LoadMap(const std::string &filePath) {
   try {
+
+    if (map)
+      delete[] map;
+
     std::ifstream infile(filePath);
 
     std::string line;
