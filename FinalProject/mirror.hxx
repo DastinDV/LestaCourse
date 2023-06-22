@@ -35,4 +35,5 @@ private:
   Tile mirror;
   std::vector<Tile> &tiles;
   Player *player;
+  ETileType mirrorType; // Vertical Horizontal
 };

@@ -217,12 +217,13 @@ int main() {
       ImGui_ImplSDL3_NewFrame();
       ImGui::NewFrame();
 
-      ImGui::ShowDemoWindow();
+      // ImGui::ShowDemoWindow();
 
       consoleGame->OnEvent(event, deltaTime);
       if (isMainMenu) {
         {
           ImGui::SetNextWindowSize({mainMenuSizeX, mainMenuSizeY});
+          ImGui::SetNextWindowPos({0.0f, 0.0f});
           ImGui::Begin("OpenGL Texture Text");
           ImGui::Text("pointer = %p", my_image_texture);
           ImGui::Text("size = %d x %d", my_image_width, my_image_height);

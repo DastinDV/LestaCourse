@@ -52,7 +52,8 @@ void MirrorGame::Render() {
       glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
       tiles[i].buf->Unbind();
     }
-    if (tiles[i].tileType == ETileType::VERTICAL) {
+    if (tiles[i].tileType == ETileType::VERTICAL ||
+        tiles[i].tileType == ETileType::HORIZONTAL) {
       mirrorShader.Use();
       tiles[i].buf->Bind();
       glRenderer->SetAttribute(0, 3, core::EGlType::gl_float, 3 * sizeof(float),
@@ -62,6 +63,8 @@ void MirrorGame::Render() {
       u_tilePos[1] = tiles[i].tilePos[1];
       mirrorShader.SetVec2fvUniform(u_tilePos, "u_tileCoordinate");
       mirrorShader.SetUniform1f(timeSinceRun, "u_time");
+      mirrorShader.SetUniform1i(static_cast<int>(tiles[i].tileType),
+                                "u_mirrorType");
       glRenderer->DrawTriangle(tiles[i].buf->GetElementsCount());
       tiles[i].buf->Unbind();
     }
@@ -214,7 +217,8 @@ void MirrorGame::ResizeScreen() {
 
     mirrorShader.Use();
     for (int i = 0; i < tiles.size(); i++) {
-      if (tiles[i].tileType == ETileType::VERTICAL) {
+      if (tiles[i].tileType == ETileType::VERTICAL ||
+          tiles[i].tileType == ETileType::HORIZONTAL) {
         mirrorShader.SetMatrix4fvUniform(result, "u_translate");
         mirrorShader.SetMatrix4fvUniform(proj, "u_projection");
         mirrorShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
@@ -574,13 +578,16 @@ void MirrorGame::InitUniforms() {
 
   mirrorShader.Use();
   for (int i = 0; i < tiles.size(); i++) {
-    if (tiles[i].tileType == ETileType::VERTICAL) {
+    if (tiles[i].tileType == ETileType::VERTICAL ||
+        tiles[i].tileType == ETileType::HORIZONTAL) {
       mirrorShader.SetUniform1f(this->tileSize, "u_tileSize");
       float u_mirrorPos[2];
       u_mirrorPos[0] = tiles[i].tilePos[0];
       u_mirrorPos[0] = tiles[i].tilePos[1];
       mirrorShader.SetVec2fvUniform(u_mirrorPos, "u_tileCoordinate");
       mirrorShader.SetMatrix4fvUniform(transform, "u_transform");
+      mirrorShader.SetUniform1i(static_cast<int>(tiles[i].tileType),
+                                "u_mirrorType");
     }
   }
 }

@@ -9,6 +9,7 @@ uniform vec2 u_windowSize;
 uniform float u_time;
 uniform vec2 u_tileCoordinate;
 uniform float u_tileSize;
+uniform int u_mirrorType;
 
 float remap( float minval, float maxval, float curval )
 {
@@ -60,15 +61,27 @@ void main()
 
     vec3 col = vec3(0.0);
 
-    if (uvTile.x >= -0.25 && uvTile.x <= 0){
-        col = mix(colBlue, colWhite, remap(-0.25, 0.0, uvTile.x)); 
-        FragColor = vec4(col, 1.0);
-    } else if (uvTile.x >= 0.0 && uvTile.x <= 0.25){
-        col = mix(colWhite, colBlue, remap(0, 0.25, uvTile.x));
-        FragColor = vec4(col, 1.0);
+    if (u_mirrorType == 3){
+        if (uvTile.x >= -0.25 && uvTile.x <= 0){
+            col = mix(colBlue, colWhite, remap(-0.25, 0.0, uvTile.x)); 
+            FragColor = vec4(col, 1.0);
+        } else if (uvTile.x >= 0.0 && uvTile.x <= 0.25){
+            col = mix(colWhite, colBlue, remap(0, 0.25, uvTile.x));
+            FragColor = vec4(col, 1.0);
+        }
+        else
+            FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    } else {
+       if (uvTile.y >= -0.25 && uvTile.y <= 0){
+            col = mix(colBlue, colWhite, remap(-0.25, 0.0, uvTile.y)); 
+            FragColor = vec4(col, 1.0);
+        } else if (uvTile.y >= 0.0 && uvTile.y <= 0.25){
+            col = mix(colWhite, colBlue, remap(0, 0.25, uvTile.y));
+            FragColor = vec4(col, 1.0);
+        }
+        else
+            FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     }
-    else
-        FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 
     if (uvTile.x <= -0.95 || uvTile.x >= 0.95){
         FragColor = vec4(neonBlue, 1.0);
