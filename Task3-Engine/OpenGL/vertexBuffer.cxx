@@ -9,7 +9,6 @@ namespace core {
 VertexBuffer::VertexBuffer() {
   glGenBuffers(1, &bufferId);
   glCheckError();
-  std::cout << bufferId << std::endl;
 }
 
 VertexBuffer::VertexBuffer(const void *data, unsigned int size) {

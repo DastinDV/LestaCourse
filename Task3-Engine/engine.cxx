@@ -6,6 +6,9 @@
 #include "canvas.hxx"
 #include "engine.hxx"
 #include "glad/glad.h"
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl3.h"
 #include <SDL3/SDL.h>
 
 namespace core {
@@ -99,6 +102,21 @@ int Engine::Initialize(int screenWidth, int screenHeight) {
 
   GetOpenGLVersionInfo();
 
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+
+  ImGuiIO &io = ImGui::GetIO();
+  (void)io;
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+
+  ImGui_ImplSDL3_InitForOpenGL(window, openGLContext);
+  ImGui_ImplOpenGL3_Init();
+  ImGui::StyleColorsDark();
+
   return EXIT_SUCCESS;
 }
 
@@ -134,6 +152,8 @@ KeyboardInfo KeyBinding(SDL_Keycode from, KeyboardEventType keyboardEvent) {
 int Engine::ProcessEvent(Event &event) {
   SDL_Event sdlEvent;
   while (SDL_PollEvent(&sdlEvent)) {
+
+    ImGui_ImplSDL3_ProcessEvent(&sdlEvent);
     if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
       event.eventType = EventType::keyboard_event;
       event.keyBoardInfo =

@@ -4,6 +4,10 @@
 #include "glRenderer.hxx"
 #include "glad/glad.h"
 #include "helper.hxx"
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl3.h"
+#include "imgui_impl_win32.h"
 #include "lineRenderer.hxx"
 #include "shader.hxx"
 #include "triangleRenderer.hxx"
@@ -18,6 +22,67 @@
 #include <filesystem>
 #include <iostream>
 #include <thread>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+// Simple helper function to load an image into a OpenGL texture with common
+// settings
+bool LoadTextureFromFile(const char *filename, GLuint *out_texture,
+                         int *out_width, int *out_height) {
+  // Load from file
+  int image_width = 0;
+  int image_height = 0;
+  unsigned char *image_data =
+      stbi_load(filename, &image_width, &image_height, NULL, 4);
+  if (image_data == NULL)
+    return false;
+
+  // Create a OpenGL texture identifier
+  GLuint image_texture;
+  glGenTextures(1, &image_texture);
+  glBindTexture(GL_TEXTURE_2D, image_texture);
+
+  // Setup filtering parameters for display
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                  GL_CLAMP_TO_EDGE); // This is required on WebGL for non
+                                     // power-of-two textures
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+
+  // Upload pixels into texture
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, image_data);
+  stbi_image_free(image_data);
+
+  *out_texture = image_texture;
+  *out_width = image_width;
+  *out_height = image_height;
+
+  return true;
+}
+
+void CenterNextElement(float width) {
+  ImGui::SetCursorPosX((ImGui::GetWindowWidth() - width) / 2);
+}
+
+bool ButtonCenteredOnLine(const char *label, ImVec2 buttonSize,
+                          float alignment = 0.5f) {
+  ImGuiStyle &style = ImGui::GetStyle();
+
+  float size = buttonSize.x;
+  float avail = ImGui::GetContentRegionAvail().x;
+
+  float off = (avail - size) * alignment;
+  if (off > 0.0f)
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+
+  return ImGui::Button(label, buttonSize);
+}
 
 int main() {
   {
@@ -59,6 +124,39 @@ int main() {
     float timeSinceRun = 0.0;
     long last;
 
+    // // Setup Dear ImGui context
+    // IMGUI_CHECKVERSION();
+    // ImGui::CreateContext();
+
+    // ImGui_ImplSDL3_InitForOpenGL(window, openGLContext);
+    // ImGui_ImplOpenGL3_Init();
+    // ImGui::StyleColorsDark();
+
+    ImGuiIO &io = ImGui::GetIO();
+    // io.ConfigFlags |=
+    //     ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    // io.ConfigFlags |=
+    //     ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+
+    bool show_demo_window = true;
+    bool show_another_window = false;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    int my_image_width = 0;
+    int my_image_height = 0;
+    GLuint my_image_texture = 0;
+    bool ret = LoadTextureFromFile(
+        "../../FinalProject/Assets/Images/MirrorLogo1.jpg", &my_image_texture,
+        &my_image_width, &my_image_height);
+    IM_ASSERT(ret);
+
+    float mainMenuSizeX = 640.0;
+    float mainMenuSizeY = 480.0;
+
+    bool isMainMenu = true;
+    bool isGame = false;
+    float aspectRatio = mainMenuSizeX / mainMenuSizeY;
+
     while (!quit) {
       long now = SDL_GetTicks();
 
@@ -98,6 +196,9 @@ int main() {
             event.windowInfo->type == WindowEventType::maximized) {
           engine.ResizeViewPort(event.windowInfo->width,
                                 event.windowInfo->height);
+          mainMenuSizeX = event.windowInfo->width;
+          mainMenuSizeY = event.windowInfo->height;
+          aspectRatio = mainMenuSizeX / mainMenuSizeY;
         }
       }
 
@@ -110,12 +211,48 @@ int main() {
       if (event.eventType == EventType::quit)
         quit = true;
 
-      consoleGame->OnEvent(event, deltaTime);
-
       engine.ClearScreen(timeSinceRun);
 
-      consoleGame->Update(deltaTime);
-      consoleGame->Render();
+      ImGui_ImplOpenGL3_NewFrame();
+      ImGui_ImplSDL3_NewFrame();
+      ImGui::NewFrame();
+
+      ImGui::ShowDemoWindow();
+
+      consoleGame->OnEvent(event, deltaTime);
+      if (isMainMenu) {
+        {
+          ImGui::SetNextWindowSize({mainMenuSizeX, mainMenuSizeY});
+          ImGui::Begin("OpenGL Texture Text");
+          ImGui::Text("pointer = %p", my_image_texture);
+          ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+          CenterNextElement(mainMenuSizeX - (mainMenuSizeX * 0.2f));
+          ImGui::Image((void *)(intptr_t)my_image_texture,
+                       ImVec2(mainMenuSizeX - (mainMenuSizeX * 0.2f),
+                              mainMenuSizeY / 2.0));
+
+          ImGui::Dummy(ImVec2{0.0, mainMenuSizeY / 2.0 / 10.0});
+          if (ButtonCenteredOnLine("Play", ImVec2{200.f * aspectRatio,
+                                                  mainMenuSizeY / 2.0 / 5.0}))
+            isMainMenu = false;
+          ImGui::Dummy(ImVec2{0.0, mainMenuSizeY / 2.0 / 10.0});
+          if (ButtonCenteredOnLine("Exit", ImVec2{200.f * aspectRatio,
+                                                  mainMenuSizeY / 2.0 / 5.0})) {
+            engine.CleanUp();
+            delete consoleGame;
+            quit = true;
+          }
+          ImGui::End();
+        }
+      } else {
+        consoleGame->Update(deltaTime);
+        consoleGame->Render();
+      }
+
+      // Rendering
+      ImGui::Render();
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
       engine.SwapBuffers();
     }
 
