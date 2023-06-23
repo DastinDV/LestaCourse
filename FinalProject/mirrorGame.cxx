@@ -2,11 +2,6 @@
 #include "../OpenGL/shader.hxx"
 #include "../OpenGL/vertexBuffer.hxx"
 
-// #include "imgui.h"
-// #include "imgui_impl_opengl3.h"
-// #include "imgui_impl_sdl3.h"
-// #include "imgui_impl_win32.h"
-
 #include <algorithm>
 #include <iostream>
 #include <string>
@@ -14,6 +9,7 @@
 MirrorGame::MirrorGame() { std::cout << "FinalGame created!" << std::endl; }
 
 void MirrorGame::Init() {
+  // player = new Player(0, 0, &gameState);
   targetAR = static_cast<float>(targetScreenWidth) /
              static_cast<float>(targetScreenHeight);
   auto screen = core::GetScreenSize();
@@ -24,6 +20,7 @@ void MirrorGame::Init() {
 
   glRenderer = new core::GlRenderer();
   CreateShaders();
+  InitSounds();
 
   LoadLVL(currentLVL);
 
@@ -94,6 +91,8 @@ void MirrorGame::Update(float deltaTime) {
   }
 
   if (gameState.GetGameState() == EGameState::NEXTLVL) {
+    winSound->stop();
+    winSound->play(core::SoundBuffer::properties::once);
     LoadLVL(currentLVL++);
     gameState.SetGameState(EGameState::PLAY);
   }
@@ -126,8 +125,11 @@ void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
         player->Move(tiles, {0, 1});
       }
       if (event.keyBoardInfo->keyCode == core::KeyCode::q) {
-        if (currentMirror)
+        reflectionSound->stop();
+        if (currentMirror) {
+          reflectionSound->play(core::SoundBuffer::properties::once);
           currentMirror->Reflect(tiles);
+        }
       }
       if (event.keyBoardInfo->keyCode == core::KeyCode::e) {
         if (currentMirror)
@@ -176,9 +178,7 @@ MirrorGame::~MirrorGame() {
 
   delete[] exitVertecies;
   delete player;
-  for (auto &item : mirrors) {
-    delete item;
-  }
+  CleanUpResources();
 }
 
 void MirrorGame::ResizeScreen() {
@@ -358,7 +358,7 @@ void MirrorGame::CreateTiles() {
 }
 
 void MirrorGame::CreatePlayer(Tile playerTile) {
-
+  std::cout << "Create Player " << std::endl;
   playerShader.CreateShaderProgramFromFile(
       "./../../FinalProject/Assets/Shaders/tileVS.txt",
       "./../../FinalProject/Assets/Shaders/playerFS.txt");
@@ -385,18 +385,14 @@ void MirrorGame::CreatePlayer(Tile playerTile) {
 }
 
 void MirrorGame::CreateMirror(Tile mirrorTile) {
+  // std::cout << "Create Mirror " << std::endl;
   Mirror *mirror = new Mirror(mirrorTile, tiles, player);
   mirror->SetMapSizeInTiles(map.GetMapWidth(), map.GetMapHeight());
   mirrors.push_back(mirror);
 }
 
 void MirrorGame::LoadLVL(int lvl) {
-  for (auto &tile : tiles) {
-    delete tile.buf;
-    delete tile.vertecies;
-  }
-  tiles.clear();
-
+  CleanUpResources();
   std::string path = pathToMaps + std::to_string(currentLVL) + ".txt";
 
   if (map.LoadMap(path))
@@ -590,4 +586,24 @@ void MirrorGame::InitUniforms() {
                                 "u_mirrorType");
     }
   }
+}
+
+void MirrorGame::InitSounds() {
+  reflectionSound =
+      core::CreateSoundBuffer("../../FinalProject/Assets/Music/reflection.wav");
+  assert(reflectionSound != nullptr);
+  winSound = core::CreateSoundBuffer("../../FinalProject/Assets/Music/win.wav");
+  assert(winSound != nullptr);
+}
+
+void MirrorGame::CleanUpResources() {
+  for (auto &tile : tiles) {
+    delete tile.buf;
+    delete tile.vertecies;
+  }
+  for (auto &mirror : mirrors)
+    delete mirror;
+
+  mirrors.clear();
+  tiles.clear();
 }

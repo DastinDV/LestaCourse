@@ -105,6 +105,7 @@ void Mirror::Update(float dt, std::vector<Mirror *> &mirrors) {
     }
 
     if (mirrorType == ETileType::HORIZONTAL) {
+      bool wasMoved = false;
       forwardMove = !forwardMove;
       isReflect = false;
       for (int i = yMirrorPos - radius, k = 0; i < yMirrorPos; i++, k++) {
@@ -115,6 +116,10 @@ void Mirror::Update(float dt, std::vector<Mirror *> &mirrors) {
 
           auto fromTilePos = std::make_pair(fromTile.j, fromTile.i);
           auto toTilePos = std::make_pair(toTile.j, toTile.i);
+
+          if (fromTile.tileType == ETileType::EXIT ||
+              toTile.tileType == ETileType::EXIT)
+            continue;
 
           if (fromTile.tileType == ETileType::HORIZONTAL ||
               fromTile.tileType == ETileType::VERTICAL) {
@@ -154,6 +159,29 @@ void Mirror::Update(float dt, std::vector<Mirror *> &mirrors) {
 
           std::swap(tiles[i * mapWidth + j].tileType,
                     tiles[(yMirrorPos + radius - k) * mapWidth + j].tileType);
+
+          if (fromTile.i == player->GetYTilePos() &&
+              fromTile.j == player->GetXTilePos()) {
+            float yDiff =
+                std::abs(tiles[i * mapWidth + j].i -
+                         tiles[(yMirrorPos + radius - k) * mapWidth + j].i);
+            player->Move(tiles, {0, yDiff});
+            wasMoved = true;
+          }
+        }
+      }
+
+      if (!wasMoved) {
+        for (int i = yMirrorPos + radius, k = 0; i > yMirrorPos; i--, k++) {
+          for (int j = xMirrorPos - radius; j < xMirrorPos + radius + 1; j++) {
+            if (tiles[i * mapWidth + j].i == player->GetYTilePos() &&
+                tiles[i * mapWidth + j].j == player->GetXTilePos()) {
+              float yDiff =
+                  std::abs(tiles[i * mapWidth + j].i -
+                           tiles[(yMirrorPos - radius + k) * mapWidth + j].i);
+              player->Move(tiles, {0, -yDiff});
+            }
+          }
         }
       }
     }

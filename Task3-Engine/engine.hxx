@@ -4,6 +4,7 @@
 #define IZ_DECLSPEC
 #endif
 
+#include <mutex>
 #include <optional>
 #include <string_view>
 #include <vector>
@@ -56,6 +57,7 @@ struct Event {
   std::optional<WindowInfo> windowInfo;
 };
 
+// ###### Math ######
 float *Translate(std::vector<float> &translation);
 float *Rotate(float angle);
 float *Scale(float scaleFactor);
@@ -65,8 +67,22 @@ float *OrthoProj(float left, float right, float bottom, float top, float near,
 std::vector<float> Unproject(std::vector<float> win, std::vector<float> model,
                              float xCorrection, float yCorrection,
                              int screenWidth, int screenHeight);
+// ###### Math ######
 
 std::pair<int, int> GetScreenSize();
+
+class IZ_DECLSPEC SoundBuffer {
+public:
+  enum class properties { once, looped };
+  virtual ~SoundBuffer();
+  virtual void play(const properties) = 0;
+  virtual void stop() = 0;
+};
+
+SoundBuffer *CreateSoundBuffer(std::string_view path);
+void DestroySoundBuffer(SoundBuffer *);
+
+class SoundBufferImpl;
 
 class IZ_DECLSPEC Engine {
 public:
@@ -82,7 +98,15 @@ public:
   void ResizeViewPort(int w, int h) const;
   // ###### OpenGL ######
 
+  // virtual SoundBuffer *CreateSoundBuffer(std::string_view path);
+  // virtual void DestroySoundBuffer(SoundBuffer *);
+
 private:
   void GetOpenGLVersionInfo();
+
+  // static std::mutex audio_mutex;
+  static void audio_callback(void *, uint8_t *, int);
+
+  friend class SoundBufferImpl; // for audio_mutex
 };
 } // namespace core

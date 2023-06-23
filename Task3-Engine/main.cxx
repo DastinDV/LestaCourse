@@ -157,6 +157,13 @@ int main() {
     bool isGame = false;
     float aspectRatio = mainMenuSizeX / mainMenuSizeY;
 
+    SoundBuffer *menuMusic =
+        CreateSoundBuffer("../../FinalProject/Assets/Music/BackTheme1.wav");
+    SoundBuffer *gameMusic =
+        CreateSoundBuffer("../../FinalProject/Assets/Music/BackTheme.wav");
+    assert(menuMusic != nullptr);
+    assert(gameMusic != nullptr);
+
     while (!quit) {
       long now = SDL_GetTicks();
 
@@ -221,12 +228,11 @@ int main() {
 
       consoleGame->OnEvent(event, deltaTime);
       if (isMainMenu) {
+        menuMusic->play(SoundBuffer::properties::looped);
         {
           ImGui::SetNextWindowSize({mainMenuSizeX, mainMenuSizeY});
           ImGui::SetNextWindowPos({0.0f, 0.0f});
           ImGui::Begin("OpenGL Texture Text");
-          ImGui::Text("pointer = %p", my_image_texture);
-          ImGui::Text("size = %d x %d", my_image_width, my_image_height);
           CenterNextElement(mainMenuSizeX - (mainMenuSizeX * 0.2f));
           ImGui::Image((void *)(intptr_t)my_image_texture,
                        ImVec2(mainMenuSizeX - (mainMenuSizeX * 0.2f),
@@ -246,6 +252,8 @@ int main() {
           ImGui::End();
         }
       } else {
+        menuMusic->stop();
+        gameMusic->play(SoundBuffer::properties::looped);
         consoleGame->Update(deltaTime);
         consoleGame->Render();
       }

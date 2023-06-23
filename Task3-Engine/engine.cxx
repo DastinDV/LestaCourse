@@ -1,6 +1,9 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <map>
+#include <memory>
+#include <sstream>
 #include <unordered_map>
 
 #include "canvas.hxx"
@@ -10,12 +13,43 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl3.h"
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_audio.h>
 
 namespace core {
+
+// class SoundBufferImpl;
 
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
 SDL_GLContext openGLContext = nullptr;
+SDL_AudioDeviceID audio_device;
+SDL_AudioSpec audio_device_spec;
+std::vector<SoundBufferImpl *> sounds;
+static std::mutex audio_mutex;
+// std::mutex Engine::audio_mutex;
+
+static std::string_view get_sound_format_name(uint16_t format_value) {
+  static const std::map<int, std::string_view> format = {
+      {AUDIO_U8, "AUDIO_U8"},         {AUDIO_S8, "AUDIO_S8"},
+      {AUDIO_S16LSB, "AUDIO_S16LSB"}, {AUDIO_S16MSB, "AUDIO_S16MSB"},
+      {AUDIO_S32LSB, "AUDIO_S32LSB"}, {AUDIO_S32MSB, "AUDIO_S32MSB"},
+      {AUDIO_F32LSB, "AUDIO_F32LSB"}, {AUDIO_F32MSB, "AUDIO_F32MSB"},
+  };
+
+  auto it = format.find(format_value);
+  return it->second;
+}
+
+static std::size_t get_sound_format_size(uint16_t format_value) {
+  static const std::map<int, std::size_t> format = {
+      {AUDIO_U8, 1},     {AUDIO_S8, 1},     {AUDIO_S16LSB, 2},
+      {AUDIO_S16MSB, 2}, {AUDIO_S32LSB, 4}, {AUDIO_S32MSB, 4},
+      {AUDIO_F32LSB, 4}, {AUDIO_F32MSB, 4},
+  };
+
+  auto it = format.find(format_value);
+  return it->second;
+}
 
 const std::unordered_map<SDL_Keycode, KeyCode> sdlToEngineKeyBinding{
     {SDLK_w, KeyCode::w},         {SDLK_s, KeyCode::s},
@@ -30,6 +64,109 @@ static std::ostream &operator<<(std::ostream &out, const SDL_version &v) {
   out << static_cast<int>(v.minor) << '.';
   out << static_cast<int>(v.patch);
   return out;
+}
+
+SoundBuffer::~SoundBuffer() {}
+
+#pragma pack(push, 1)
+class SoundBufferImpl final : public SoundBuffer {
+public:
+  SoundBufferImpl(std::string_view path, SDL_AudioDeviceID device_,
+                  SDL_AudioSpec device_audio_spec);
+
+  ~SoundBufferImpl() final;
+
+  void play(const properties prop) final {
+    std::lock_guard<std::mutex> lock(audio_mutex);
+    // here we can change properties
+    // of sound and dont collade with multithreaded playing
+    // current_index = 0;
+    is_playing = true;
+    is_looped = (prop == properties::looped);
+  }
+
+  void stop() final {
+    std::lock_guard<std::mutex> lock(audio_mutex);
+    current_index = 0;
+    is_playing = false;
+  }
+
+  std::unique_ptr<uint8_t[]> tmp_buf;
+  uint8_t *buffer;
+  uint32_t length;
+  uint32_t current_index = 0;
+  SDL_AudioDeviceID device;
+  bool is_playing = false;
+  bool is_looped = false;
+};
+#pragma pack(pop)
+
+SoundBufferImpl::SoundBufferImpl(std::string_view path,
+                                 SDL_AudioDeviceID device_,
+                                 SDL_AudioSpec device_audio_spec)
+    : buffer(nullptr), length(0), device(device_) {
+  SDL_RWops *file = SDL_RWFromFile(path.data(), "rb");
+  if (file == nullptr) {
+    throw std::runtime_error(std::string("can't open audio file: ") +
+                             path.data());
+  }
+
+  // freq, format, channels, and samples - used by SDL_LoadWAV_RW
+  SDL_AudioSpec file_audio_spec;
+
+  if (nullptr == SDL_LoadWAV_RW(file, 1, &file_audio_spec, &buffer, &length)) {
+    throw std::runtime_error(std::string("can't load wav: ") + path.data());
+  }
+
+  std::cout << "--------------------------------------------\n";
+  std::cout << "audio format for: " << path << '\n'
+            << "format: " << get_sound_format_name(file_audio_spec.format)
+            << '\n'
+            << "sample_size: " << get_sound_format_size(file_audio_spec.format)
+            << '\n'
+            << "channels: " << static_cast<uint32_t>(file_audio_spec.channels)
+            << '\n'
+            << "frequency: " << file_audio_spec.freq << '\n'
+            << "length: " << length << '\n'
+            << "time: "
+            << static_cast<double>(length) /
+                   (file_audio_spec.channels *
+                    static_cast<uint32_t>(file_audio_spec.freq) *
+                    get_sound_format_size(file_audio_spec.format))
+            << "sec" << std::endl;
+  std::cout << "--------------------------------------------\n";
+
+  if (file_audio_spec.channels != device_audio_spec.channels ||
+      file_audio_spec.format != device_audio_spec.format ||
+      file_audio_spec.freq != device_audio_spec.freq) {
+    Uint8 *output_bytes;
+    int output_length;
+
+    int convert_status = SDL_ConvertAudioSamples(
+        file_audio_spec.format, file_audio_spec.channels, file_audio_spec.freq,
+        buffer, static_cast<int>(length), device_audio_spec.format,
+        device_audio_spec.channels, device_audio_spec.freq, &output_bytes,
+        &output_length);
+    if (0 != convert_status) {
+      std::stringstream message;
+      message << "failed to convert WAV byte stream: " << SDL_GetError();
+      throw std::runtime_error(message.str());
+    }
+
+    SDL_free(buffer);
+    buffer = output_bytes;
+    length = static_cast<uint32_t>(output_length);
+  } else {
+    // no need to convert buffer, use as is
+  }
+}
+
+SoundBufferImpl::~SoundBufferImpl() {
+  if (!tmp_buf) {
+    SDL_free(buffer);
+  }
+  buffer = nullptr;
+  length = 0;
 }
 
 Engine::Engine() {}
@@ -100,6 +237,56 @@ int Engine::Initialize(int screenWidth, int screenHeight) {
     return EXIT_FAILURE;
   }
 
+  // initialize audio
+  audio_device_spec.freq = 48000;
+  audio_device_spec.format = AUDIO_S16LSB;
+  audio_device_spec.channels = 2;
+  audio_device_spec.samples = 4096; // must be power of 2
+  audio_device_spec.callback = Engine::audio_callback;
+  audio_device_spec.userdata = this;
+
+  const int num_audio_drivers = SDL_GetNumAudioDrivers();
+  for (int i = 0; i < num_audio_drivers; ++i) {
+    std::cout << "audio_driver #:" << i << " " << SDL_GetAudioDriver(i) << '\n';
+  }
+  std::cout << std::flush;
+
+  const char *default_audio_device_name = nullptr;
+
+  // SDL_FALSE - mean get only OUTPUT audio devices
+  const int num_audio_devices = SDL_GetNumAudioDevices(SDL_FALSE);
+  if (num_audio_devices > 0) {
+    default_audio_device_name =
+        SDL_GetAudioDeviceName(num_audio_devices - 1, SDL_FALSE);
+    for (int i = 0; i < num_audio_devices; ++i) {
+      std::cout << "audio device #" << i << ": "
+                << SDL_GetAudioDeviceName(i, SDL_FALSE) << '\n';
+    }
+  }
+  std::cout << std::flush;
+
+  audio_device =
+      SDL_OpenAudioDevice(default_audio_device_name, 0, &audio_device_spec,
+                          nullptr, SDL_AUDIO_ALLOW_ANY_CHANGE);
+
+  if (audio_device == 0) {
+    std::cerr << "failed open audio device: " << SDL_GetError();
+    throw std::runtime_error("audio failed");
+  } else {
+    std::cout << "--------------------------------------------\n";
+    std::cout << "audio device selected: " << default_audio_device_name << '\n'
+              << "freq: " << audio_device_spec.freq << '\n'
+              << "format: " << get_sound_format_name(audio_device_spec.format)
+              << '\n'
+              << "channels: "
+              << static_cast<uint32_t>(audio_device_spec.channels) << '\n'
+              << "samples: " << audio_device_spec.samples << '\n'
+              << std::flush;
+
+    // unpause device
+    SDL_PlayAudioDevice(audio_device);
+  }
+
   GetOpenGLVersionInfo();
 
   // Setup Dear ImGui context
@@ -132,12 +319,61 @@ void Engine::ResizeViewPort(int w, int h) const {
   }
 }
 
+SoundBuffer *CreateSoundBuffer(std::string_view path) {
+  SoundBufferImpl *s =
+      new SoundBufferImpl(path, audio_device, audio_device_spec);
+  {
+    // push_backsound_buffer_impl
+    std::lock_guard<std::mutex> lock(audio_mutex);
+    sounds.push_back(s);
+  }
+  return s;
+}
+
+void DestroySoundBuffer(SoundBuffer *sound) { delete sound; }
+
 void Engine::GetOpenGLVersionInfo() {
   std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
   std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
   std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
   std::cout << "Shading Language: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
             << std::endl;
+}
+
+void Engine::audio_callback(void *userdata, uint8_t *stream, int stream_size) {
+
+  std::lock_guard<std::mutex> lock(audio_mutex);
+
+  // no sound default
+  std::fill_n(stream, stream_size, '\0');
+
+  for (SoundBufferImpl *snd : sounds) {
+    if (snd->is_playing) {
+      uint32_t rest = snd->length - snd->current_index;
+      uint8_t *current_buff = &snd->buffer[snd->current_index];
+
+      if (rest <= static_cast<uint32_t>(stream_size)) {
+        // copy rest to buffer
+        SDL_MixAudioFormat(stream, current_buff, audio_device_spec.format, rest,
+                           SDL_MIX_MAXVOLUME);
+        snd->current_index += rest;
+      } else {
+        SDL_MixAudioFormat(stream, current_buff, audio_device_spec.format,
+                           static_cast<uint32_t>(stream_size),
+                           SDL_MIX_MAXVOLUME);
+        snd->current_index += static_cast<uint32_t>(stream_size);
+      }
+
+      if (snd->current_index == snd->length) {
+        if (snd->is_looped) {
+          // start from begining
+          snd->current_index = 0;
+        } else {
+          snd->is_playing = false;
+        }
+      }
+    }
+  }
 }
 
 void Engine::SwapBuffers() { SDL_GL_SwapWindow(window); }
@@ -203,6 +439,7 @@ int Engine::CleanUp() {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
+  return EXIT_SUCCESS;
 }
 
 glm::mat4 trans;

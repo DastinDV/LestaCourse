@@ -48,7 +48,9 @@ private:
   void PushToBuffers();
   void ResizeScreen();
   void InitUniforms();
+  void InitSounds();
 
+  void CleanUpResources();
   core::GlRenderer *glRenderer;
   Map map;
   GameState gameState;
@@ -76,13 +78,16 @@ private:
   int exitTileCount = 1;
 
   float *exitVertecies;
-  Player *player;
-  Mirror *currentMirror;
+  Player *player = nullptr;
+  Mirror *currentMirror = nullptr;
 
   std::vector<Mirror *> mirrors;
 
   float timeSinceRun = 0.0;
   const std::string pathToMaps = "./../../FinalProject/Assets/map";
+
+  core::SoundBuffer *reflectionSound = nullptr;
+  core::SoundBuffer *winSound = nullptr;
 };
 
 IZ_DECLSPEC core::Game *CreateGame() { return new MirrorGame(); }
