@@ -92,7 +92,7 @@ int main() {
         SDL_GetPlatform() == "Windows"
             ? "libFinalProject-shared.dll"
             : "../lib/MirrorGame/libFinalProject-shared.so";
-    const char *tmp_library_file = "../lib/glTest/temp.so";
+    const char *tmp_library_file = "../lib/MirrorGame/temp.so";
 
     void *game_library_handle{};
 
