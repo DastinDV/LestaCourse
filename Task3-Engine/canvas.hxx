@@ -2,6 +2,10 @@
 #include <string>
 #include <vector>
 
+#if defined(_WIN32)
+typedef uint8_t u_int8_t;
+#endif
+
 namespace core {
 
 struct Position {

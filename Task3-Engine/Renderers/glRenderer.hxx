@@ -4,9 +4,13 @@
 
 #include <vector>
 
+#ifndef IZ_DECLSPEC
+#define IZ_DECLSPEC
+#endif
+
 namespace core {
 
-struct GlVertex {
+struct IZ_DECLSPEC GlVertex {
   float x;
   float y;
   float z;
@@ -19,7 +23,7 @@ struct GlVertex {
   friend GlVertex operator*(const GlVertex &l, float val);
 };
 
-struct GLTriangle {
+struct IZ_DECLSPEC GLTriangle {
   GLTriangle() {
     v[0] = GlVertex();
     v[1] = GlVertex();
@@ -57,17 +61,17 @@ struct GLTriangle {
   GlVertex v[3];
 };
 
-unsigned int CompileShader(unsigned int type, const std::string &source);
-int CreateShader(const std::string &vertexShader,
+unsigned int IZ_DECLSPEC CompileShader(unsigned int type, const std::string &source);
+int IZ_DECLSPEC CreateShader(const std::string &vertexShader,
                  const std::string &fragmentShader);
 
-std::string GetShaderSource(std::string path);
-float *ParseVerticies(std::string path, char separator, int &count);
-unsigned int *ParseIndexies(std::string path, char separator, int &count);
+std::string IZ_DECLSPEC GetShaderSource(std::string path);
+float * ParseVerticies(std::string path, char separator, int &count);
+unsigned int * ParseIndexies(std::string path, char separator, int &count);
 
 enum EGlType { gl_float };
 
-class GlRenderer {
+class IZ_DECLSPEC GlRenderer {
 public:
   GlRenderer();
   void DrawPoint(const int size);

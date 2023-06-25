@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(Task3-Engine)
 
+set(CMAKE_CXX_STANDARD 17)
+
 set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../externals)
 set(IMGUI_DIR ${LIB_DIR}/imgui)
 
@@ -26,11 +28,20 @@ list(
     ${IMGUI_DIR}/backends/imgui_impl_sdl3.h
 )
 
+if(WIN32)
+  set(CMAKE_PREFIX_PATH "C:\\libs\\SDL3")
+endif()
+
+message(CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH})
+
 find_package(SDL3 REQUIRED)
 
 add_library(imgui-lib STATIC ${IMGUI_SOURCE})
 #target_link_libraries(imgui-lib PUBLIC SDL3::SDL3-shared)
 target_include_directories(imgui-lib PUBLIC ${IMGUI_DIR})
+if(WIN32)
+target_include_directories(imgui-lib PUBLIC ${CMAKE_PREFIX_PATH}/include)
+endif()
 set_property(TARGET imgui-lib PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_executable(
@@ -64,8 +75,13 @@ add_executable(
   ./OpenGL/glDebug.hxx
   ./glad/include/glad/glad.h)
 
+if(WIN32)
+    target_compile_definitions(Engine
+                               PRIVATE "-DIZ_DECLSPEC=__declspec(dllexport)")
+endif(WIN32)
+
 set_target_properties(
-  Engine PROPERTIES ENABLE_EXPORTS 1 # we need to be able to link to exe
+  Engine PROPERTIES ENABLE_EXPORTS ON # we need to be able to link to exe
                                      # functions from game
 )
 
@@ -80,7 +96,13 @@ target_include_directories(Engine PUBLIC ${IMGUI_DIR}
 target_compile_features(Engine PUBLIC cxx_std_20)
 
 #target_link_libraries(Engine PRIVATE SDL3::SDL3-shared ConsoleGame)
+if (LINUX)
 target_link_libraries(Engine PRIVATE SDL3::SDL3-shared imgui-lib)
+endif()
+if (WIN32)
+target_link_libraries(Engine PRIVATE SDL3::SDL3 imgui-lib)
+target_include_directories(Engine PUBLIC ${CMAKE_PREFIX_PATH}/include)
+endif()
 
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Game
 #${CMAKE_BINARY_DIR}/lib/MyGame)

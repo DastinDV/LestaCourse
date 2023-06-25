@@ -3,6 +3,10 @@
 #include "canvas.hxx"
 #include <cmath>
 
+#ifndef M_PI
+#    define M_PI 3.14159265358979323846
+#endif
+
 int GetRandomNumber(int min, int max) {
   int num = min + rand() % (max - min + 1);
 

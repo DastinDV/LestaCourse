@@ -1,6 +1,7 @@
 #include "mirror.hxx"
 #include <iostream>
 #include <math.h>
+#include <algorithm>
 
 Mirror::Mirror(Tile &mirror, std::vector<Tile> &tiles, Player *player)
     : mirror(mirror), tiles(tiles), player(player) {

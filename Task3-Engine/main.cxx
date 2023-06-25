@@ -88,11 +88,15 @@ int main() {
   {
     using namespace core;
     bool quit;
+
+    using namespace std::string_literals;
     const char *library_name =
-        SDL_GetPlatform() == "Windows"
-            ? "libFinalProject-shared.dll"
+        SDL_GetPlatform() == "Windows"s
+            ? "../lib/MirrorGame/FinalProject-shared.dll"
             : "../lib/MirrorGame/libFinalProject-shared.so";
-    const char *tmp_library_file = "../lib/MirrorGame/temp.so";
+    const char *tmp_library_file = SDL_GetPlatform() == "Windows"s
+     ? "../lib/MirrorGame/temp.dll"
+     : "../lib/MirrorGame/temp.so";
 
     void *game_library_handle{};
 
@@ -124,19 +128,7 @@ int main() {
     float timeSinceRun = 0.0;
     long last;
 
-    // // Setup Dear ImGui context
-    // IMGUI_CHECKVERSION();
-    // ImGui::CreateContext();
-
-    // ImGui_ImplSDL3_InitForOpenGL(window, openGLContext);
-    // ImGui_ImplOpenGL3_Init();
-    // ImGui::StyleColorsDark();
-
     ImGuiIO &io = ImGui::GetIO();
-    // io.ConfigFlags |=
-    //     ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    // io.ConfigFlags |=
-    //     ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
     bool show_demo_window = true;
     bool show_another_window = false;
@@ -238,13 +230,13 @@ int main() {
                        ImVec2(mainMenuSizeX - (mainMenuSizeX * 0.2f),
                               mainMenuSizeY / 2.0));
 
-          ImGui::Dummy(ImVec2{0.0, mainMenuSizeY / 2.0 / 10.0});
+          ImGui::Dummy(ImVec2{0.0, static_cast<float>(mainMenuSizeY / 2.0 / 10.0)});
           if (ButtonCenteredOnLine("Play", ImVec2{200.f * aspectRatio,
-                                                  mainMenuSizeY / 2.0 / 5.0}))
+                                                  static_cast<float>(mainMenuSizeY / 2.0 / 5.0)}))
             isMainMenu = false;
-          ImGui::Dummy(ImVec2{0.0, mainMenuSizeY / 2.0 / 10.0});
+          ImGui::Dummy(ImVec2{0.0, static_cast<float>(mainMenuSizeY / 2.0 / 10.0)});
           if (ButtonCenteredOnLine("Exit", ImVec2{200.f * aspectRatio,
-                                                  mainMenuSizeY / 2.0 / 5.0})) {
+                                                  static_cast<float>(mainMenuSizeY / 2.0 / 5.0)})) {
             engine.CleanUp();
             delete consoleGame;
             quit = true;

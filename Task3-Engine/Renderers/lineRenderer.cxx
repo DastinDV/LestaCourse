@@ -1,8 +1,6 @@
 #include "lineRenderer.hxx"
 #include <cmath>
 #include <iostream>
-//#include <set>
-//#include <unordered_map>
 
 namespace core {
 
@@ -19,8 +17,8 @@ Color LineRenderer::Interpolate(Color from, Color to, int curr, int count) {
   double remain =
       std::abs(static_cast<double>(count - curr) / static_cast<double>(count));
   // std::cout << "Interpolated: " << passed << " " << remain << std::endl;
-  return {from.r * passed + to.r * remain, from.g * passed + to.g * remain,
-          from.b * passed + to.b * remain};
+  return {static_cast<uint8_t>(from.r * passed + to.r * remain), static_cast<uint8_t>(from.g * passed + to.g * remain),
+          static_cast<uint8_t>(from.b * passed + to.b * remain)};
 }
 
 void LineRenderer::CreateBresenhamsLine(Position &from, Position &to,
@@ -102,8 +100,8 @@ std::vector<Vertex> LineRenderer::DrawInterpolated(Vertex from, Vertex to) {
   std::vector<Vertex> linePixels;
   linePixels.reserve(pixelsCount);
 
-  Position from_ = {from.x, from.y};
-  Position to_ = {to.x, to.y};
+  Position from_ = {static_cast<int>(from.x), static_cast<int>(from.y)};
+  Position to_ = {static_cast<int>(to.x), static_cast<int>(to.y)};
 
   CreateBresenhamsLine(from_, to_, linePixels);
 

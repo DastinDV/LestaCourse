@@ -1,7 +1,11 @@
 #pragma once
 
+#ifndef IZ_DECLSPEC
+#define IZ_DECLSPEC
+#endif
+
 namespace core {
-class VertexBuffer {
+class IZ_DECLSPEC VertexBuffer {
 public:
   VertexBuffer();
   VertexBuffer(const void *data, unsigned int size);

@@ -58,18 +58,18 @@ struct Event {
 };
 
 // ###### Math ######
-float *Translate(std::vector<float> &translation);
-float *Rotate(float angle);
-float *Scale(float scaleFactor);
-float *OrthoProj(float left, float right, float bottom, float top, float near,
+float IZ_DECLSPEC *Translate(std::vector<float> &translation);
+float IZ_DECLSPEC *Rotate(float angle);
+float IZ_DECLSPEC *Scale(float scaleFactor);
+float IZ_DECLSPEC *OrthoProj(float left, float right, float bottom, float top, float near,
                  float far);
 
-std::vector<float> Unproject(std::vector<float> win, std::vector<float> model,
+std::vector<float> IZ_DECLSPEC Unproject(std::vector<float> win, std::vector<float> model,
                              float xCorrection, float yCorrection,
                              int screenWidth, int screenHeight);
 // ###### Math ######
 
-std::pair<int, int> GetScreenSize();
+std::pair<int, int> IZ_DECLSPEC GetScreenSize();
 
 class IZ_DECLSPEC SoundBuffer {
 public:
@@ -79,10 +79,10 @@ public:
   virtual void stop() = 0;
 };
 
-SoundBuffer *CreateSoundBuffer(std::string_view path);
+SoundBuffer IZ_DECLSPEC *CreateSoundBuffer(std::string_view path);
 void DestroySoundBuffer(SoundBuffer *);
 
-class SoundBufferImpl;
+class IZ_DECLSPEC SoundBufferImpl;
 
 class IZ_DECLSPEC Engine {
 public:

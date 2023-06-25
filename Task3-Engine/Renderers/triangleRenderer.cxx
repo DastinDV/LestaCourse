@@ -2,6 +2,8 @@
 #include <iostream>
 #include <set>
 #include <unordered_map>
+#include <array>
+#include <algorithm>
 
 namespace core {
 TriangleRenderer::TriangleRenderer(Canvas &canvas) : canvas(canvas) {

@@ -2,8 +2,12 @@
 #include <string>
 #include <unordered_map>
 
+#ifndef IZ_DECLSPEC
+#define IZ_DECLSPEC
+#endif
+
 namespace core {
-class Shader {
+class IZ_DECLSPEC Shader {
 public:
   Shader(std::string vertex_path, const std::string fragment_path) {
     CreateShaderProgramFromFile(vertex_path, fragment_path);

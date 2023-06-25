@@ -3,6 +3,10 @@
 #include "../Renderers/glRenderer.hxx"
 #include "../Task3-Engine/engine.hxx"
 #include "../Task3-Engine/game.hxx"
+// #include "shader.hxx"
+// #include "glRenderer.hxx"
+// #include "engine.hxx"
+// #include "game.hxx"
 
 #include "common.hxx"
 #include "map.hxx"
