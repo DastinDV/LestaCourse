@@ -205,7 +205,7 @@ void MirrorGame::ResizeScreen() {
                         targetScreenHeight, 0.0f, nearPlain, farPlain);
     std::vector<float> translate = {
         ((factor * targetScreenWidth - targetScreenWidth) /
-         (factor * targetScreenWidth) * 2.0f),
+         (factor * targetScreenWidth)),
         0.0f, 0.0f};
     float *result = core::Translate(translate);
     std::cout << "translate = " << translate[0] << " " << translate[1] << " "
@@ -216,7 +216,7 @@ void MirrorGame::ResizeScreen() {
       std::cout << proj[i] << " ";
     }
     std::cout << std::endl;
-    
+
     roadShader.SetMatrix4fvUniform(result, "u_translate");
     roadShader.SetMatrix4fvUniform(proj, "u_projection");
     roadShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
@@ -231,7 +231,8 @@ void MirrorGame::ResizeScreen() {
         float u_mirrorPos[2];
         u_mirrorPos[0] = tiles[i].tilePos[0];
         u_mirrorPos[1] = tiles[i].tilePos[1];
-        std::cout << "Mirror tile coordinate = " << u_mirrorPos[0] << " " << u_mirrorPos[1] << std::endl;
+        std::cout << "Mirror tile coordinate = " << u_mirrorPos[0] << " "
+                  << u_mirrorPos[1] << std::endl;
         mirrorShader.SetVec2fvUniform(u_mirrorPos, "u_tileCoordinate");
       }
     }
@@ -240,7 +241,8 @@ void MirrorGame::ResizeScreen() {
     exitShader.SetMatrix4fvUniform(result, "u_translate");
     exitShader.SetMatrix4fvUniform(proj, "u_projection");
     exitShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
-    std::cout << "Exit tile coordinate = " << u_exitPos[0] << " " << u_exitPos[1] << std::endl;
+    std::cout << "Exit tile coordinate = " << u_exitPos[0] << " "
+              << u_exitPos[1] << std::endl;
     exitShader.SetVec2fvUniform(u_exitPos, "u_tileCoordinate");
 
     playerShader.Use();
@@ -262,7 +264,7 @@ void MirrorGame::ResizeScreen() {
     std::vector<float> translate = {
         0.0f,
         (-((factor * targetScreenHeight) - targetScreenHeight) /
-         (factor * targetScreenHeight) * 2.0f),
+         (factor * targetScreenHeight)),
         0.0f};
 
     std::cout << "translate " << translate[0] << " " << translate[1] << " "
@@ -545,9 +547,9 @@ void MirrorGame::PushToBuffers() {
       tiles[i].tilePos = pos;
       u_exitPos[0] = pos[0];
       u_exitPos[1] = pos[1];
-      //tiles[i].tilePos = pos;
-      std::cout << "exit coordinate in world = " << pos[0] << " "
-            << pos[1] << std::endl;
+      // tiles[i].tilePos = pos;
+      std::cout << "exit coordinate in world = " << pos[0] << " " << pos[1]
+                << std::endl;
     }
   }
 }
