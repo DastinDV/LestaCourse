@@ -15,8 +15,8 @@ public:
 private:
   int mapWidth;
   int mapHeight;
-  const int tileWidth = 32;
-  const int tileHeight = 32;
+  //const int tileWidth = 32;
+  //const int tileHeight = 32;
 
   int playerPosX = 0;
   int playerPosY = 0;

@@ -87,7 +87,7 @@ bool ButtonCenteredOnLine(const char *label, ImVec2 buttonSize,
 int main() {
   {
     using namespace core;
-    bool quit;
+    bool quit = false;
 
     using namespace std::string_literals;
     const char *library_name =
@@ -250,7 +250,7 @@ int main() {
         consoleGame->Render();
       }
 
-      // Rendering
+      // Rendering  
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

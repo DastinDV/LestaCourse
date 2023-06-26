@@ -5,6 +5,7 @@
 #include <memory>
 #include <sstream>
 #include <unordered_map>
+#include <queue>
 
 #include "canvas.hxx"
 #include "engine.hxx"
@@ -17,6 +18,29 @@
 
 namespace core {
 
+
+#ifdef _WIN32
+struct UserDataForEvent {
+  int screenWidth;
+  int screenHeight;
+} userDataForEvent;
+
+std::queue<UserDataForEvent> screenSizeEventQueue;
+
+static int SDLCALL filterEvent(void *userdata, SDL_Event * event) {
+    if (event->type == SDL_EVENT_WINDOW_RESIZED) {  
+      std::queue<UserDataForEvent>* data = (std::queue<UserDataForEvent>*)userdata;
+      SDL_Window* window = SDL_GetWindowFromID(event->window.windowID);
+      int w, h;
+      SDL_GetWindowSize(window, &w, &h);
+      data->push({w, h});     
+      //return 0 if you don't want to handle this event twice
+      return 0;
+    }
+    //important to allow all events, or your SDL_PollEvent doesn't get any event
+    return 1;
+}
+#endif
 // class SoundBufferImpl;
 
 SDL_Window *window = nullptr;
@@ -26,6 +50,7 @@ SDL_AudioDeviceID audio_device;
 SDL_AudioSpec audio_device_spec;
 std::vector<SoundBufferImpl *> sounds;
 static std::mutex audio_mutex;
+
 // std::mutex Engine::audio_mutex;
 
 static std::string_view get_sound_format_name(uint16_t format_value) {
@@ -198,6 +223,11 @@ int Engine::Initialize(int screenWidth, int screenHeight) {
 
   window = SDL_CreateWindow("title", screenWidth, screenHeight,
                             ::SDL_WINDOW_OPENGL | ::SDL_WINDOW_RESIZABLE);
+
+#ifdef _WIN32
+  // weird thing for windows.
+  SDL_SetEventFilter(filterEvent, &screenSizeEventQueue);
+#endif
 
   if (window == nullptr) {
     const char *err_message = SDL_GetError();
@@ -386,9 +416,28 @@ KeyboardInfo KeyBinding(SDL_Keycode from, KeyboardEventType keyboardEvent) {
 }
 
 int Engine::ProcessEvent(Event &event) {
-  SDL_Event sdlEvent;
-  while (SDL_PollEvent(&sdlEvent)) {
 
+  // int a;
+  // SDL_SetEventFilter(filterEvent, userDataForEvent);
+
+  //userDataForEvent = &event;
+
+  SDL_Event sdlEvent;
+
+#ifdef _WIN32
+// This code to deal with screen resize events for windows.
+  while (!screenSizeEventQueue.empty()){
+      auto item = screenSizeEventQueue.front();
+      std::cout << "from queue " << item.screenWidth << " " << item.screenHeight << std::endl;
+      screenSizeEventQueue.pop();
+      event.eventType = EventType::window_event;
+      event.windowInfo = {SDL_GetWindowID(window), WindowEventType::resized, item.screenWidth,
+                          item.screenHeight};
+      return 1;
+  }
+#endif
+
+  while (SDL_PollEvent(&sdlEvent)) {
     ImGui_ImplSDL3_ProcessEvent(&sdlEvent);
     if (sdlEvent.type == SDL_EVENT_KEY_DOWN) {
       event.eventType = EventType::keyboard_event;
@@ -442,12 +491,12 @@ int Engine::CleanUp() {
   return EXIT_SUCCESS;
 }
 
-glm::mat4 trans;
-glm::mat4 proj;
+glm::mat4 trans = glm::mat4(1.0f);
+glm::mat4 proj = glm::mat4(1.0f);
 
 // Translate vertex to a new coordinate
 float *Translate(std::vector<float> &translation) {
-  float *matrix;
+  float *matrix = nullptr;
 
   trans = glm::mat4(1.0f);
   trans = glm::translate(
@@ -459,7 +508,7 @@ float *Translate(std::vector<float> &translation) {
 
 // Rotate and scale verteces
 float *Rotate(float angle) {
-  float *matrix;
+  float *matrix = nullptr;
   trans = glm::rotate(trans, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
   // rot = glm::scale(rot, glm::vec3(0.5, 0.5, 0.5));
 
@@ -468,7 +517,7 @@ float *Rotate(float angle) {
 }
 
 float *Scale(float scaleFactor) {
-  float *matrix;
+  float *matrix = nullptr;
   trans = glm::scale(trans, glm::vec3(scaleFactor, scaleFactor, scaleFactor));
 
   matrix = glm::value_ptr(trans);
@@ -478,7 +527,7 @@ float *Scale(float scaleFactor) {
 // Ortographic projection with (0,0) in upper-left.
 float *OrthoProj(float left, float right, float bottom, float top, float near,
                  float far) {
-  float *matrix;
+  float *matrix = nullptr;
   proj = glm::ortho(left, right, bottom, top, near, far);
 
   matrix = glm::value_ptr(proj);

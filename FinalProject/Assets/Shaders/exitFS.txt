@@ -1,5 +1,7 @@
 #version 330 core
-                          
+
+precision mediump float;
+            
 in vec3 out_position;
 in vec3 out_translate;
 
@@ -34,14 +36,14 @@ void main()
 
     if (aspectRatio >= targetAR){
         factor = aspectRatio / targetAR;
-        translateX = ((factor * 640.0)- 640.0) / 2;
+        translateX = ((factor * 640.0) - 640.0) / 2.0;
         posX = (posX + translateX) / (640.0 * factor);
         posY = posY / 480.0;
         sizeX = sizeX / (640 * factor);
         sizeY = sizeY / 480;
     } else {
         factor = targetAR / aspectRatio;
-        translateY = ((factor * 480.0) - 480.0) / 2;
+        translateY = ((factor * 480.0) - 480.0) / 2.0;
         posX = posX / 640.0;
         posY = (posY + translateY) / (480 * factor);
         sizeX = sizeX / 640;

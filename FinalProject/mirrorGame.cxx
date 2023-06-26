@@ -93,7 +93,7 @@ void MirrorGame::Update(float deltaTime) {
   if (gameState.GetGameState() == EGameState::NEXTLVL) {
     winSound->stop();
     winSound->play(core::SoundBuffer::properties::once);
-    LoadLVL(currentLVL++);
+    LoadLVL(++currentLVL);
     gameState.SetGameState(EGameState::PLAY);
   }
 }
@@ -204,13 +204,19 @@ void MirrorGame::ResizeScreen() {
         core::OrthoProj(factor * 0.0f, factor * targetScreenWidth,
                         targetScreenHeight, 0.0f, nearPlain, farPlain);
     std::vector<float> translate = {
-        (((factor * targetScreenWidth) - (targetScreenWidth)) /
-         (factor * targetScreenWidth)),
+        ((factor * targetScreenWidth - targetScreenWidth) /
+         (factor * targetScreenWidth) * 2.0f),
         0.0f, 0.0f};
     float *result = core::Translate(translate);
-    std::cout << "translate " << translate[0] << " " << translate[1] << " "
+    std::cout << "translate = " << translate[0] << " " << translate[1] << " "
               << translate[2] << std::endl;
 
+    std::cout << "Projection data = ";
+    for (int i = 0; i < 16; i++) {
+      std::cout << proj[i] << " ";
+    }
+    std::cout << std::endl;
+    
     roadShader.SetMatrix4fvUniform(result, "u_translate");
     roadShader.SetMatrix4fvUniform(proj, "u_projection");
     roadShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
@@ -224,7 +230,8 @@ void MirrorGame::ResizeScreen() {
         mirrorShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
         float u_mirrorPos[2];
         u_mirrorPos[0] = tiles[i].tilePos[0];
-        u_mirrorPos[0] = tiles[i].tilePos[1];
+        u_mirrorPos[1] = tiles[i].tilePos[1];
+        std::cout << "Mirror tile coordinate = " << u_mirrorPos[0] << " " << u_mirrorPos[1] << std::endl;
         mirrorShader.SetVec2fvUniform(u_mirrorPos, "u_tileCoordinate");
       }
     }
@@ -233,6 +240,7 @@ void MirrorGame::ResizeScreen() {
     exitShader.SetMatrix4fvUniform(result, "u_translate");
     exitShader.SetMatrix4fvUniform(proj, "u_projection");
     exitShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
+    std::cout << "Exit tile coordinate = " << u_exitPos[0] << " " << u_exitPos[1] << std::endl;
     exitShader.SetVec2fvUniform(u_exitPos, "u_tileCoordinate");
 
     playerShader.Use();
@@ -253,8 +261,8 @@ void MirrorGame::ResizeScreen() {
                         factor * 0.0f, nearPlain, farPlain);
     std::vector<float> translate = {
         0.0f,
-        (-((factor * targetScreenHeight) - (targetScreenHeight)) /
-         (factor * targetScreenHeight)),
+        (-((factor * targetScreenHeight) - targetScreenHeight) /
+         (factor * targetScreenHeight) * 2.0f),
         0.0f};
 
     std::cout << "translate " << translate[0] << " " << translate[1] << " "
@@ -272,7 +280,7 @@ void MirrorGame::ResizeScreen() {
         mirrorShader.SetVec2fvUniform(u_screenSize, "u_windowSize");
         float u_mirrorPos[2];
         u_mirrorPos[0] = tiles[i].tilePos[0];
-        u_mirrorPos[0] = tiles[i].tilePos[1];
+        u_mirrorPos[1] = tiles[i].tilePos[1];
         mirrorShader.SetVec2fvUniform(u_mirrorPos, "u_tileCoordinate");
       }
     }
@@ -393,7 +401,7 @@ void MirrorGame::CreateMirror(Tile mirrorTile) {
 
 void MirrorGame::LoadLVL(int lvl) {
   CleanUpResources();
-  std::string path = pathToMaps + std::to_string(currentLVL) + ".txt";
+  std::string path = pathToMaps + std::to_string(lvl) + ".txt";
 
   if (map.LoadMap(path))
     throw std::runtime_error("Couldn't load map");
@@ -535,12 +543,13 @@ void MirrorGame::PushToBuffers() {
 
       // for uniform to scale shader for an exit tile.
       tiles[i].tilePos = pos;
-      tiles[i].tilePos = pos;
+      u_exitPos[0] = pos[0];
+      u_exitPos[1] = pos[1];
+      //tiles[i].tilePos = pos;
+      std::cout << "exit coordinate in world = " << pos[0] << " "
+            << pos[1] << std::endl;
     }
   }
-
-  std::cout << "exit coordinate in world = " << u_exitPos[0] << " "
-            << u_exitPos[1] << std::endl;
 }
 
 void MirrorGame::CreateShaders() {
@@ -579,7 +588,7 @@ void MirrorGame::InitUniforms() {
       mirrorShader.SetUniform1f(this->tileSize, "u_tileSize");
       float u_mirrorPos[2];
       u_mirrorPos[0] = tiles[i].tilePos[0];
-      u_mirrorPos[0] = tiles[i].tilePos[1];
+      u_mirrorPos[1] = tiles[i].tilePos[1];
       mirrorShader.SetVec2fvUniform(u_mirrorPos, "u_tileCoordinate");
       mirrorShader.SetMatrix4fvUniform(transform, "u_transform");
       mirrorShader.SetUniform1i(static_cast<int>(tiles[i].tileType),

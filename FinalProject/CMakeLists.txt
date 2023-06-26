@@ -13,6 +13,12 @@ add_library(
   mirror.hxx
   common.hxx)
 
+target_compile_options(
+    FinalProject-shared
+    PRIVATE
+        "$<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wall;-Wextra;-Wpedantic;>"
+)
+
 target_compile_features(FinalProject-shared PUBLIC cxx_std_20)
 # target_include_directories(FinalProject-shared PUBLIC ${IMGUI_DIR}
 #                             ${IMGUI_DIR}/backends)
@@ -21,6 +27,12 @@ target_compile_features(FinalProject-shared PUBLIC cxx_std_20)
 
 if (WIN32)
   target_compile_definitions(FinalProject-shared PRIVATE "-DIZ_DECLSPEC=__declspec(dllexport)")
+
+  # target_include_directories(FinalProject-shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Engine/Renderers
+  # ${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Engine/OpenGL
+  # ${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Engine/
+  # ${CMAKE_CURRENT_SOURCE_DIR})
+  #target_link_libraries(FinalProject-shared PUBLIC Engine)
 endif()
 
 target_link_libraries(FinalProject-shared PUBLIC Engine)
