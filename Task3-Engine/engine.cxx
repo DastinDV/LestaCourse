@@ -32,7 +32,7 @@ static int SDLCALL filterEvent(void *userdata, SDL_Event * event) {
       std::queue<UserDataForEvent>* data = (std::queue<UserDataForEvent>*)userdata;
       SDL_Window* window = SDL_GetWindowFromID(event->window.windowID);
       int w, h;
-      SDL_GetWindowSize(window, &w, &h);
+      SDL_GetWindowSizeInPixels(window, &w, &h);
       data->push({w, h});     
       //return 0 if you don't want to handle this event twice
       return 0;
@@ -258,8 +258,9 @@ int Engine::Initialize(int screenWidth, int screenHeight) {
     return EXIT_FAILURE;
   }
 
-  renderer = SDL_CreateRenderer(window, NULL, SDL_RENDERER_ACCELERATED);
 
+  renderer = SDL_CreateRenderer(window, NULL, SDL_RENDERER_ACCELERATED);
+                   
   if (renderer == nullptr) {
     const char *err_message = SDL_GetError();
     cerr << "error: failed call SDL_CreateRenderer: " << err_message << endl;
@@ -269,9 +270,16 @@ int Engine::Initialize(int screenWidth, int screenHeight) {
 
   // initialize audio
   audio_device_spec.freq = 48000;
-  audio_device_spec.format = AUDIO_S16LSB;
-  audio_device_spec.channels = 2;
-  audio_device_spec.samples = 4096; // must be power of 2
+  #if defined(_WIN32)
+    audio_device_spec.format = AUDIO_F32LSB;
+    audio_device_spec.channels = 8;
+    audio_device_spec.samples = 480;
+  #else
+    audio_device_spec.format = AUDIO_S16LSB;
+    audio_device_spec.channels = 2;
+    audio_device_spec.samples = 4096;
+  #endif
+
   audio_device_spec.callback = Engine::audio_callback;
   audio_device_spec.userdata = this;
 
@@ -283,6 +291,7 @@ int Engine::Initialize(int screenWidth, int screenHeight) {
 
   const char *default_audio_device_name = nullptr;
 
+  SDL_AudioSpec desired_device_spec;  
   // SDL_FALSE - mean get only OUTPUT audio devices
   const int num_audio_devices = SDL_GetNumAudioDevices(SDL_FALSE);
   if (num_audio_devices > 0) {
@@ -297,7 +306,7 @@ int Engine::Initialize(int screenWidth, int screenHeight) {
 
   audio_device =
       SDL_OpenAudioDevice(default_audio_device_name, 0, &audio_device_spec,
-                          nullptr, SDL_AUDIO_ALLOW_ANY_CHANGE);
+                          &desired_device_spec, SDL_AUDIO_ALLOW_ANY_CHANGE);
 
   if (audio_device == 0) {
     std::cerr << "failed open audio device: " << SDL_GetError();
@@ -311,6 +320,17 @@ int Engine::Initialize(int screenWidth, int screenHeight) {
               << "channels: "
               << static_cast<uint32_t>(audio_device_spec.channels) << '\n'
               << "samples: " << audio_device_spec.samples << '\n'
+              << std::flush;
+
+
+    std::cout << "--------------------------------------------\n";
+    std::cout << "audio device desired: " << default_audio_device_name << '\n'
+              << "freq: " << desired_device_spec.freq << '\n'
+              << "format: " << get_sound_format_name(desired_device_spec.format)
+              << '\n'
+              << "channels: "
+              << static_cast<uint32_t>(desired_device_spec.channels) << '\n'
+              << "samples: " << desired_device_spec.samples << '\n'
               << std::flush;
 
     // unpause device
@@ -344,7 +364,7 @@ void Engine::ClearScreen(float deltaTime) {
 }
 
 void Engine::ResizeViewPort(int w, int h) const {
-  if (window) {
+  if (window) {    
     glViewport(0, 0, w, h);
   }
 }
@@ -416,12 +436,6 @@ KeyboardInfo KeyBinding(SDL_Keycode from, KeyboardEventType keyboardEvent) {
 }
 
 int Engine::ProcessEvent(Event &event) {
-
-  // int a;
-  // SDL_SetEventFilter(filterEvent, userDataForEvent);
-
-  //userDataForEvent = &event;
-
   SDL_Event sdlEvent;
 
 #ifdef _WIN32
@@ -464,14 +478,14 @@ int Engine::ProcessEvent(Event &event) {
     if (sdlEvent.type == SDL_EVENT_WINDOW_RESIZED) {
       event.eventType = EventType::window_event;
       int w, h;
-      SDL_GetWindowSize(window, &w, &h);
+      SDL_GetWindowSizeInPixels(window, &w, &h);
       event.windowInfo = {SDL_GetWindowID(window), WindowEventType::resized, w,
                           h};
     }
     if (sdlEvent.type == SDL_EVENT_WINDOW_MAXIMIZED) {
       event.eventType = EventType::window_event;
       int w, h;
-      SDL_GetWindowSize(window, &w, &h);
+      SDL_GetWindowSizeInPixels(window, &w, &h);
       event.windowInfo = {SDL_GetWindowID(window), WindowEventType::maximized,
                           w, h};
       return 1;
@@ -553,7 +567,7 @@ std::vector<float> Unproject(std::vector<float> win, std::vector<float> model,
 
 std::pair<int, int> GetScreenSize() {
   int w, h;
-  SDL_GetWindowSize(window, &w, &h);
+  SDL_GetWindowSizeInPixels(window, &w, &h);
   return std::pair<int, int>(w, h);
 }
 

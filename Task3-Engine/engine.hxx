@@ -98,13 +98,8 @@ public:
   void ResizeViewPort(int w, int h) const;
   // ###### OpenGL ######
 
-  // virtual SoundBuffer *CreateSoundBuffer(std::string_view path);
-  // virtual void DestroySoundBuffer(SoundBuffer *);
-
 private:
   void GetOpenGLVersionInfo();
-
-  // static std::mutex audio_mutex;
   static void audio_callback(void *, uint8_t *, int);
 
   friend class SoundBufferImpl; // for audio_mutex

@@ -36,8 +36,9 @@ static std::pair<int, int> GetTilePosByClickPos(float x, float y, float w,
                                                 float ySizeCorrection) {
   std::vector<float> screenCoord = {x, y, 0.0};
 
+  std::cout << xSizeCorrection << " " << ySizeCorrection << " " << screenWidth << " " << screenHeight << std::endl;
   float xTranslate =
-      ((640.0 * xSizeCorrection) - 640.0f) / (640 * xSizeCorrection);
+      ((640.0 * xSizeCorrection) - 640.0f) / (640.0 * xSizeCorrection);
   float yTranslate =
       ((480.0 * ySizeCorrection) - 480.0f) / (480.0 * ySizeCorrection);
 
@@ -47,8 +48,8 @@ static std::pair<int, int> GetTilePosByClickPos(float x, float y, float w,
                                 ySizeCorrection, screenWidth, screenHeight);
 
   // Но подтягиваем для центровки экрана.
-  result[0] -= (xTranslate * (640 * xSizeCorrection)) / 2.0;
-  result[1] -= (yTranslate * (480 * ySizeCorrection)) / 2.0;
+  result[0] -= (xTranslate * (640.0 * xSizeCorrection)) / 2.0;
+  result[1] -= (yTranslate * (480.0 * ySizeCorrection)) / 2.0;
 
   result[0] /= (w);
   result[1] /= (h);

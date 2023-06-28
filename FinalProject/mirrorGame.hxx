@@ -59,6 +59,9 @@ private:
   Map map;
   GameState gameState;
 
+  core::VertexBuffer testBuffer;
+  float* testVertecies;
+
   int currentLVL = 1;
 
   float targetScreenWidth = 640.0f;

@@ -201,12 +201,13 @@ void MirrorGame::ResizeScreen() {
     std::cout << "right = " << factor * targetScreenWidth << " " << screenWidth
               << std::endl;
     float *proj =
-        core::OrthoProj(factor * 0.0f, factor * targetScreenWidth,
-                        targetScreenHeight, 0.0f, nearPlain, farPlain);
-    std::vector<float> translate = {
-        ((factor * targetScreenWidth - targetScreenWidth) /
-         (factor * targetScreenWidth)),
-        0.0f, 0.0f};
+
+    core::OrthoProj(factor * 0.0f, factor * targetScreenWidth,
+                      targetScreenHeight, 0.0f, nearPlain, farPlain);
+
+    float translateX = (factor * targetScreenWidth - targetScreenWidth) / (factor * targetScreenWidth);
+    std::vector<float> translate = { translateX, 0.0f, 0.0f};
+
     float *result = core::Translate(translate);
     std::cout << "translate = " << translate[0] << " " << translate[1] << " "
               << translate[2] << std::endl;
@@ -261,11 +262,9 @@ void MirrorGame::ResizeScreen() {
     float *proj =
         core::OrthoProj(0.0f, targetScreenWidth, factor * targetScreenHeight,
                         factor * 0.0f, nearPlain, farPlain);
-    std::vector<float> translate = {
-        0.0f,
-        (-((factor * targetScreenHeight) - targetScreenHeight) /
-         (factor * targetScreenHeight)),
-        0.0f};
+
+    float translateY = ((factor * targetScreenHeight) - targetScreenHeight) / (factor * targetScreenHeight);
+    std::vector<float> translate = { 0.0f, -translateY, 0.0f};
 
     std::cout << "translate " << translate[0] << " " << translate[1] << " "
               << translate[2] << std::endl;

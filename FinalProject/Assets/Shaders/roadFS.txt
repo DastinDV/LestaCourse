@@ -34,26 +34,26 @@ void main()
         translateX = ((factor * 640.0) - 640.0) / 2.0;
         posX = (posX + translateX) / (640.0 * factor);
         posY = posY / 480.0;
-        sizeX = sizeX / (640 * factor);
-        sizeY = sizeY / 480;
+        sizeX = sizeX / (640.0 * factor);
+        sizeY = sizeY / 480.0;
     } else {
         factor = targetAR / aspectRatio;
         translateY = ((factor * 480.0) - 480.0) / 2.0;
         posX = posX / 640.0;
-        posY = (posY + translateY) / (480 * factor);
-        sizeX = sizeX / 640;
-        sizeY = sizeY / (480 * factor);
+        posY = (posY + translateY) / (480.0 * factor);
+        sizeX = sizeX / 640.0;
+        sizeY = sizeY / (480.0 * factor);
     }
 
     vec2 uv = gl_FragCoord.xy / u_windowSize.xy;
 
-    float uvX = ( uv.x - posX ) * 1 / sizeX; 
-    float uvY = ( uv.y - posY ) * 1 / sizeY;
+    float uvX = ( uv.x - posX ) * 1.0 / sizeX; 
+    float uvY = ( uv.y - posY ) * 1.0 / sizeY;
 
     vec2 uvTile = vec2(uvX, uvY);
 
     uvTile = uvTile - 0.5;
-    uvTile = uvTile * 2;
+    uvTile = uvTile * 2.0;
 
     vec3 neonBlue = vec3(0.0, 1.0, 1.0);
 
@@ -75,4 +75,3 @@ void main()
         FragColor =  vec4(u_borderColor.xyz, 1.0);
     }
 }
-
