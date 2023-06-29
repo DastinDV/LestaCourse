@@ -61,12 +61,13 @@ struct Event {
 float IZ_DECLSPEC *Translate(std::vector<float> &translation);
 float IZ_DECLSPEC *Rotate(float angle);
 float IZ_DECLSPEC *Scale(float scaleFactor);
-float IZ_DECLSPEC *OrthoProj(float left, float right, float bottom, float top, float near,
-                 float far);
+float IZ_DECLSPEC *OrthoProj(float left, float right, float bottom, float top,
+                             float near, float far);
 
-std::vector<float> IZ_DECLSPEC Unproject(std::vector<float> win, std::vector<float> model,
-                             float xCorrection, float yCorrection,
-                             int screenWidth, int screenHeight);
+std::vector<float> IZ_DECLSPEC Unproject(std::vector<float> win,
+                                         std::vector<float> model,
+                                         float xCorrection, float yCorrection,
+                                         int screenWidth, int screenHeight);
 // ###### Math ######
 
 std::pair<int, int> IZ_DECLSPEC GetScreenSize();
@@ -96,6 +97,7 @@ public:
   void ClearScreen(float deltaTime);
   void SwapBuffers();
   void ResizeViewPort(int w, int h) const;
+  std::pair<int, int> GetScreenSize();
   // ###### OpenGL ######
 
 private:

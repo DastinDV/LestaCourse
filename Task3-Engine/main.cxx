@@ -95,8 +95,8 @@ int main() {
             ? "../lib/MirrorGame/FinalProject-shared.dll"
             : "../lib/MirrorGame/libFinalProject-shared.so";
     const char *tmp_library_file = SDL_GetPlatform() == "Windows"s
-     ? "../lib/MirrorGame/temp.dll"
-     : "../lib/MirrorGame/temp.so";
+                                       ? "../lib/MirrorGame/temp.dll"
+                                       : "../lib/MirrorGame/temp.so";
 
     void *game_library_handle{};
 
@@ -142,8 +142,9 @@ int main() {
         &my_image_width, &my_image_height);
     IM_ASSERT(ret);
 
-    float mainMenuSizeX = 640.0;
-    float mainMenuSizeY = 480.0;
+    auto screenSize = engine.GetScreenSize();
+    float mainMenuSizeX = screenSize.first;
+    float mainMenuSizeY = screenSize.second;
 
     bool isMainMenu = true;
     bool isGame = false;
@@ -230,13 +231,19 @@ int main() {
                        ImVec2(mainMenuSizeX - (mainMenuSizeX * 0.2f),
                               mainMenuSizeY / 2.0));
 
-          ImGui::Dummy(ImVec2{0.0, static_cast<float>(mainMenuSizeY / 2.0 / 10.0)});
-          if (ButtonCenteredOnLine("Play", ImVec2{200.f * aspectRatio,
-                                                  static_cast<float>(mainMenuSizeY / 2.0 / 5.0)}))
+          ImGui::Dummy(
+              ImVec2{0.0, static_cast<float>(mainMenuSizeY / 2.0 / 10.0)});
+          if (ButtonCenteredOnLine(
+                  "Play",
+                  ImVec2{200.f * aspectRatio,
+                         static_cast<float>(mainMenuSizeY / 2.0 / 5.0)}))
             isMainMenu = false;
-          ImGui::Dummy(ImVec2{0.0, static_cast<float>(mainMenuSizeY / 2.0 / 10.0)});
-          if (ButtonCenteredOnLine("Exit", ImVec2{200.f * aspectRatio,
-                                                  static_cast<float>(mainMenuSizeY / 2.0 / 5.0)})) {
+          ImGui::Dummy(
+              ImVec2{0.0, static_cast<float>(mainMenuSizeY / 2.0 / 10.0)});
+          if (ButtonCenteredOnLine(
+                  "Exit",
+                  ImVec2{200.f * aspectRatio,
+                         static_cast<float>(mainMenuSizeY / 2.0 / 5.0)})) {
             engine.CleanUp();
             delete consoleGame;
             quit = true;
@@ -250,7 +257,7 @@ int main() {
         consoleGame->Render();
       }
 
-      // Rendering  
+      // Rendering
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
