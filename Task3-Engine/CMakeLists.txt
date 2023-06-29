@@ -30,6 +30,12 @@ list(
 
 if(WIN32)
   set(CMAKE_PREFIX_PATH "C:\\libs\\SDL3")
+  set(SDL_SHARED ON)
+  set(SDL_STATIC OFF)
+
+  add_subdirectory(${LIB_DIR}/SDL3
+  ${CMAKE_BINARY_DIR}/lib/SDL3)
+
 endif()
 
 message(CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH})
@@ -102,6 +108,12 @@ endif()
 if (WIN32)
 target_link_libraries(Engine PRIVATE SDL3::SDL3 imgui-lib)
 target_include_directories(Engine PUBLIC ${CMAKE_PREFIX_PATH}/include)
+
+add_custom_command(
+        TARGET Engine
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:SDL3::SDL3> $<TARGET_FILE_DIR:Engine>)
 endif()
 
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Task3-Game
