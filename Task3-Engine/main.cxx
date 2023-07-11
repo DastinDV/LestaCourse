@@ -137,16 +137,24 @@ int main() {
     int my_image_width = 0;
     int my_image_height = 0;
     GLuint my_image_texture = 0;
+    GLuint finish_game_texture = 0;
+
     bool ret = LoadTextureFromFile(
         "../../FinalProject/Assets/Images/MirrorLogo1.jpg", &my_image_texture,
         &my_image_width, &my_image_height);
     IM_ASSERT(ret);
+
+    bool ret1 = LoadTextureFromFile(
+        "../../FinalProject/Assets/Images/finishLogo.jpg", &finish_game_texture,
+        &my_image_width, &my_image_height);
+    IM_ASSERT(ret1);
 
     auto screenSize = engine.GetScreenSize();
     float mainMenuSizeX = screenSize.first;
     float mainMenuSizeY = screenSize.second;
 
     bool isMainMenu = true;
+    bool isGameFinished = false;
     bool isGame = false;
     float aspectRatio = mainMenuSizeX / mainMenuSizeY;
 
@@ -154,8 +162,12 @@ int main() {
         CreateSoundBuffer("../../FinalProject/Assets/Music/BackTheme1.wav");
     SoundBuffer *gameMusic =
         CreateSoundBuffer("../../FinalProject/Assets/Music/BackTheme.wav");
+    SoundBuffer *winMusic =
+        CreateSoundBuffer("../../FinalProject/Assets/Music/winGame.wav");
+
     assert(menuMusic != nullptr);
     assert(gameMusic != nullptr);
+    assert(winMusic != nullptr);
 
     while (!quit) {
       long now = SDL_GetTicks();
@@ -220,6 +232,11 @@ int main() {
       // ImGui::ShowDemoWindow();
 
       consoleGame->OnEvent(event, deltaTime);
+      if (consoleGame->IsGameEnd()) {
+        isGame = false;
+        isGameFinished = true;
+      }
+
       if (isMainMenu) {
         menuMusic->play(SoundBuffer::properties::looped);
         {
@@ -236,8 +253,10 @@ int main() {
           if (ButtonCenteredOnLine(
                   "Play",
                   ImVec2{200.f * aspectRatio,
-                         static_cast<float>(mainMenuSizeY / 2.0 / 5.0)}))
+                         static_cast<float>(mainMenuSizeY / 2.0 / 5.0)})) {
             isMainMenu = false;
+            isGame = true;
+          }
           ImGui::Dummy(
               ImVec2{0.0, static_cast<float>(mainMenuSizeY / 2.0 / 10.0)});
           if (ButtonCenteredOnLine(
@@ -250,11 +269,33 @@ int main() {
           }
           ImGui::End();
         }
-      } else {
+      } else if (isGame) {
         menuMusic->stop();
         gameMusic->play(SoundBuffer::properties::looped);
         consoleGame->Update(deltaTime);
         consoleGame->Render();
+      } else if (isGameFinished) {
+        winMusic->play(SoundBuffer::properties::looped);
+        {
+          ImGui::SetNextWindowSize({mainMenuSizeX, mainMenuSizeY});
+          ImGui::SetNextWindowPos({0.0f, 0.0f});
+          ImGui::Begin("Finish");
+          CenterNextElement(mainMenuSizeX - (mainMenuSizeX * 0.2f));
+          ImGui::Image((void *)(intptr_t)finish_game_texture,
+                       ImVec2(mainMenuSizeX - (mainMenuSizeX * 0.2f),
+                              mainMenuSizeY / 2.0));
+          ImGui::Dummy(
+              ImVec2{0.0, static_cast<float>(mainMenuSizeY / 2.0 / 10.0)});
+          if (ButtonCenteredOnLine(
+                  "Bye!",
+                  ImVec2{200.f * aspectRatio,
+                         static_cast<float>(mainMenuSizeY / 2.0 / 5.0)})) {
+            engine.CleanUp();
+            delete consoleGame;
+            quit = true;
+          }
+          ImGui::End();
+        }
       }
 
       // Rendering

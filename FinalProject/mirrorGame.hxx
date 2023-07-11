@@ -38,6 +38,7 @@ public:
   void Render() override;
   void Update(float deltaTime) override;
   void OnEvent(core::Event &event, float deltaTime) override;
+  bool IsGameEnd() override;
 
   ~MirrorGame();
 
@@ -60,7 +61,7 @@ private:
   GameState gameState;
 
   core::VertexBuffer testBuffer;
-  float* testVertecies;
+  float *testVertecies;
 
   int currentLVL = 1;
 
@@ -95,6 +96,9 @@ private:
 
   core::SoundBuffer *reflectionSound = nullptr;
   core::SoundBuffer *winSound = nullptr;
+
+  const int lvlCount = 6;
+  bool isGameEnd = false;
 };
 
 IZ_DECLSPEC core::Game *CreateGame() { return new MirrorGame(); }

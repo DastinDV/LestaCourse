@@ -93,8 +93,14 @@ void MirrorGame::Update(float deltaTime) {
   if (gameState.GetGameState() == EGameState::NEXTLVL) {
     winSound->stop();
     winSound->play(core::SoundBuffer::properties::once);
-    LoadLVL(++currentLVL);
-    gameState.SetGameState(EGameState::PLAY);
+    if (currentLVL + 1 > lvlCount) {
+      std::cout << "Game finished " << std::endl;
+      gameState.SetGameState(EGameState::WIN);
+      isGameEnd = true;
+    } else {
+      LoadLVL(++currentLVL);
+      gameState.SetGameState(EGameState::PLAY);
+    }
   }
 }
 
@@ -173,6 +179,8 @@ void MirrorGame::OnEvent(core::Event &event, float deltaTime) {
   }
 }
 
+bool MirrorGame::IsGameEnd() { return isGameEnd; }
+
 MirrorGame::~MirrorGame() {
   std::cout << "Destroy game " << std::endl;
 
@@ -202,11 +210,12 @@ void MirrorGame::ResizeScreen() {
               << std::endl;
     float *proj =
 
-    core::OrthoProj(factor * 0.0f, factor * targetScreenWidth,
-                      targetScreenHeight, 0.0f, nearPlain, farPlain);
+        core::OrthoProj(factor * 0.0f, factor * targetScreenWidth,
+                        targetScreenHeight, 0.0f, nearPlain, farPlain);
 
-    float translateX = (factor * targetScreenWidth - targetScreenWidth) / (factor * targetScreenWidth);
-    std::vector<float> translate = { translateX, 0.0f, 0.0f};
+    float translateX = (factor * targetScreenWidth - targetScreenWidth) /
+                       (factor * targetScreenWidth);
+    std::vector<float> translate = {translateX, 0.0f, 0.0f};
 
     float *result = core::Translate(translate);
     std::cout << "translate = " << translate[0] << " " << translate[1] << " "
@@ -263,8 +272,9 @@ void MirrorGame::ResizeScreen() {
         core::OrthoProj(0.0f, targetScreenWidth, factor * targetScreenHeight,
                         factor * 0.0f, nearPlain, farPlain);
 
-    float translateY = ((factor * targetScreenHeight) - targetScreenHeight) / (factor * targetScreenHeight);
-    std::vector<float> translate = { 0.0f, -translateY, 0.0f};
+    float translateY = ((factor * targetScreenHeight) - targetScreenHeight) /
+                       (factor * targetScreenHeight);
+    std::vector<float> translate = {0.0f, -translateY, 0.0f};
 
     std::cout << "translate " << translate[0] << " " << translate[1] << " "
               << translate[2] << std::endl;

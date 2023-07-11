@@ -9,6 +9,7 @@ public:
   virtual void Render() = 0;
   virtual void Update(float deltaTime) = 0;
   virtual void OnEvent(Event &event, float deltaTime) = 0;
+  virtual bool IsGameEnd() = 0;
 };
 // namespace core
 
